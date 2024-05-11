@@ -84,6 +84,12 @@ export default {
 }
 
 @media (min-width: 180px) {
+  .nav_header {
+    --var-font-size-xxsm: 1.2em;
+    --var-font-size-xsm: 1.8em;
+    padding: 1.5rem 0.15rem 2rem 0.15rem !important;
+  }
+
   .generic_logo {
     position: relative;
     left: 0.5rem;
@@ -102,9 +108,10 @@ export default {
   }
 
   .btn-logo {
-    @apply text-white xxsm:text-xxsm xsm:text-xsm font-semibold pb-3 md:py-1;
+    @apply text-white font-semibold pb-3 md:py-1;
     font-family: 'Poetsen One', sans-serif;
     font-style: normal;
+    font-size: var(--var-font-size-xxsm);
   }
 
   .btn-link {
@@ -114,10 +121,6 @@ export default {
   .btn-mobile-link {
     @apply p-3 text-white;
     font-size: calc(14px + 0.3vw);
-  }
-
-  .nav_header {
-    padding: 1.5rem 0.15rem 2rem 0.15rem !important;
   }
 
   .nav_mobile {
@@ -202,6 +205,10 @@ export default {
 
   .nav_header {
     padding: 2rem !important;
+  }
+
+  .btn-logo {
+    font-size: var(--var-font-size-xsm);
   }
 
   .btn_register_nav {

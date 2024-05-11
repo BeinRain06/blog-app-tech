@@ -57,7 +57,7 @@ export const dataPostsList = [
     Author: 'Mladen Radujković, Mariela Sjekavica',
     image: Project,
     summary:
-      'Project management success is extremely interesting topic from scientific, as well as practical point of view. Namely, different models of project management success emerged through history, indicating the level of thoughts considering management of project successful. This article differs project management from project success, gives definitions of project management success, aims to review different models of project management success, differs success of managing public and private projects and gives a special accent on present situation in context of project management in Croatia. Comprehensive literature review is given, analysis and synthesis of most interesting material is made, and applicable practical guidelines are defined.',
+      'Project management success is extremely interesting topic from scientific, as well as practical point of view. Namely, different models of project management success emerged through history, indicating the level of thoughts considering management of project successful. This article differs project management from project success, gives definitions of project management success, aims to review different models of project management success, differs success of managing public and private projects and gives a special accent on present situation in context of project management in Croatia. ',
     date: '29 Apr 2024, 02:45 AM',
     url: 'https://www.sciencedirect.com/science/article/pii/S1877705817331740',
     url: 'https://hbr.org/2023/11/what-the-next-generation-of-project-management-will-look-like',

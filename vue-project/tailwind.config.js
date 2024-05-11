@@ -7,10 +7,7 @@ export default {
       xsm: '375px',
       md: '768px'
     },
-    fontSize: {
-      xxsm: '1.2em',
-      xsm: '2em'
-    },
+
     extend: {}
   }
 }
