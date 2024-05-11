@@ -138,6 +138,7 @@ export default {
   }
 
   .others_features {
+    visibility: hidden;
     position: absolute;
     top: 6.9rem;
     right: 0;
