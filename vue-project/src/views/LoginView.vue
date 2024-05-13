@@ -37,7 +37,7 @@
               </div>
             </div>
             <div class="form_submit">
-              <input type="submit" id="btn_identity" class="btn_identity" value="submit" />
+              <input type="submit" id="btn_identity" class="btn_identity" value="login" />
             </div>
           </div>
         </fieldset>
@@ -61,12 +61,6 @@
     display: grid;
     grid-auto-columns: 100%;
     grid-template-rows: 56% 1fr;
-  }
-
-  .upper_msg_content {
-    position: relative;
-    top: 50%;
-    left: 2rem;
   }
 
   .login_wrapper {
