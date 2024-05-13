@@ -49,9 +49,10 @@
 <style scoped>
 @media (min-width: 180px) {
   p {
-    font-size: calc(15px + 0.3vw);
+    font-size: calc(12px + 0.5vw);
     padding: 0.25rem 0;
     tex-align: center;
+    line-height: 1.3;
   }
 
   .about {
@@ -69,11 +70,11 @@
   }
 
   .login_wrapper {
-    @apply w-8/12 max-w-lg  border-2 border-solid border-blue-200 rounded-xl;
+    @apply w-11/12 max-w-lg  border-2 border-solid border-blue-200 rounded-xl;
     position: absolute;
     top: 50%;
     left: 50%;
-    height: 28rem;
+    height: 30rem;
     padding: 0 1rem;
     transform: translate(-50%, -50%);
     box-shadow: 0px 0px 4px hsl(240, 2%, 62%);
@@ -126,6 +127,18 @@
     @apply w-full h-auto text-white bg-gray-800 p-2 rounded-lg text-center;
     position: relative;
     top: 0.5rem;
+  }
+}
+
+@media (min-width: 540px) {
+  p {
+    font-size: calc(15px + 0.3vw);
+  }
+
+  .login_wrapper {
+    @apply w-8/12 max-w-lg  border-2 border-solid border-blue-200 rounded-xl;
+    height: 28rem;
+    padding: 0 1rem;
   }
 }
 </style>
