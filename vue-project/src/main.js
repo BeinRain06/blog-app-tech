@@ -2,6 +2,8 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import PrimeVue from 'primevue/config'
+import Editor from 'primevue/editor'
 
 import App from './App.vue'
 import router from './router'
@@ -19,5 +21,8 @@ curly logical OR (&#8910; | &#x22CE;)
 
 app.use(createPinia())
 app.use(router)
+app.use(PrimeVue)
+
+app.component('Editor', Editor)
 
 app.mount('#app')

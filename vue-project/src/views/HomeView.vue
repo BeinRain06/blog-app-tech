@@ -29,11 +29,12 @@
                   <span class="posted_at font-light text-sm md:text-base"
                     >{{ postItem.date }} |</span
                   >
-                  <img
-                    class="svg_edit w-6 h-4"
-                    src="../assets/edit-svgrepo-com.svg"
-                    alt="edit post"
-                  />
+                  <RouterLink class="btn-edit-link" to="/edit"
+                    ><img
+                      class="svg_edit w-6 h-4 cursor-pointer"
+                      src="../assets/edit-svgrepo-com.svg"
+                      alt="edit post"
+                  /></RouterLink>
                 </div>
               </div>
               <div class="summary_wrapper w-full px-2 py-4 sm:p-2">
