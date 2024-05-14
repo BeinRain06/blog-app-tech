@@ -2,30 +2,26 @@
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 import NavbarBlog from './components/NavbarBlog.vue'
+import LoginAdminView from './components/LoginAdminView.vue'
 </script>
 
 <template>
   <NavbarBlog />
 
-  <RouterView />
+  <div class="group_main relative w-full">
+    <RouterView />
+    <div class="log_admin_area">
+      <LoginAdminView />
+    </div>
+  </div>
 </template>
 
 <style scoped>
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
+@media (min-width: 180px) {
+  .log_admin_area {
+    @apply fixed top-0 left-0 w-full h-screen;
+    background-color: rgba(0, 0, 0, 0.66);
+    z-index: 5;
+  }
 }
 </style>
