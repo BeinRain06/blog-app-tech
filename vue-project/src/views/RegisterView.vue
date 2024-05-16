@@ -20,6 +20,7 @@
                 name="email"
                 placeholder="address_Email"
                 focus
+                v-model="user.email"
               />
             </div>
             <div class="form_control">
@@ -31,10 +32,11 @@
                 name="password"
                 min-length="8"
                 placeholder="Password"
+                v-model="user.password"
               />
             </div>
             <div class="form_control">
-              <label for="password">Confirm Password</label>
+              <label for="confirm_password">Confirm Password</label>
               <input
                 type="password"
                 id="confirm_password"
@@ -42,12 +44,13 @@
                 name="confirm_password"
                 min-length="8"
                 placeholder="Confirm Password"
+                v-model="user.confirm_password"
               />
             </div>
             <div class="form_custom">
               <ul class="label_custom w-full flex justify-center items-center py-2 gap-2">
-                <label for="password" class="pr-2"> Custom (Optional)</label>
-                <input type="radio" id="custom" class="input_radio" name="custom" />
+                <label for="checkbox" class="pr-2"> Custom (Optional) {{ warningMsg }}</label>
+                <input type="checkbox" class="z-10" id="checkbox" v-model="checked" />
               </ul>
               <input
                 type="text"
@@ -56,11 +59,25 @@
                 name="custom"
                 min-length="8"
                 placeholder="Custom"
-                disabled
+                v-model="user.custom"
+                :disabled="!checked"
               />
             </div>
-            <div class="form_submit">
-              <input type="submit" id="btn_identity" class="btn_identity" value="register" />
+            <div class="form_submit relative">
+              <input
+                type="button"
+                id="btn_identity"
+                class="btn_identity cursor-pointer"
+                value="register"
+                @click="handleRegistration"
+              />
+              <div
+                id="warning_msg"
+                class="warning_msg absolute top-2 w-full h-8 text-red-600 text-center bg-yellow-100"
+                v-if="isWarning"
+              >
+                <p>{{ warningMsg }}</p>
+              </div>
             </div>
           </div>
         </fieldset>
@@ -69,8 +86,85 @@
   </div>
 </template>
 
+<script>
+import { ref } from 'vue'
+import { registrationapi } from '../api/registration-api.js'
+
+export default {
+  setup() {
+    const checked = ref(false)
+    const isWarning = ref(false)
+    let warningMsg = ref(null)
+    const user = ref({
+      email: '',
+      password: '',
+      confirm_password: '',
+      cutom: ''
+    })
+    let msg = ref('toggle me')
+    return {
+      checked,
+      isWarning,
+      warningMsg,
+      user,
+      msg
+    }
+  },
+
+  methods: {
+    handleRegistration() {
+      this.checkInputError()
+
+      console.log('user:', this.user)
+      if (!this.isWarning) {
+        const user = this.user
+        registrationapi(user)
+      }
+    },
+    warningUpdate(msg) {
+      this.warningMsg = msg
+      this.isWarning = true
+      setTimeout(() => {
+        this.warningMsg = null
+        this.isWarning = false
+        const userKeys = Object.keys(this.user)
+        userKeys.forEach((key) => (this.user[key] = ''))
+      }, 3000)
+    },
+    checkInputError() {
+      const reg = /^([\w\-]+)@(\w+)\.([A-Za-z]{2,5})$/
+
+      if (
+        this.user.email === '' ||
+        this.user.password === '' ||
+        this.user.confirm_password === ''
+      ) {
+        this.warningUpdate('input Fields Empty!')
+        return
+      }
+
+      if (!reg.test(this.user.email)) {
+        this.warningUpdate('invalid Email! Try again')
+        return
+      }
+
+      if (this.user.password.length < 6 || this.user.confirm_password.length < 6) {
+        this.warningUpdate('password could be at least 06 characters')
+        return
+      } else if (this.user.password !== this.user.confirm_password) {
+        this.warningUpdate('password fields incorrect!')
+        return
+      }
+    }
+  }
+}
+</script>
+
 <style scoped>
 @media (min-width: 180px) {
+  .lower_wrapper {
+    z-index: -2;
+  }
   p {
     padding: 0.25rem 0;
     tex-align: center;
@@ -145,24 +239,18 @@
     transform: skewX(0deg);
   }
 
-  input[type='radio'] {
-    appearance: none;
-    -moz-appearance: none;
-    --webkit-appearance: none;
+  input[type='checkbox'] {
     width: 14px;
     height: 14px;
-    border-radius: 50%;
-    @apply bg-white border-2 border-white ring-1 ring-gray-600;
+    z-index: 5;
+    opacity: 0.5;
   }
 
-  input[type='radio']:checked {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    @apply bg-green-500 border-2 border-white ring-1 ring-green-500;
+  input[type='checkbox']:checked {
+    opacity: 1;
   }
 
-  input[type='submit'] {
+  input[type='button'] {
     @apply w-full h-auto text-white bg-gray-800 p-2 rounded-lg text-center;
     position: relative;
     top: 2.25rem;

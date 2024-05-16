@@ -19,6 +19,7 @@ import LoginAdminView from './components/LoginAdminView.vue'
 <style scoped>
 @media (min-width: 180px) {
   .log_admin_area {
+    display: none;
     @apply fixed top-0 left-0 w-full h-screen;
     background-color: rgba(0, 0, 0, 0.66);
     z-index: 5;

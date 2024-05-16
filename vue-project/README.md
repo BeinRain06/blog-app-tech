@@ -1,60 +1,213 @@
 # vue-project
 
-This template should help get you started developing with Vue 3 in Vite.
+This summary is about your first note in vue.js developing with Vue 3 in Vite.
 
-## Recommended IDE Setup
+## Concept Crossed
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+### Composition API/Options API
 
-## Customize configuration
+We have two ways of implementing `<script` tag in vue.js either with the new syntax "composition API" or the standard syntax "options API" but avoid to use the **both** syntax at **same time** -**composition API** (vue3, setup, script) -**options API** (vue3, setup, script)
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+### write Composition API alike Options API
 
-## Project Setup
+1- syntax **Options API** (wide Object)
 
-```sh
-npm install
-```
+      1.1-- writing syntax one
+      `
+        <script>
+          export default{
+            name: "Home",
+            data() {
+                return {
+                    isVisible:true,
+                    message: "toggle me"
+                }
+            },
+            methods {
+                getMessage() {
+                    const msg= this.message
+                    let tmpMsg = `${msg} and see what is gong on `
+                    console.log(tmpMsg)
+                    this.msg= tmpMsg;
+                }
+                changeVisible() {
+                    this.isVisible= ! this.isVisible
+                }
+            },
+            props //props from parent: ["story", "advice"],
+            computed: // while editing {},
+            mounted() // lifecycle Hooks methods {
+                console.log("mounting finished")
+            } ,
+            template: `
+            <label for="test">example</label>
+            <button class="btn_msg" @click="getMessage">{{msg}}</button>
+            <input class="btn_check" type="checkbox" name="checkbox" @change="(event) => event.target.checked = !event.target.checked ">
+            `
 
-### Compile and Hot-Reload for Development
+         }
+        </script>
+        <styled scoped>
+          .btn_msg{
+            padding:5px 10px;
+            text:center;//...
+          }
+          .btn_check {
+            width:14px;
+            height:14px;//...
+          }
+        </styled>
+      `
 
-```sh
-npm run dev
-```
+     1.2-- writing syntax two
+      `
+        <template>
+           <label for="test">example</label>
+          <button class="btn_msg" @click="getMessage">{{msg}}</button>
+          <input class="btn_check" type="checkbox" name="checkbox" @change="(event) => event.target.checked = !event.target.checked /">
+        </template>
 
-### Compile and Minify for Production
+        <script>
+          export default{
+            name: "Home",
+            data() {
+                return {
+                    isVisible:true,
+                    message: "toggle me"
+                }
+            },
+            methods {
+                getMessage() {
+                    const msg= this.message
+                    let tmpMsg = `${msg} and see what is gong on `
+                    console.log(tmpMsg)
+                    this.msg= tmpMsg;
+                }
+                changeVisible() {
+                    this.isVisible= ! this.isVisible
+                }
+            },
+            props //props from parent: ["story", "advice"],
+            computed: // while editing {},
+            mounted() // lifecycle Hooks methods {
+                console.log("mounting finished")
+            } ,
 
-```sh
-npm run build
-```
+          }
+        </script>
+        <styled scoped>
+          .btn_msg{
+            padding:5px 10px;
+            text:center;//...
+          }
+          .btn_check {
+            width:14px;
+            height:14px;//...
+          }
+        </styled>
+      `
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+1- syntax **Composition API** (reference Object)
 
-```sh
-npm run test:unit
-```
+      1.1-- writing syntax like OPtions API v.2
+            (use setup() instead of data() for holding variables )
+      `
+        <template>
+           <label for="test">example</label>
+          <button class="btn_msg" @click="getMessage">{{msg}}</button>
+          <input class="btn_check" type="checkbox" name="checkbox" @change="(event) => event.target.checked = !event.target.checked /">
+        </template>
 
-### Run End-to-End Tests with [Playwright](https://playwright.dev)
+        <script>
+          export default{
+           import {ref} from "vue" // add ref() or reactive()
 
-```sh
-# Install browsers for the first run
-npx playwright install
+           const isVisible= ref(true);
+           const message= ref("toggle me")
+           setup() {
+                return {
+                    isVisible,
+                    message
+                }
+            },
+            const props = defineProps({"story", "advice"}) ,
+            const emits = defineEmitss(["mouseon", "changeevent"]) ,
+            computed: // while editing {},
+            mounted() // lifecycle Hooks methods {
+                console.log("mounting finished")
+            } ,
+            methods {
+                getMessage() {
+                    const msg= this.message
+                    let tmpMsg = `${msg} and see what is gong on `
+                    console.log(tmpMsg)
+                    this.msg= tmpMsg;
+                }
+                changeVisible() {
+                    this.isVisible= ! this.isVisible
+                }
+            },
+          }
+        </script>
+        <styled scoped>
+          .btn_msg{
+            padding:5px 10px;
+            text:center;//...
+          }
+          .btn_check {
+            width:14px;
+            height:14px;//...
+          }
+        </styled>
+      `
 
-# When testing on CI, must build the project first
-npm run build
+      1.2-- writing syntax two (setup() bound in script)
+      `
+        <template>
+           <label for="test">example</label>
+          <button class="btn_msg" @click="getMessage">{{msg}}</button>
+          <input class="btn_check" type="checkbox" name="checkbox" @change="(event) => event.target.checked = !event.target.checked /">
+        </template>
 
-# Runs the end-to-end tests
-npm run test:e2e
-# Runs the tests only on Chromium
-npm run test:e2e -- --project=chromium
-# Runs the tests of a specific file
-npm run test:e2e -- tests/example.spec.ts
-# Runs the tests in debug mode
-npm run test:e2e -- --debug
-```
+        <script setup>
+           import {ref} from "vue" // add ref() or reactive()
 
-### Lint with [ESLint](https://eslint.org/)
+           const isVisible= ref(true);
+           const message= ref("toggle me"),
+           const props = defineProps({"story", "advice"}) ,
+           const emits = defineEmitss(["mouseon", "changeevent"]) ,
 
-```sh
-npm run lint
-```
+           computed: // while editing {},
+           mounted() // lifecycle Hooks methods {
+                console.log("mounting finished")
+            } ,
+
+            function getMessage() {
+                const msg= this.message
+                let tmpMsg = `${msg} and see what is gong on `
+                console.log(tmpMsg)
+                this.msg= tmpMsg;
+            }
+            function changeVisible() {
+                this.isVisible= ! this.isVisible
+            },
+        </script>
+
+        <styled scoped>
+          .btn_msg{
+            padding:5px 10px;
+            text:center;//...
+          }
+          .btn_check {
+            width:14px;
+            height:14px;//...
+          }
+        </styled>
+      `
+
+### importing JS file into script:setup with Composition API
+
+- **avoid** using **CamelCase** syntax
+  and bump into **error** `ambiguous indirect import`
+- you might **import** and name function like this:
+-     `import { registrationapi } from '../api/registration-api.js'`
