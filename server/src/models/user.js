@@ -1,6 +1,17 @@
 const mongoose = require("mongoose");
+const format = require("date-fns/format");
+
+// format style : "D MMM YYYY, at HH:mm"
+
+// format(new Date(), "DD, MMM YYYY")
+
+// format(new Date(), "D MMM YYYY, at HH:mm")
 
 const userSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+  },
   username: {
     type: String,
     required: true,
@@ -19,5 +30,10 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model("user", userSchema);
+
+userSchema.virtual("id").get(function () {
+  return this._id.toHexString();
+});
+userSchema.set("toJSON", { virtuals: true });
 
 module.exports = User;

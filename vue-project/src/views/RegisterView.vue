@@ -24,6 +24,18 @@
               />
             </div>
             <div class="form_control">
+              <label for="username"> Username</label>
+              <input
+                type="text"
+                id="username"
+                class="input_content"
+                name="username"
+                placeholder="username"
+                focus
+                v-model="user.username"
+              />
+            </div>
+            <div class="form_control">
               <label for="password"> Password</label>
               <input
                 type="password"
@@ -49,7 +61,9 @@
             </div>
             <div class="form_custom">
               <ul class="label_custom w-full flex justify-center items-center py-2 gap-2">
-                <label for="checkbox" class="pr-2"> Custom (Optional) {{ warningUpMsg }} } </label>
+                <label for="checkbox" class="pr-2">
+                  Custom (Optional-retriever password) {{ warningUpMsg }} }
+                </label>
                 <input
                   type="checkbox"
                   class="z-10"
@@ -102,6 +116,7 @@ export default defineComponent({
     const checked = ref(false)
     const user = ref({
       email: '',
+      username: '',
       password: '',
       confirm_password: '',
       custom: ''
@@ -151,6 +166,7 @@ export default defineComponent({
 
       if (
         this.user.email === '' ||
+        this.user.username === '' ||
         this.user.password === '' ||
         this.user.confirm_password === ''
       ) {
@@ -189,7 +205,7 @@ export default defineComponent({
 
   .register {
     position: relative;
-    height: calc(80vh);
+    height: calc(110vh);
     display: grid;
     grid-auto-columns: 100%;
     grid-template-rows: 56% 1fr;
@@ -200,7 +216,7 @@ export default defineComponent({
     position: absolute;
     top: 50%;
     left: 50%;
-    height: 30rem;
+    height: 38rem;
     padding: 0 1rem;
     transform: translate(-50%, -50%);
     box-shadow: 0px 0px 4px hsl(240, 2%, 62%);
@@ -233,7 +249,7 @@ export default defineComponent({
     height: 100%;
     display: grid;
     grid-auto-columns: 100%;
-    grid-auto-rows: 16% 22% 22% 22% auto;
+    grid-auto-rows: 15% 15% 15% 15% 26% 14% auto;
   }
 
   .form_control,
@@ -268,17 +284,17 @@ export default defineComponent({
   input[type='button'] {
     @apply w-full h-auto text-white bg-gray-800 p-2 rounded-lg text-center;
     position: relative;
-    top: 2.25rem;
+    top: 1.35rem;
   }
 }
 
 @media (min-width: 240px) {
   .register {
-    height: calc(102vh);
+    height: calc(126vh);
   }
 
   .register_wrapper {
-    height: 40rem;
+    height: 48rem;
   }
 
   .field_msg {
@@ -286,11 +302,15 @@ export default defineComponent({
   }
 
   .form_content {
-    grid-auto-rows: 16% 16% 16% 22% auto;
+    grid-auto-rows: 14% 14% 14% 14% 14% 16% auto;
   }
 
   .input_content {
     height: 2.8rem;
+  }
+
+  input[type='button'] {
+    top: 2.25rem;
   }
 }
 
@@ -301,12 +321,12 @@ export default defineComponent({
   }
 
   .register {
-    height: calc(108vh);
+    height: calc(130vh);
   }
 
   .register_wrapper {
     @apply w-8/12 max-w-lg  border-2 border-solid border-blue-200 rounded-xl;
-    height: 44rem;
+    height: 50rem;
     padding: 0 1rem;
   }
 
