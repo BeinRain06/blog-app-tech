@@ -49,8 +49,14 @@
             </div>
             <div class="form_custom">
               <ul class="label_custom w-full flex justify-center items-center py-2 gap-2">
-                <label for="checkbox" class="pr-2"> Custom (Optional) {{ warningMsg }}</label>
-                <input type="checkbox" class="z-10" id="checkbox" v-model="checked" />
+                <label for="checkbox" class="pr-2"> Custom (Optional) {{ warningUpMsg }} } </label>
+                <input
+                  type="checkbox"
+                  class="z-10"
+                  id="checkbox"
+                  v-model="checked"
+                  @click="changeMsg"
+                />
               </ul>
               <input
                 type="text"
@@ -74,9 +80,9 @@
               <div
                 id="warning_msg"
                 class="warning_msg absolute top-2 w-full h-8 text-red-600 text-center bg-yellow-100"
-                v-if="isWarning"
+                v-if="warningUpStage"
               >
-                <p>{{ warningMsg }}</p>
+                <p>{{ warningUpMsg }}</p>
               </div>
             </div>
           </div>
@@ -87,31 +93,47 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, defineComponent } from 'vue'
 import { registrationapi } from '../api/registration-api.js'
+import { useWarningStore } from '@/stores/warning.js'
 
-export default {
+export default defineComponent({
   setup() {
     const checked = ref(false)
-    const isWarning = ref(false)
-    let warningMsg = ref(null)
     const user = ref({
       email: '',
       password: '',
       confirm_password: '',
-      cutom: ''
+      custom: ''
     })
     let msg = ref('toggle me')
+
     return {
       checked,
-      isWarning,
-      warningMsg,
       user,
       msg
     }
   },
 
+  computed: {
+    warningUpStage: () => {
+      const warningStore = useWarningStore()
+      const stage = warningStore.warningStage
+      console.log(stage)
+      return stage
+    },
+    warningUpMsg: () => {
+      const warningStore = useWarningStore()
+      const msgWarn = warningStore.warningNews
+      console.log(msgWarn)
+      return msgWarn
+    }
+  },
+
   methods: {
+    changeMsg() {
+      this.msg = 'you got i-t!'
+    },
     handleRegistration() {
       this.checkInputError()
 
@@ -121,43 +143,36 @@ export default {
         registrationapi(user)
       }
     },
-    warningUpdate(msg) {
-      this.warningMsg = msg
-      this.isWarning = true
-      setTimeout(() => {
-        this.warningMsg = null
-        this.isWarning = false
-        const userKeys = Object.keys(this.user)
-        userKeys.forEach((key) => (this.user[key] = ''))
-      }, 3000)
-    },
+
     checkInputError() {
       const reg = /^([\w\-]+)@(\w+)\.([A-Za-z]{2,5})$/
+
+      const warningPop = useWarningStore()
 
       if (
         this.user.email === '' ||
         this.user.password === '' ||
         this.user.confirm_password === ''
       ) {
-        this.warningUpdate('input Fields Empty!')
+        warningPop.warningUpdate('input Fields Empty!', this.user)
         return
       }
 
       if (!reg.test(this.user.email)) {
-        this.warningUpdate('invalid Email! Try again')
+        warningPop.warningUpdate('invalid Email! Try again', this.user)
         return
       }
 
       if (this.user.password.length < 6 || this.user.confirm_password.length < 6) {
-        this.warningUpdate('password could be at least 06 characters')
+        warningPop.warningUpdate('password could be at least 06 characters', this.user)
         return
       } else if (this.user.password !== this.user.confirm_password) {
-        this.warningUpdate('password fields incorrect!')
+        warningPop.warningUpdate('password fields incorrect!', this.user)
         return
       }
     }
   }
-}
+})
 </script>
 
 <style scoped>
