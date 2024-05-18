@@ -10,19 +10,36 @@
       </ul>
 
       <nav class="nav_desktop space-x-3 text-sm md:text-lg">
-        <RouterLink class="btn btn-link" to="/login">Login</RouterLink>
-        <RouterLink class="btn btn-link" to="/register">Register</RouterLink>
+        {currentUserIn !== "" ? (
+        <div class="user_login_desk">
+          <p class="user_in text-white underline">welcome @{{ shortyName }}</p>
+        </div>
+        ):(<RouterLink class="btn btn-link" to="/login">Login</RouterLink>
+        <RouterLink class="btn btn-link" to="/register">Register</RouterLink>) }
+
         <ul
           id="custom_feature"
           class="custom_features flex text-gray-300 justify-center items-center gap-1"
         >
+          {currentUserIn !== "" ? (
+          <li><button id="init_new_post" class="init_new_post">create a post</button></li>
+          <li><span class="specs_blog_title">techreviews</span></li>
+          ):(
           <li class="relative">Custom</li>
           <li class="relative md:top-1 font-bold cursor-pointer">&#65088;</li>
+          )}
         </ul>
+
+        <RouterLink class="btn_logout_desk" to="/">Logout</RouterLink>
       </nav>
 
       <nav class="nav_mobile flex">
-        <RouterLink class="btn_register_nav btn-mobile-link" to="/register">Register</RouterLink>
+        {currentUserIn!== "" ? (
+        <div class="user_login_mob">
+          <p class="user_in text-white underline">@{{ shortyName }}</p>
+        </div>
+        ): (<RouterLink class="btn_register_nav btn-mobile-link" to="/register">Register</RouterLink
+        >)}
         <ul
           id="menu_wrap"
           class="menu_wrap flex xxsm:flex-col xsm:flex-row justify-center py-1 gap-2 bg-gray-700 rounded"
@@ -39,21 +56,37 @@
           </li>
         </ul>
         <div class="others_features flex flex-col rounded-md">
-          <RouterLink class="btn_register_menu btn-mobile-link" to="/register">Register</RouterLink>
-          <RouterLink class="btn-mobile-link" to="/login">Login</RouterLink>
+          {currentUserIn!== "" ? (
+          <p class="aside_login_label">login</p>
+          <div class="user_login_mob">
+            <p class="user_in text-white underline">welcome {{ shortyName }}</p>
+            {lastDateAction!== undefined &&
+            <p class="last_post">last Post:{{ lastDateAction }}</p>
+            }
+            <div class="written_wrapper w-full flex justify-between items-center py-2">
+              <span class="articles_label">Articles</span>
+              <span class="count_articles p-1 text-sm rounded bg-red-400">{{ countArt }}</span>
+            </div>
+            <RouterLink class="btn_logout_menu btn-mobile-link" to="/">Logout</RouterLink>
+          </div>
+          ): (<RouterLink class="btn_register_menu btn-mobile-link" to="/register"
+            >Register</RouterLink
+          >
+          <RouterLink class="btn-mobile-link" to="/login">Login</RouterLink>)}
+
           <div class="custom_mob_wrap w-full">
             <p class="custom-p">
               <span>Custom</span> <span class="relative top-2 cursor-pointer">&#65088;</span>
             </p>
             <div class="w-full h-10 text-base flex">
               <div class="select_blog">
-                <label for="all">All</label>
+                <label for="all">all</label>
                 <div class="box_circle w-10 grid place-items-start">
                   <input type="radio" id="all_blogger" name="blog" />
                 </div>
               </div>
               <div class="select_blog">
-                <label for="single">Single</label>
+                <label for="single">single</label>
                 <div class="box_circle w-10 grid place-items-start">
                   <input type="radio" id="single_blogger" name="blog" />
                 </div>
@@ -68,10 +101,31 @@
 
 <script>
 import { RouterLink } from 'vue-router'
+import { defineComponent } from 'vue'
+import { useUserStore } from '@/stores/user.js'
+import { usePostStore } from '@/stores/post.js'
 
-export default {
-  name: 'NavbarBlog'
-}
+export default defineComponent({
+  setUp() {},
+  computed: {
+    currentUserIn: () => {
+      const userStore = useUserStore()
+      return userStore.currentUser
+    },
+    shortyName: () => {
+      const userStore = useUserStore()
+      return userStore.shortNameUser
+    },
+    lastDateAction: () => {
+      const postStore = usePostStore()
+      return postStore.lastDate
+    },
+    countArt: () => {
+      const postStore = usePostStore()
+      return postStore.countArticles
+    }
+  }
+})
 </script>
 
 <style scoped>
@@ -136,7 +190,8 @@ export default {
     text-decoration: underline;
   }
 
-  .btn_register_menu {
+  .btn_register_menu,
+  .btn_logout_menu {
     display: block;
   }
 
@@ -215,7 +270,8 @@ export default {
     display: block;
   }
 
-  .btn_register_menu {
+  .btn_register_menu,
+  .btn_logout_menu {
     display: none;
   }
 

@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-
+const cookie = require("cookie-parser");
 const postRouter = require("./src/routes/post-route");
 const registerRouter = require("./src/routes/register-route");
 const loginRouter = require("./src/routes/login-route");
@@ -22,6 +22,7 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookie());
 
 const PORT = process.env.PORT;
 const base_url = process.env.API_BASE;

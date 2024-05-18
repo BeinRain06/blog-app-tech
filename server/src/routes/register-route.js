@@ -82,16 +82,24 @@ router.post("/", async (req, res) => {
 
     console.log("user saved :", user.username);
 
+    /* console.log("req cookie:", req.cookies); */
+
     //send cookies
     const userId = user.id;
     const maxAge = 2 * 24 * 60 * 60; // in sec
-    res.cookie("userInfo", [userId, userName, session_token], {
-      httpOnly: true,
-      maxAge: maxAge * 1000,
-    });
+    res.cookie(
+      "userInfo",
+      { userId, userName, session_token },
+      {
+        httpOnly: true,
+        maxAge: maxAge * 1000,
+      }
+    );
 
     //send final json response
     res.json({ success: true, data: user.username });
+
+    /* res.redirect("http://localhost:5173"); */
   } catch (err) {
     console.log(err);
   }

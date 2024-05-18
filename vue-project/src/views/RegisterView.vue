@@ -3,7 +3,7 @@
     <div class="upper_wrapper w-full"></div>
     <div class="lower_wrapper w-full h-full bg-gray-300"></div>
     <div class="register_wrapper">
-      <form class="register_form h-full">
+      <form action="" class="register_form h-full">
         <fieldset class="fieldset_area h-full">
           <legend class="register_title">Register</legend>
           <div class="form_content">
@@ -98,6 +98,7 @@
               >
                 <p>{{ warningUpMsg }}</p>
               </div>
+              {loadingStage && <LoadingView />}
             </div>
           </div>
         </fieldset>
@@ -108,8 +109,12 @@
 
 <script>
 import { ref, defineComponent } from 'vue'
+import { storeToRefs } from 'pinia'
 import { registrationapi } from '../api/registration-api.js'
 import { useWarningStore } from '@/stores/warning.js'
+import { useUserStore } from '@/stores/user.js'
+
+import LoadingView from '../components/loading/LoadingView.vue'
 
 export default defineComponent({
   setup() {
@@ -142,6 +147,10 @@ export default defineComponent({
       const msgWarn = warningStore.warningNews
       console.log(msgWarn)
       return msgWarn
+    },
+    loadingStage: () => {
+      const userStore = useUserStore()
+      return userStore.loading
     }
   },
 
@@ -149,14 +158,34 @@ export default defineComponent({
     changeMsg() {
       this.msg = 'you got i-t!'
     },
-    handleRegistration() {
+    async handleRegistration() {
+      const userStore = useUserStore()
+
+      const { usersLoginList } = storeToRefs(userStore)
+
       this.checkInputError()
 
       console.log('user:', this.user)
-      if (!this.isWarning) {
-        const user = this.user
-        registrationapi(user)
-      }
+
+      setTimeout(() => {
+        userStore.$patch({
+          loading: true
+        })
+      }, 3000)
+
+      const newUser = await registrationapi(this.user)
+
+      userStore.usersListed(newUser)
+
+      userStore.$patch({
+        currentUsername: newUser,
+        loading: false
+      })
+
+      console.log('usersLogin :', userStore.usersLogin)
+      console.log('userName :', userStore.currentUser)
+
+      this.resetUser(this.user)
     },
 
     checkInputError() {
@@ -186,6 +215,11 @@ export default defineComponent({
         warningPop.warningUpdate('password fields incorrect!', this.user)
         return
       }
+    },
+    resetUser(user) {
+      this.checked = false
+      const userKeys = Object.keys(user)
+      userKeys.forEach((key) => (user[key] = ''))
     }
   }
 })
