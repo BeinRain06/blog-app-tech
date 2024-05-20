@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.use(
   cors({
-    origin: ["http://localhost:5000"],
+    origin: ["http://localhost:5000", "http://localhost:5173"],
     credentials: true,
   })
 );
@@ -84,6 +84,8 @@ router.post("/", async (req, res) => {
 
     /* console.log("req cookie:", req.cookies); */
 
+    /* res.redirect("http://localhost:5173"); */
+
     //send cookies
     const userId = user.id;
     const maxAge = 2 * 24 * 60 * 60; // in sec
@@ -98,8 +100,6 @@ router.post("/", async (req, res) => {
 
     //send final json response
     res.json({ success: true, data: user.username });
-
-    /* res.redirect("http://localhost:5173"); */
   } catch (err) {
     console.log(err);
   }

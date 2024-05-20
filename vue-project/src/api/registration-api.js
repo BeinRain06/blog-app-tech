@@ -18,8 +18,7 @@ export const registrationapi = async (userInfo) => {
     headers: {
       'Content-Type': 'application/json'
       // 'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    credentials: 'include'
+    }
   })
     .then((res) => res.json())
     .then((newres) => newres.data)

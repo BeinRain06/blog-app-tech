@@ -19,21 +19,3 @@
   font-weight: normal;
   overflow-x: hidden;
 }
-
-/* input[type='radio'] {
-    appearance: none;
-    -moz-appearance: none;
-    --webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    @apply bg-white border-2 border-white ring-1 ring-gray-600;
-    transition: all 1s ease-in;
-  }
-
-  input[type='radio']:checked {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    @apply bg-green-500 border-2 border-white ring-1 ring-green-500;
-  } */

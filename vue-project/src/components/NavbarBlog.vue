@@ -9,37 +9,47 @@
         >
       </ul>
 
-      <nav class="nav_desktop space-x-3 text-sm md:text-lg">
-        {currentUserIn !== "" ? (
-        <div class="user_login_desk">
-          <p class="user_in text-white underline">welcome @{{ shortyName }}</p>
+      <nav
+        v-if="currentUserIn !== null"
+        class="nav_desktop flex justify-center gap-1 md:gap-7 md:text-lg"
+      >
+        <div class="user_login_desk flex justify-end gap-1 md:justify-center items-center md:gap-4">
+          <p class="user_in">welcome @{{ shortyName }}</p>
+
+          <div
+            class="init_post w-24 h-6 bg-black text-center rounded-2xl hover:bg-green-700 transition-all duration-1000 ease-in-out"
+          >
+            <p id="init_new_post" class="btn-new-post">create a post</p>
+          </div>
         </div>
-        ):(<RouterLink class="btn btn-link" to="/login">Login</RouterLink>
-        <RouterLink class="btn btn-link" to="/register">Register</RouterLink>) }
 
         <ul
           id="custom_feature"
           class="custom_features flex text-gray-300 justify-center items-center gap-1"
         >
-          {currentUserIn !== "" ? (
-          <li><button id="init_new_post" class="init_new_post">create a post</button></li>
           <li><span class="specs_blog_title">techreviews</span></li>
-          ):(
-          <li class="relative">Custom</li>
-          <li class="relative md:top-1 font-bold cursor-pointer">&#65088;</li>
-          )}
         </ul>
 
-        <RouterLink class="btn_logout_desk" to="/">Logout</RouterLink>
+        <button class="btn-logout-desk">Logout</button>
       </nav>
 
-      <nav class="nav_mobile flex">
-        {currentUserIn!== "" ? (
-        <div class="user_login_mob">
-          <p class="user_in text-white underline">@{{ shortyName }}</p>
+      <nav v-if="currentUserIn === null" class="nav_desktop space-x-3 text-sm md:text-lg">
+        <RouterLink class="btn btn-link" to="/login">Login</RouterLink>
+        <RouterLink class="btn btn-link" to="/register">Register</RouterLink>
+
+        <ul
+          id="custom_feature"
+          class="custom_features flex text-gray-300 justify-center items-center gap-1"
+        >
+          <li class="relative">Custom</li>
+          <li class="relative md:top-1 font-bold cursor-pointer">&#65088;</li>
+        </ul>
+      </nav>
+
+      <nav v-if="currentUserIn !== null" class="nav_mobile flex gap-3">
+        <div class="grid place-items-center">
+          <p class="user_in_mob text-xl xsm:text-base text-white underline">{{ shortyName }}</p>
         </div>
-        ): (<RouterLink class="btn_register_nav btn-mobile-link" to="/register">Register</RouterLink
-        >)}
         <ul
           id="menu_wrap"
           class="menu_wrap flex xxsm:flex-col xsm:flex-row justify-center py-1 gap-2 bg-gray-700 rounded"
@@ -55,26 +65,77 @@
             &#65088;
           </li>
         </ul>
-        <div class="others_features flex flex-col rounded-md">
-          {currentUserIn!== "" ? (
-          <p class="aside_login_label">login</p>
-          <div class="user_login_mob">
-            <p class="user_in text-white underline">welcome {{ shortyName }}</p>
-            {lastDateAction!== undefined &&
-            <p class="last_post">last Post:{{ lastDateAction }}</p>
-            }
-            <div class="written_wrapper w-full flex justify-between items-center py-2">
-              <span class="articles_label">Articles</span>
-              <span class="count_articles p-1 text-sm rounded bg-red-400">{{ countArt }}</span>
-            </div>
-            <RouterLink class="btn_logout_menu btn-mobile-link" to="/">Logout</RouterLink>
-          </div>
-          ): (<RouterLink class="btn_register_menu btn-mobile-link" to="/register"
-            >Register</RouterLink
-          >
-          <RouterLink class="btn-mobile-link" to="/login">Login</RouterLink>)}
 
-          <div class="custom_mob_wrap w-full">
+        <div class="others_features flex flex-col rounded-md">
+          <div class="aside_login_label w-full flex justify-end items-center">
+            <p
+              class="aside_login_label w-12 text-sm text-center text-gray-100 bg-purple-900 rounded-xl"
+            >
+              login
+            </p>
+          </div>
+
+          <div class="p-2 text-lg xsm:text-base">
+            <p class="user_in">welcome {{ shortyName }}</p>
+            <p v-if="lastDateAction !== undefined" class="last_post">
+              last Post:{{ lastDateAction }}
+            </p>
+            <div class="written_wrapper w-full flex justify-between items-center h-8">
+              <span class="articles_label text-gray-500 font-bold">Articles</span>
+              <span class="count_articles w-3 text-center rounded-2xl bg-green-800">{{
+                countArt
+              }}</span>
+            </div>
+            <div class="logout_mob_wrapper w-full">
+              <button class="btn_logout_menu text-purple-500 f0nt-bold">Logout</button>
+            </div>
+          </div>
+
+          <div class="custom_mob_wrap w-full text-white">
+            <p class="custom-p xsm:text-base">
+              <span>Custom</span> <span class="relative top-2 cursor-pointer">&#65088;</span>
+            </p>
+            <div class="w-full h-10 text-base flex">
+              <div class="select_blog">
+                <label for="all">all</label>
+                <div class="box_circle w-10 grid place-items-start">
+                  <input type="radio" id="all_blogger" name="blog" />
+                </div>
+              </div>
+              <div class="select_blog">
+                <label for="single">single</label>
+                <div class="box_circle w-10 grid place-items-start">
+                  <input type="radio" id="single_blogger" name="blog" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <nav v-if="currentUserIn === null" class="nav_mobile flex">
+        <RouterLink class="btn_register_nav btn-mobile-link" to="/register">Register</RouterLink>
+        <ul
+          id="menu_wrap"
+          class="menu_wrap flex xxsm:flex-col xsm:flex-row justify-center py-1 gap-2 bg-gray-700 rounded"
+        >
+          <li>
+            <img
+              alt="account logo"
+              class="profile_logo"
+              src="@/assets/account-avatar-profile-user-9-svgrepo-com.svg"
+            />
+          </li>
+          <li class="angle_bracket font-bold text-lg text-center text-white cursor-pointer">
+            &#65088;
+          </li>
+        </ul>
+
+        <div class="others_features flex flex-col rounded-md">
+          <RouterLink class="btn_register_menu btn-mobile-link" to="/register">Register</RouterLink>
+          <RouterLink class="btn-mobile-link" to="/login">Login</RouterLink>
+
+          <div class="custom_mob_wrap w-full text-white">
             <p class="custom-p">
               <span>Custom</span> <span class="relative top-2 cursor-pointer">&#65088;</span>
             </p>
@@ -110,10 +171,14 @@ export default defineComponent({
   computed: {
     currentUserIn: () => {
       const userStore = useUserStore()
+
+      console.log('current user:', userStore.currentUser)
       return userStore.currentUser
     },
     shortyName: () => {
       const userStore = useUserStore()
+
+      console.log('shorty name:', userStore.shortNameUser)
       return userStore.shortNameUser
     },
     lastDateAction: () => {
@@ -138,9 +203,11 @@ export default defineComponent({
 }
 
 @media (min-width: 180px) {
+  span.count_articles {
+    font-size: 12px;
+  }
   .nav_header {
-    --var-font-size-xxsm: 1.2em;
-    --var-font-size-xsm: 1.8em;
+    --var-font-size: 1.2em;
     padding: 1.5rem 0.15rem 2rem 0.15rem !important;
   }
 
@@ -157,6 +224,16 @@ export default defineComponent({
     height: 2rem;
   }
 
+  p.user_in {
+    @apply text-white transition-all duration-1000 ease-in-out hover:text-red-700 py-2;
+    width: calc(10rem + 3vw);
+    font-size: calc(0.86rem + 0.48vw);
+  }
+
+  p.user_in_mob {
+    display: none;
+  }
+
   .btn {
     @apply px-4  font-normal;
   }
@@ -165,7 +242,7 @@ export default defineComponent({
     @apply text-white font-semibold pb-3 md:py-1;
     font-family: 'Poetsen One', sans-serif;
     font-style: normal;
-    font-size: var(--var-font-size-xxsm);
+    font-size: var(--var-font-size);
   }
 
   .btn-link {
@@ -175,6 +252,26 @@ export default defineComponent({
   .btn-mobile-link {
     @apply p-3 text-white;
     font-size: calc(14px + 0.3vw);
+  }
+
+  .btn-logout-desk {
+    @apply cursor-pointer text-gray-100 underline hover:text-gray-300;
+    font-size: calc(14px + 0.3vw);
+  }
+
+  .btn-new-post {
+    @apply w-full h-full text-white;
+    cursor: pointer;
+    font-size: calc(10px + 0.1vw);
+    position: relative;
+    top: -3px;
+    z-index: 3;
+  }
+
+  .specs_blog_title {
+    font-size: calc(8px + 0.1vw);
+    display: none;
+    @apply text-blue-400;
   }
 
   .nav_mobile {
@@ -196,24 +293,28 @@ export default defineComponent({
   }
 
   .others_features {
-    visibility: hidden;
+    visibility: visible;
     position: absolute;
     top: 6.9rem;
     right: 0;
     width: 100%;
-    padding: 0.5rem 0;
+    padding: 0.5rem;
     @apply bg-gray-700;
     box-shadow: 0px 1px 10px 5px rgba(0, 0, 0, 0.65);
+    z-index: 3;
   }
 
   .custom_mob_wrap {
-    padding: 0.5rem;
-    color: #fff;
+    padding-bottom: 0.75rem;
+  }
+
+  .logout_mob_wrapper {
+    padding: 0.5rem 0;
   }
 
   .custom-p {
-    @apply font-bold;
-    font-size: calc(14px + 0.3vw);
+    @apply font-bold py-2;
+    font-size: calc(15px + 0.3vw);
   }
 
   .select_blog {
@@ -245,6 +346,10 @@ export default defineComponent({
 }
 
 @media (min-width: 375px) {
+  .nav_header {
+    --var-font-size: 1.4em;
+  }
+
   .generic_logo {
     position: relative;
     left: 0.5rem;
@@ -263,16 +368,19 @@ export default defineComponent({
   }
 
   .btn-logo {
-    font-size: var(--var-font-size-xsm);
+    font-size: var(--var-font-size);
   }
 
   .btn_register_nav {
     display: block;
   }
 
-  .btn_register_menu,
-  .btn_logout_menu {
+  .btn_register_menu {
     display: none;
+  }
+
+  p.user_in_mob {
+    display: block;
   }
 
   .others_features {
@@ -280,14 +388,61 @@ export default defineComponent({
     right: 0.25rem;
     width: 16em;
   }
+
+  .logout_mob_wrapper {
+    padding: 0.75rem 0;
+  }
 }
 
 @media (min-width: 520px) {
+  .nav_header {
+    --var-font-size: 1.6em;
+  }
+
+  .btn-logo {
+    font-size: var(--var-font-size);
+  }
+
+  .btn-new-post {
+    top: 3px;
+  }
+
   .nav_mobile {
     display: none;
   }
   .nav_desktop {
     display: flex;
+  }
+
+  p.user_in {
+    width: calc(8rem + 3vw);
+    font-size: calc(0.72rem + 0.48vw);
+  }
+}
+
+@media (min-width: 780px) {
+  .nav_header {
+    --var-font-size: calc(1.25rem + 1vw);
+  }
+
+  .btn-logo {
+    font-size: var(--var-font-size);
+  }
+
+  .specs_blog_title {
+    display: block;
+  }
+
+  .nav_mobile {
+    display: none;
+  }
+
+  .nav_desktop {
+    display: flex;
+  }
+
+  .btn-new-post {
+    top: -3px;
   }
 }
 </style>

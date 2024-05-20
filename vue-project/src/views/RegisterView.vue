@@ -89,7 +89,7 @@
                 id="btn_identity"
                 class="btn_identity cursor-pointer"
                 value="register"
-                @click="handleRegistration"
+                @click.prevent="handleRegistration"
               />
               <div
                 id="warning_msg"
@@ -98,7 +98,14 @@
               >
                 <p>{{ warningUpMsg }}</p>
               </div>
-              {loadingStage && <LoadingView />}
+
+              <div v-if="loadingStage" class="load_wrapper">
+                <ul
+                  class="loading_content flex justify-center gap-2 justify-center items-center py-2"
+                >
+                  <li><span class="loading_msg text-sm"> Please Wait . . .</span></li>
+                </ul>
+              </div>
             </div>
           </div>
         </fieldset>
@@ -109,12 +116,9 @@
 
 <script>
 import { ref, defineComponent } from 'vue'
-import { storeToRefs } from 'pinia'
 import { registrationapi } from '../api/registration-api.js'
 import { useWarningStore } from '@/stores/warning.js'
 import { useUserStore } from '@/stores/user.js'
-
-import LoadingView from '../components/loading/LoadingView.vue'
 
 export default defineComponent({
   setup() {
@@ -150,7 +154,7 @@ export default defineComponent({
     },
     loadingStage: () => {
       const userStore = useUserStore()
-      return userStore.loading
+      return userStore.loadingState
     }
   },
 
@@ -161,35 +165,40 @@ export default defineComponent({
     async handleRegistration() {
       const userStore = useUserStore()
 
-      const { usersLoginList } = storeToRefs(userStore)
-
       this.checkInputError()
 
       console.log('user:', this.user)
 
       setTimeout(() => {
         userStore.$patch({
-          loading: true
+          loading: !userStore.loadingState
         })
-      }, 3000)
+      }, 5400)
+
+      userStore.$patch({
+        loading: !userStore.loadingState
+      })
 
       const newUser = await registrationapi(this.user)
 
       userStore.usersListed(newUser)
 
       userStore.$patch({
-        currentUsername: newUser,
-        loading: false
+        currentUsername: newUser
       })
 
-      console.log('usersLogin :', userStore.usersLogin)
-      console.log('userName :', userStore.currentUser)
+      console.log('loading:', userStore.loading)
 
       this.resetUser(this.user)
+
+      this.$router.push({ path: '/' })
     },
 
     checkInputError() {
       const reg = /^([\w\-]+)@(\w+)\.([A-Za-z]{2,5})$/
+
+      const reg2 = /\@/
+      const checkExc = reg2.exec(this.user.username)
 
       const warningPop = useWarningStore()
 
@@ -208,6 +217,14 @@ export default defineComponent({
         return
       }
 
+      if (checkExc !== null) {
+        warningPop.warningUpdate('username cannot contains character - @', this.user)
+        return
+      } else if (this.user.username.length < 5) {
+        warningPop.warningUpdate('username, at least 5 characters', this.user)
+        return
+      }
+
       if (this.user.password.length < 6 || this.user.confirm_password.length < 6) {
         warningPop.warningUpdate('password could be at least 06 characters', this.user)
         return
@@ -217,9 +234,11 @@ export default defineComponent({
       }
     },
     resetUser(user) {
-      this.checked = false
-      const userKeys = Object.keys(user)
-      userKeys.forEach((key) => (user[key] = ''))
+      setTimeout(() => {
+        this.checked = false
+        const userKeys = Object.keys(user)
+        userKeys.forEach((key) => (user[key] = ''))
+      }, 4800)
     }
   }
 })
@@ -319,6 +338,33 @@ export default defineComponent({
     @apply w-full h-auto text-white bg-gray-800 p-2 rounded-lg text-center;
     position: relative;
     top: 1.35rem;
+  }
+
+  /* loading */
+  .load_wrapper {
+    position: absolute;
+    top: -0.5rem;
+    widrh: 140px;
+    height: 70px;
+  }
+
+  .loading_msg {
+    padding: 0.25rem 1rem;
+    animation: load-msg 2.4s ease-in-out infinite;
+  }
+
+  @keyframes load-msg {
+    0% {
+      color: white;
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    100% {
+      color: #f4f4f4;
+      opacity: 0.5;
+      background-color: rgba(0, 0, 0, 0.2);
+    }
   }
 }
 
