@@ -3,7 +3,13 @@ import { defineStore } from 'pinia'
 //using Options Object
 
 export const useUserStore = defineStore('user', {
-  state: () => ({ usersLogin: [], currentUsername: null, loading: false }),
+  state: () => ({
+    usersLogin: [],
+    currentUsername: null,
+    loading: false,
+    customIsVisible: false,
+    miniCustomIsVisible: false
+  }),
   getters: {
     usersLoginList: (state) => {
       return (newUser) => state.usersLogin.push(newUser)

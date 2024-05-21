@@ -37,13 +37,37 @@
         <RouterLink class="btn btn-link" to="/login">Login</RouterLink>
         <RouterLink class="btn btn-link" to="/register">Register</RouterLink>
 
-        <ul
+        <div
           id="custom_feature"
-          class="custom_features flex text-gray-300 justify-center items-center gap-1"
+          class="custom_features flex flex-col justify-center items-center gap-2"
         >
-          <li class="relative">Custom</li>
-          <li class="relative md:top-1 font-bold cursor-pointer">&#65088;</li>
-        </ul>
+          <ul class="panel_desk_custom flex text-gray-300 justify-center items-center gap-1">
+            <li class="relative">Custom</li>
+            <li class="relative md:top-1 font-bold cursor-pointer" @click="handleMiniCustom">
+              &#65088;
+            </li>
+          </ul>
+          <div class="desk_custom_wrapper flex text-white" v-if="minicustom">
+            <div class="select_blog z-10">
+              <label for="all">all</label>
+              <div class="box_circle w-10 grid place-items-start">
+                <input
+                  type="radio"
+                  id="all_blogr"
+                  name="blogr"
+                  @change="handleRadioState"
+                  checked
+                />
+              </div>
+            </div>
+            <div class="select_blog z-10">
+              <label for="single">single</label>
+              <div class="box_circle w-10 grid place-items-start">
+                <input type="radio" id="single_blogr" name="blogr" @change="handleRadioState" />
+              </div>
+            </div>
+          </div>
+        </div>
       </nav>
 
       <nav v-if="currentUserIn !== null" class="nav_mobile flex gap-3">
@@ -61,12 +85,15 @@
               src="@/assets/account-avatar-profile-user-9-svgrepo-com.svg"
             />
           </li>
-          <li class="angle_bracket font-bold text-lg text-center text-white cursor-pointer">
+          <li
+            class="angle_bracket font-bold text-lg text-center text-white cursor-pointer"
+            @click="handleCustom"
+          >
             &#65088;
           </li>
         </ul>
 
-        <div class="others_features flex flex-col rounded-md">
+        <div class="others_features flex flex-col rounded-md" v-if="custom">
           <div class="aside_login_label w-full flex justify-end items-center">
             <p
               class="aside_login_label w-12 text-sm text-center text-gray-100 bg-purple-900 rounded-xl"
@@ -93,19 +120,26 @@
 
           <div class="custom_mob_wrap w-full text-white">
             <p class="custom-p xsm:text-base">
-              <span>Custom</span> <span class="relative top-2 cursor-pointer">&#65088;</span>
+              <span>Custom</span>
+              <span class="relative top-2 cursor-pointer" @click="handleMiniCustom">&#65088;</span>
             </p>
-            <div class="w-full h-10 text-base flex">
+            <div class="w-full h-10 text-base flex" v-if="minicustom">
               <div class="select_blog">
                 <label for="all">all</label>
                 <div class="box_circle w-10 grid place-items-start">
-                  <input type="radio" id="all_blogger" name="blog" />
+                  <input
+                    type="radio"
+                    id="all_blogger"
+                    name="blog"
+                    @change="handleRadioState"
+                    checked
+                  />
                 </div>
               </div>
               <div class="select_blog">
                 <label for="single">single</label>
                 <div class="box_circle w-10 grid place-items-start">
-                  <input type="radio" id="single_blogger" name="blog" />
+                  <input type="radio" id="single_blogger" name="blog" @change="handleRadioState" />
                 </div>
               </div>
             </div>
@@ -126,30 +160,48 @@
               src="@/assets/account-avatar-profile-user-9-svgrepo-com.svg"
             />
           </li>
-          <li class="angle_bracket font-bold text-lg text-center text-white cursor-pointer">
+          <li
+            class="angle_bracket font-bold text-lg text-center text-white cursor-pointer"
+            @click="handleCustom"
+          >
             &#65088;
           </li>
         </ul>
 
-        <div class="others_features flex flex-col rounded-md">
-          <RouterLink class="btn_register_menu btn-mobile-link" to="/register">Register</RouterLink>
-          <RouterLink class="btn-mobile-link" to="/login">Login</RouterLink>
+        <div class="others_features flex flex-col rounded-md gap-3" v-if="custom">
+          <RouterLink class="btn_register_menu text-white font-medium" to="/register"
+            >Register</RouterLink
+          >
+
+          <button id="btn-mobile-login" class="btn-mobile-login">Login</button>
 
           <div class="custom_mob_wrap w-full text-white">
             <p class="custom-p">
-              <span>Custom</span> <span class="relative top-2 cursor-pointer">&#65088;</span>
+              <span>Custom</span>
+              <span class="relative top-2 left-1 cursor-pointer" @click="handleMiniCustom"
+                >&#65088;</span
+              >
             </p>
-            <div class="w-full h-10 text-base flex">
+            <div
+              class="w-full h-10 text-base flex transition-all duration-1000 ease-in-out"
+              v-if="minicustom"
+            >
               <div class="select_blog">
                 <label for="all">all</label>
                 <div class="box_circle w-10 grid place-items-start">
-                  <input type="radio" id="all_blogger" name="blog" />
+                  <input
+                    type="radio"
+                    id="all_blogger"
+                    name="blog"
+                    @change="handleRadioState"
+                    checked
+                  />
                 </div>
               </div>
               <div class="select_blog">
                 <label for="single">single</label>
                 <div class="box_circle w-10 grid place-items-start">
-                  <input type="radio" id="single_blogger" name="blog" />
+                  <input type="radio" id="single_blogger" name="blog" @change="handleRadioState" />
                 </div>
               </div>
             </div>
@@ -162,7 +214,7 @@
 
 <script>
 import { RouterLink } from 'vue-router'
-import { defineComponent } from 'vue'
+import { ref, defineComponent } from 'vue'
 import { useUserStore } from '@/stores/user.js'
 import { usePostStore } from '@/stores/post.js'
 
@@ -188,6 +240,36 @@ export default defineComponent({
     countArt: () => {
       const postStore = usePostStore()
       return postStore.countArticles
+    },
+    custom: () => {
+      const userStore = useUserStore()
+      return userStore.customIsVisible
+    },
+    minicustom: () => {
+      const userStore = useUserStore()
+      return userStore.miniCustomIsVisible
+    }
+  },
+  methods: {
+    handleRadioState(e) {
+      console.log(e.target)
+      if (e.target.id === 'all_blogger') {
+        e.target.checked
+      } else if (e.target.id === 'single_blogger') {
+        e.target.checked
+      }
+    },
+    handleCustom() {
+      const userStore = useUserStore()
+      const newState = !userStore.customIsVisible
+
+      userStore.$patch({ customIsVisible: newState })
+    },
+    handleMiniCustom() {
+      const userStore = useUserStore()
+      const newState = !userStore.miniCustomIsVisible
+      userStore.$patch({ miniCustomIsVisible: newState })
+      console.log('new state:', newState)
     }
   }
 })
@@ -254,6 +336,11 @@ export default defineComponent({
     font-size: calc(14px + 0.3vw);
   }
 
+  .btn-mobile-login {
+    @apply w-full text-left text-white font-medium;
+    font-size: calc(15px + 0.47vw);
+  }
+
   .btn-logout-desk {
     @apply cursor-pointer text-gray-100 underline hover:text-gray-300;
     font-size: calc(14px + 0.3vw);
@@ -304,8 +391,18 @@ export default defineComponent({
     z-index: 3;
   }
 
+  .desk_custom_wrapper {
+    position: absolute;
+    top: 6.4rem;
+    right: 0rem;
+    width: 10rem;
+    height: 2.5rem;
+    @apply bg-gray-500;
+  }
+
   .custom_mob_wrap {
-    padding-bottom: 0.75rem;
+    position: relative;
+    top: -0.5rem;
   }
 
   .logout_mob_wrapper {
@@ -314,7 +411,7 @@ export default defineComponent({
 
   .custom-p {
     @apply font-bold py-2;
-    font-size: calc(15px + 0.3vw);
+    font-size: calc(14px + 0.24vw);
   }
 
   .select_blog {
@@ -375,10 +472,6 @@ export default defineComponent({
     display: block;
   }
 
-  .btn_register_menu {
-    display: none;
-  }
-
   p.user_in_mob {
     display: block;
   }
@@ -397,6 +490,11 @@ export default defineComponent({
 @media (min-width: 520px) {
   .nav_header {
     --var-font-size: 1.6em;
+  }
+
+  .btn_register_menu,
+  .btn_logout_menu {
+    display: none;
   }
 
   .btn-logo {
@@ -443,6 +541,10 @@ export default defineComponent({
 
   .btn-new-post {
     top: -3px;
+  }
+
+  .desk_custom_wrapper {
+    top: 6.7rem;
   }
 }
 </style>
