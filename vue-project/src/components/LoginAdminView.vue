@@ -30,7 +30,10 @@
               placeholder="custom"
             />
           </div>
-          <div class="form_submit flex justify-center xsm:justify-around items-center">
+          <div
+            class="form_submit flex justify-center xsm:justify-around items-center"
+            @click.prevent="hideShowLogAdmin"
+          >
             <input
               type="button"
               id="cancel_log"
@@ -51,7 +54,24 @@
     </form>
   </div>
 </template>
-<script setup></script>
+<script setup>
+import { ref, computed } from 'vue'
+import { useUserStore } from '../stores/user.js'
+
+function hideShowLogAdmin(e) {
+  const userStore = useUserStore()
+
+  console.log(e.target.id)
+  if ((e.target.id = 'submit_log')) {
+    userStore.$patch({ isLogAdminOpen: false, miniCustomIsVisible: false })
+
+    userStore.updateStateRadio('false', 'true')
+  } else if (e.target.id === 'cancel_log') {
+    userStore.$patch({ isLogAdminOpen: false, miniCustomIsVisible: false })
+    userStore.updateStateRadio('true', 'false')
+  }
+}
+</script>
 <style scoped>
 @media (min-width: 180px) {
   *,

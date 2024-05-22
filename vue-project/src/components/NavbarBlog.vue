@@ -184,7 +184,8 @@
             </p>
             <div
               class="w-full h-10 text-base flex transition-all duration-1000 ease-in-out"
-              v-if="minicustom"
+              v-if="userStore.miniCustomIsVisible"
+              @click="handleRadioState"
             >
               <div class="select_blog">
                 <label for="all">all</label>
@@ -193,15 +194,19 @@
                     type="radio"
                     id="all_blogger"
                     name="blog"
-                    @change="handleRadioState"
-                    checked
+                    v-model="userStore.isCheckedAll"
                   />
                 </div>
               </div>
               <div class="select_blog">
                 <label for="single">single</label>
                 <div class="box_circle w-10 grid place-items-start">
-                  <input type="radio" id="single_blogger" name="blog" @change="handleRadioState" />
+                  <input
+                    type="radio"
+                    id="single_blogger"
+                    name="blog"
+                    v-model="userStore.isCheckedSingle"
+                  />
                 </div>
               </div>
             </div>
@@ -210,69 +215,95 @@
       </nav>
     </div>
   </header>
+  <div class="log_admin_area" v-if="isAdminOpen">
+    <LoginAdminView />
+  </div>
 </template>
 
-<script>
+<script setup>
 import { RouterLink } from 'vue-router'
-import { ref, defineComponent } from 'vue'
+import { ref, computed } from 'vue'
+import { defineComponent } from 'vue'
 import { useUserStore } from '@/stores/user.js'
 import { usePostStore } from '@/stores/post.js'
+import LoginAdminView from './LoginAdminView.vue'
 
-export default defineComponent({
-  setUp() {},
-  computed: {
-    currentUserIn: () => {
-      const userStore = useUserStore()
+const userStore = ref(useUserStore())
 
-      console.log('current user:', userStore.currentUser)
-      return userStore.currentUser
-    },
-    shortyName: () => {
-      const userStore = useUserStore()
+const currentUserIn = computed(() => {
+  const userStore = useUserStore()
 
-      console.log('shorty name:', userStore.shortNameUser)
-      return userStore.shortNameUser
-    },
-    lastDateAction: () => {
-      const postStore = usePostStore()
-      return postStore.lastDate
-    },
-    countArt: () => {
-      const postStore = usePostStore()
-      return postStore.countArticles
-    },
-    custom: () => {
-      const userStore = useUserStore()
-      return userStore.customIsVisible
-    },
-    minicustom: () => {
-      const userStore = useUserStore()
-      return userStore.miniCustomIsVisible
-    }
-  },
-  methods: {
-    handleRadioState(e) {
-      console.log(e.target)
-      if (e.target.id === 'all_blogger') {
-        e.target.checked
-      } else if (e.target.id === 'single_blogger') {
-        e.target.checked
-      }
-    },
-    handleCustom() {
-      const userStore = useUserStore()
-      const newState = !userStore.customIsVisible
-
-      userStore.$patch({ customIsVisible: newState })
-    },
-    handleMiniCustom() {
-      const userStore = useUserStore()
-      const newState = !userStore.miniCustomIsVisible
-      userStore.$patch({ miniCustomIsVisible: newState })
-      console.log('new state:', newState)
-    }
-  }
+  console.log('current user:', userStore.currentUser)
+  return userStore.currentUser
 })
+
+const shortyName = computed(() => {
+  const userStore = useUserStore()
+
+  console.log('shorty name:', userStore.shortNameUser)
+  return userStore.shortNameUser
+})
+
+const lastDateAction = computed(() => {
+  const postStore = usePostStore()
+  return postStore.lastDate
+})
+
+const countArt = computed(() => {
+  const postStore = usePostStore()
+  return postStore.countArticles
+})
+
+const custom = computed(() => {
+  const userStore = useUserStore()
+  return userStore.customIsVisible
+})
+const minicustom = computed(() => {
+  const userStore = useUserStore()
+  return userStore.minor
+})
+
+const stateCheckedAll = computed(() => {
+  const userStore = useUserStore()
+  return userStore.isCheckedAll
+})
+
+const stateCheckedSingle = computed(() => {
+  const userStore = useUserStore()
+  return userStore.isCheckedSingle
+})
+
+const isAdminOpen = computed(() => {
+  const userStore = useUserStore()
+  return userStore.isLogAdminOpen
+})
+
+function handleRadioState(e) {
+  console.log(e.target)
+  const userStore = useUserStore()
+
+  if (e.target.id === 'all_blogr') {
+    userStore.$patch({ isLogAdminOpen: false })
+    userStore.updateStateRadio('true', 'false')
+  } else if (e.target.id === 'single_blogr') {
+    userStore.$patch({ isLogAdminOpen: true })
+    userStore.updateStateRadio('false', 'true')
+  }
+}
+
+function handleCustom(e) {
+  console.log('e parent element', e.currentTarget.parentElementChild)
+  const userStore = useUserStore()
+  const newState = !userStore.customIsVisible
+
+  userStore.$patch({ customIsVisible: newState })
+}
+
+function handleMiniCustom(e) {
+  const userStore = useUserStore()
+  const newState = !userStore.miniCustomIsVisible
+  userStore.$patch({ miniCustomIsVisible: newState })
+}
 </script>
 
 <style scoped>
@@ -285,6 +316,12 @@ export default defineComponent({
 }
 
 @media (min-width: 180px) {
+  .log_admin_area {
+    @apply fixed top-0 left-0 w-full h-screen;
+    background-color: rgba(0, 0, 0, 0.66);
+    z-index: 5;
+  }
+
   span.count_articles {
     font-size: 12px;
   }
