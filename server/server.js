@@ -5,9 +5,11 @@ const cookie = require("cookie-parser");
 const postRouter = require("./src/routes/post-route");
 const registerRouter = require("./src/routes/register-route");
 const loginRouter = require("./src/routes/login-route");
+const logoutRouter = require("./src/routes/logout-route");
 
-require("dotenv").config();
 const app = express();
+
+app.use(cookie());
 
 app.use(
   cors({
@@ -20,9 +22,10 @@ app.use(
   })
 );
 
+require("dotenv").config();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookie());
 
 const PORT = process.env.PORT;
 const base_url = process.env.API_BASE;
@@ -31,6 +34,7 @@ const base_url = process.env.API_BASE;
 app.use(`/${base_url}/post`, postRouter);
 app.use(`/${base_url}/register`, registerRouter);
 app.use(`/${base_url}/login`, loginRouter);
+app.use(`/${base_url}/logout`, logoutRouter);
 
 app.get("/", (req, res) => {
   const post = {

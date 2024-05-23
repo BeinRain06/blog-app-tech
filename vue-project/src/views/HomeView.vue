@@ -29,12 +29,13 @@
                   <span class="posted_at font-light text-sm md:text-base"
                     >{{ postItem.date }} |</span
                   >
-                  <RouterLink class="btn-edit-link" to="/edit"
-                    ><img
+                  <button class="btn-edit-link" @click.prevent="redirectEditPage">
+                    <img
                       class="svg_edit w-6 h-4 cursor-pointer"
                       src="../assets/edit-svgrepo-com.svg"
                       alt="edit post"
-                  /></RouterLink>
+                    />
+                  </button>
                 </div>
               </div>
               <div class="summary_wrapper w-full px-2 py-4 sm:p-2">
@@ -56,18 +57,21 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
 import TheWelcome from '../components/TheWelcome.vue'
 import { arrayImg, dataPostsList } from '../assets/images-blog-post/index.js'
+import { useUserStore } from '@/stores/user.js'
 
-data: () => {
-  return {
-    foo: 'classified'
+const router = useRouter()
+
+function redirectEditPage() {
+  const userStore = useUserStore()
+  if (userStore.currentUsername !== null) {
+    router.push({ path: '/edit' })
+  } else {
+    alert("can't edit this post, not login")
+    return
   }
-}
-
-getClassify: () => {
-  const elt = this.data()
-  console.log('elt:', elt)
 }
 </script>
 

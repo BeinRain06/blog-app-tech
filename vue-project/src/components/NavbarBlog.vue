@@ -10,7 +10,7 @@
       </ul>
 
       <nav
-        v-if="currentUserIn !== null"
+        v-if="currentUserIn !== null && currentUserIn !== undefined"
         class="nav_desktop flex justify-center gap-1 md:gap-7 md:text-lg"
       >
         <div class="user_login_desk flex justify-end gap-1 md:justify-center items-center md:gap-4">
@@ -30,12 +30,19 @@
           <li><span class="specs_blog_title">techreviews</span></li>
         </ul>
 
-        <button class="btn-logout-desk">Logout</button>
+        <button class="btn-logout-desk" @click.prevent="logoutSession">Logout</button>
       </nav>
 
-      <nav v-if="currentUserIn === null" class="nav_desktop space-x-3 text-sm md:text-lg">
-        <RouterLink class="btn btn-link" to="/login">Login</RouterLink>
-        <RouterLink class="btn btn-link" to="/register">Register</RouterLink>
+      <nav
+        v-if="currentUserIn === null || currentUserIn === undefined"
+        class="nav_desktop space-x-3 text-sm md:text-lg"
+      >
+        <button class="btn btn-link" to="/login" @click="(e) => redirectLink(e, 'login')">
+          Login
+        </button>
+        <button class="btn btn-link" to="/register" @click="(e) => redirectLink(e, 'register')">
+          Register
+        </button>
 
         <div
           id="custom_feature"
@@ -70,7 +77,10 @@
         </div>
       </nav>
 
-      <nav v-if="currentUserIn !== null" class="nav_mobile flex gap-3">
+      <nav
+        v-if="currentUserIn !== null && currentUserIn !== undefined"
+        class="nav_mobile flex gap-3"
+      >
         <div class="grid place-items-center">
           <p class="user_in_mob text-xl xsm:text-base text-white underline">{{ shortyName }}</p>
         </div>
@@ -114,7 +124,12 @@
               }}</span>
             </div>
             <div class="logout_mob_wrapper w-full">
-              <button class="btn_logout_menu text-purple-500 f0nt-bold">Logout</button>
+              <button
+                class="btn_logout_menu text-purple-500 f0nt-bold"
+                @click.prevent="logoutSession"
+              >
+                Logout
+              </button>
             </div>
           </div>
 
@@ -147,8 +162,13 @@
         </div>
       </nav>
 
-      <nav v-if="currentUserIn === null" class="nav_mobile flex">
-        <RouterLink class="btn_register_nav btn-mobile-link" to="/register">Register</RouterLink>
+      <nav v-if="currentUserIn === null || currentUserIn === undefined" class="nav_mobile flex">
+        <button
+          class="btn_register_nav btn-mobile-link"
+          @click="(e) => redirectLink(e, 'register')"
+        >
+          Register
+        </button>
         <ul
           id="menu_wrap"
           class="menu_wrap flex xxsm:flex-col xsm:flex-row justify-center py-1 gap-2 bg-gray-700 rounded"
@@ -169,11 +189,20 @@
         </ul>
 
         <div class="others_features flex flex-col rounded-md gap-3" v-if="custom">
-          <RouterLink class="btn_register_menu text-white font-medium" to="/register"
-            >Register</RouterLink
+          <button
+            class="btn_register_menu text-left text-white font-medium"
+            @click="(e) => redirectLink(e, 'register')"
           >
+            Register
+          </button>
 
-          <button id="btn-mobile-login" class="btn-mobile-login">Login</button>
+          <button
+            id="btn-mobile-login"
+            class="btn-mobile-login"
+            @click="(e) => redirectLink(e, 'login')"
+          >
+            Login
+          </button>
 
           <div class="custom_mob_wrap w-full text-white">
             <p class="custom-p">
@@ -194,19 +223,15 @@
                     type="radio"
                     id="all_blogger"
                     name="blog"
-                    v-model="userStore.isCheckedAll"
+                    @change="handleRadioState"
+                    checked
                   />
                 </div>
               </div>
               <div class="select_blog">
                 <label for="single">single</label>
                 <div class="box_circle w-10 grid place-items-start">
-                  <input
-                    type="radio"
-                    id="single_blogger"
-                    name="blog"
-                    v-model="userStore.isCheckedSingle"
-                  />
+                  <input type="radio" id="single_blogger" name="blog" @change="handleRadioState" />
                 </div>
               </div>
             </div>
@@ -221,26 +246,26 @@
 </template>
 
 <script setup>
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { ref, computed } from 'vue'
 import { defineComponent } from 'vue'
 import { useUserStore } from '@/stores/user.js'
 import { usePostStore } from '@/stores/post.js'
 import LoginAdminView from './LoginAdminView.vue'
+import { logoutapi } from '@/api/logout-api.js'
+import { redirectloginapi } from '@/api/login-api.js'
+
+const router = useRouter()
 
 const userStore = ref(useUserStore())
 
 const currentUserIn = computed(() => {
   const userStore = useUserStore()
-
-  console.log('current user:', userStore.currentUser)
   return userStore.currentUser
 })
 
 const shortyName = computed(() => {
   const userStore = useUserStore()
-
-  console.log('shorty name:', userStore.shortNameUser)
   return userStore.shortNameUser
 })
 
@@ -258,6 +283,7 @@ const custom = computed(() => {
   const userStore = useUserStore()
   return userStore.customIsVisible
 })
+
 const minicustom = computed(() => {
   const userStore = useUserStore()
   return userStore.minor
@@ -282,27 +308,60 @@ function handleRadioState(e) {
   console.log(e.target)
   const userStore = useUserStore()
 
-  if (e.target.id === 'all_blogr') {
+  if (e.target.id === 'all_blogr' || e.target.id === 'all_blogger') {
     userStore.$patch({ isLogAdminOpen: false })
     userStore.updateStateRadio('true', 'false')
-  } else if (e.target.id === 'single_blogr') {
+  } else if (e.target.id === 'single_blogr' || e.target.id === 'single_blogger') {
     userStore.$patch({ isLogAdminOpen: true })
     userStore.updateStateRadio('false', 'true')
   }
 }
 
-function handleCustom(e) {
-  console.log('e parent element', e.currentTarget.parentElementChild)
+function handleCustom() {
   const userStore = useUserStore()
   const newState = !userStore.customIsVisible
-
+  console.log('usersLogin :', userStore.usersLogin)
   userStore.$patch({ customIsVisible: newState })
 }
 
-function handleMiniCustom(e) {
+function handleMiniCustom() {
   const userStore = useUserStore()
+  console.log('usersLogin :', userStore.usersLogin)
   const newState = !userStore.miniCustomIsVisible
   userStore.$patch({ miniCustomIsVisible: newState })
+}
+
+async function logoutSession() {
+  const userStore = useUserStore()
+  const exArr = userStore.usersLogin
+  console.log('exArr:', exArr)
+  const userToLogout = await logoutapi()
+  console.log('userToLogout:', userToLogout)
+
+  const newArr = exArr.filter((item) => item !== userToLogout)
+  console.log('newArr:', newArr)
+  userStore.$patch({ usersLogin: newArr, currentUsername: null })
+
+  router.push({ path: '/' })
+}
+
+async function redirectLink(e, label) {
+  console.log('label:', label)
+  const userStore = useUserStore()
+  const usersLogin = userStore.usersLogin
+  if (label === 'login') {
+    const nameOn = await redirectloginapi()
+    console.log('nameOn:', nameOn)
+    if (nameOn !== 'null') {
+      userStore.$patch({ currentUsername: nameOn, usersLogin: [...usersLogin, nameOn] })
+    } else {
+      router.push({ path: '/login' })
+    }
+  } else if (label === 'register') {
+    router.push({ path: '/register' })
+  }
+
+  userStore.$patch({ miniCustomIsVisible: false, customIsVisible: false })
 }
 </script>
 

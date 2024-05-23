@@ -18,26 +18,55 @@
                 id="email"
                 class="input_content"
                 name="email"
+                ref="inputEml"
                 placeholder="address_Email"
-                focus
+                focus="true"
+                v-model="email"
               />
             </div>
-            <div class="form_control">
+            <div class="form_control" @click="showPassword">
               <label for="password"> Password</label>
               <input
                 type="password"
                 id="password"
-                class="input_content"
+                class="input_content password_input"
                 name="password"
                 min-length="8"
+                ref="inputPwd"
                 placeholder="Password"
+                v-model="password"
               />
-              <div class="w-full flex justify-end text-base">
-                <span id="toggle_password" class="toggle_password p-1">show</span>
+              <div
+                class="pwd_wrap_toggle w-full flex justify-end text-base text-blue-900 font-bold"
+              >
+                <span id="toggle_password" class="toggle_password cursor-pointer p-1 z-10"
+                  >show</span
+                >
               </div>
             </div>
-            <div class="form_submit">
-              <input type="submit" id="btn_identity" class="btn_identity" value="login" />
+            <div class="form_submit w-full mt-3">
+              <input
+                type="button"
+                id="btn_identity"
+                class="btn_identity cursor-pointer w-full text-center text-gray-200 py-2 bg-blue-800 rounded-xl z-10 tranition-all duration-1000 ease-in-out hover:bg-gray-800 hover: text-gray-50"
+                value="login"
+                @click.prevent="handleLogin"
+              />
+              <div
+                id="warning_msg"
+                class="warning_msg absolute bottom-12 w-full h-8 text-red-600 text-center bg-yellow-100"
+                v-if="warningStore.warningNews"
+              >
+                <p>{{ warningStore.warningNews }}</p>
+              </div>
+
+              <div v-if="userStore.loadingState" class="load_wrapper">
+                <ul
+                  class="loading_content flex justify-center gap-2 justify-center items-center py-2"
+                >
+                  <li><span class="loading_msg text-sm"> Please Wait . . .</span></li>
+                </ul>
+              </div>
             </div>
           </div>
         </fieldset>
@@ -45,6 +74,119 @@
     </div>
   </div>
 </template>
+
+<script>
+import { ref, defineComponent } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user.js'
+import { useWarningStore } from '@/stores/warning.js'
+import { loginapi } from '../api/login-api.js'
+
+export default defineComponent({
+  setup() {
+    const userStore = ref(useUserStore())
+    const warningStore = ref(useWarningStore())
+    const inputEml = ref(null)
+    const inputPwd = ref(null)
+    const email = ref('')
+    const password = ref('')
+
+    async function handleLogin(e) {
+      const userStore = useUserStore()
+
+      console.log('e login target:', e.target)
+
+      setTimeout(() => {
+        userStore.$patch({
+          loading: !userStore.loadingState
+        })
+      }, 4000)
+
+      userStore.$patch({
+        loading: !userStore.loadingState
+      })
+
+      const isStateWarning = checkInputError()
+
+      if (isStateWarning) {
+        return
+      }
+
+      //loginapi call
+      const user = { email: inputEml.value.value, password: inputPwd.value.value }
+
+      const newLoginUser = await loginapi(user)
+      console.log('newLoginUser:', newLoginUser)
+
+      const exUsersArr = userStore.usersLogin
+      userStore.$patch({
+        currentUsername: newLoginUser,
+        usersLogin: [...exUsersArr, newLoginUser]
+      })
+
+      console.log('userStore usersLogin:', userStore.usersLogin)
+
+      resetUser(user)
+
+      this.$router.push({ path: '/' })
+    }
+
+    function checkInputError() {
+      const reg = /^([\w\-]+)@(\w+)\.([A-Za-z]{2,5})$/
+
+      const user = { email: inputEml.value.value, password: inputPwd.value.value }
+
+      const warningPop = useWarningStore()
+
+      if (user.email === '' && user.password === '') {
+        setTimeout(() => {
+          warningPop.warningUpdate('input Fields Empty!', user)
+        }, 4100)
+        return true
+      } else if (!reg.test(user.email)) {
+        setTimeout(() => {
+          warningPop.warningUpdate('wrong Email! ', user)
+        }, 4100)
+        return true
+      }
+
+      return false
+    }
+
+    function showPassword(e) {
+      console.log('this e target:', e.target)
+      if (e.target.id === 'toggle_password') {
+        console.log('inputPwd:', inputPwd.value)
+        const typeEl = inputPwd.value.getAttribute('type')
+        if (typeEl === 'password') {
+          inputPwd.value.setAttribute('type', 'text')
+        } else if (typeEl === 'text') {
+          inputPwd.value.setAttribute('type', 'password')
+        }
+      }
+    }
+
+    function resetUser(user) {
+      setTimeout(() => {
+        inputPwd.value.setAttribute('type', 'password')
+        const userKeys = Object.keys(user)
+        userKeys.forEach((key) => (user[key] = ''))
+      }, 4800)
+    }
+
+    return {
+      email,
+      password,
+      userStore,
+      warningStore,
+      inputPwd,
+      inputEml,
+      handleLogin,
+      showPassword
+    }
+  }
+})
+</script>
 
 <style scoped>
 @media (min-width: 180px) {
@@ -121,6 +263,20 @@
     @apply w-full h-auto text-white bg-gray-800 p-2 rounded-lg text-center;
     position: relative;
     top: 0.5rem;
+  }
+
+  /* loading */
+  .load_wrapper {
+    position: absolute;
+    bottom: 2rem;
+    widrh: 140px;
+    height: 70px;
+  }
+
+  .loading_msg {
+    padding: 0.25rem 1rem;
+    animation: load-msg 2.4s ease-in-out infinite;
+    @apply text-gray-50 bg-gray-400;
   }
 }
 

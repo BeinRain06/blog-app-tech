@@ -10,20 +10,17 @@ export const registrationapi = async (userInfo) => {
     secret: userInfo.custom
   }
 
-  console.log('user:', user)
-
   const userCreation = await fetch(`${base_url}/register`, {
     method: 'POST',
     body: JSON.stringify(user),
     headers: {
       'Content-Type': 'application/json'
       // 'Content-Type': 'application/x-www-form-urlencoded',
-    }
+    },
+    credentials: 'include'
   })
     .then((res) => res.json())
     .then((newres) => newres.data)
-
-  console.log('userCreation:', userCreation)
 
   return userCreation
 }

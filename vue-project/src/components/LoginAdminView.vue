@@ -63,11 +63,19 @@ function hideShowLogAdmin(e) {
 
   console.log(e.target.id)
   if ((e.target.id = 'submit_log')) {
-    userStore.$patch({ isLogAdminOpen: false, miniCustomIsVisible: false })
+    userStore.$patch({
+      isLogAdminOpen: false,
+      miniCustomIsVisible: false,
+      customIsVisible: false
+    })
 
     userStore.updateStateRadio('false', 'true')
   } else if (e.target.id === 'cancel_log') {
-    userStore.$patch({ isLogAdminOpen: false, miniCustomIsVisible: false })
+    userStore.$patch({
+      isLogAdminOpen: false,
+      miniCustomIsVisible: false,
+      customIsVisible: false
+    })
     userStore.updateStateRadio('true', 'false')
   }
 }

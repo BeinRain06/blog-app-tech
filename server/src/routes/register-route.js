@@ -3,7 +3,6 @@ const cors = require("cors");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const cookie = require("cookie-parser");
 const User = require("../models/user");
 const { format } = require("date-fns");
 
@@ -24,6 +23,7 @@ router.use(express.urlencoded({ extended: false }));
 router.get("/", (req, res) => {
   const user = req.user;
   const newUser = req.body.user;
+  const ab = req.cookie;
 
   console.log(user);
   console.log(newUser);
@@ -41,8 +41,7 @@ router.post("/", async (req, res) => {
     };
 
     // encrypt password
-    const salt = bcrypt.genSalt(10);
-    const passwordHash = bcrypt.hashSync(userCatch.password, 10); //10 autogen salt
+    const passwordHash = bcrypt.hashSync(`${userCatch.password}`, 10); //10 autogen salt & hash
     let secret;
 
     //generate session_token
@@ -55,7 +54,7 @@ router.post("/", async (req, res) => {
     }
 
     const session_token = jwt.sign({ userEmail: userCatch.email }, secret, {
-      expiresIn: "2d",
+      expiresIn: "30s",
     });
 
     const access_token = jwt.sign(
@@ -89,12 +88,14 @@ router.post("/", async (req, res) => {
     //send cookies
     const userId = user.id;
     const maxAge = 2 * 24 * 60 * 60; // in sec
+    const maxAge2 = 30;
+
     res.cookie(
       "userInfo",
       { userId, userName, session_token },
       {
         httpOnly: true,
-        maxAge: maxAge * 1000,
+        maxAge: maxAge2 * 1000,
       }
     );
 
