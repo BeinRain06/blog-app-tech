@@ -33,17 +33,17 @@ router.post("/", async (req, res) => {
     const secret = process.env.common_secret;
 
     const session_token = jwt.sign({ userEmail: userDetails.email }, secret, {
-      expiresIn: "30s",
+      expiresIn: "6h",
     });
 
     const userId = userAttribute.id;
     const userName = userAttribute.username;
-    const maxAge = 2 * 24 * 60 * 60; // in sec
+    const maxAge = 6 * 60 * 60; // in sec
     const maxAge2 = 30;
     res.cookie(
       "userInfo",
       { userId, userName, session_token },
-      { httpOnly: true, maxAge: maxAge2 * 1000 }
+      { httpOnly: true, maxAge: maxAge * 1000 }
     );
 
     res.status(200).json({ success: true, data: userName });

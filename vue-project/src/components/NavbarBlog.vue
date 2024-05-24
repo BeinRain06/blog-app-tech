@@ -50,27 +50,49 @@
         >
           <ul class="panel_desk_custom flex text-gray-300 justify-center items-center gap-1">
             <li class="relative">Custom</li>
-            <li class="relative md:top-1 font-bold cursor-pointer" @click="handleMiniCustom">
+            <li class="relative md:top-1 font-bold cursor-pointer" @click="handleCustom">
               &#65088;
             </li>
           </ul>
-          <div class="desk_custom_wrapper flex text-white" v-if="minicustom">
-            <div class="select_blog z-10">
-              <label for="all">all</label>
-              <div class="box_circle w-10 grid place-items-start">
-                <input
-                  type="radio"
-                  id="all_blogr"
-                  name="blogr"
-                  @change="handleRadioState"
-                  checked
-                />
+          <div class="desk_custom_wrap" style="padding: 0 0.5rem" v-if="custom">
+            <button
+              class="btn-new-account w-full relative top-1 text-md hover:underline hover:tracking-wide hover:font-bold"
+              style="padding: 0.25rem 0; font-size: calc(14px + 0.35vw)"
+              @click.prevent="redirectLoginPage"
+            >
+              log new account
+            </button>
+            <div class="desk_feature_wrapper flex-col text-white gap-2">
+              <div
+                class="w-full flex text-white transition-all duration-1000 ease-in-out hover:tracking-wide hover:text-gray-100 hover:gap-2 gap-1"
+              >
+                <span style="font-size: calc(14px + 0.35vw)">Feature</span>
+                <span
+                  class="relative top-2 cursor-pointer hover:text-yellow-300 font-bold"
+                  style="font-size: calc(14px + 0.3vw)"
+                  @click="handleMiniCustom"
+                  >&#65088;</span
+                >
               </div>
-            </div>
-            <div class="select_blog z-10">
-              <label for="single">single</label>
-              <div class="box_circle w-10 grid place-items-start">
-                <input type="radio" id="single_blogr" name="blogr" @change="handleRadioState" />
+              <div class="w-full flex" v-if="minicustom">
+                <div class="select_blog z-10">
+                  <label for="all" style="font-size: calc(14px + 0.32vw)">all</label>
+                  <div class="box_circle w-10 grid place-items-start">
+                    <input
+                      type="radio"
+                      id="all_blogr"
+                      name="blogr"
+                      @change="handleRadioState"
+                      checked
+                    />
+                  </div>
+                </div>
+                <div class="select_blog z-10">
+                  <label for="single" style="font-size: calc(14px + 0.32vw)">single</label>
+                  <div class="box_circle w-10 grid place-items-start">
+                    <input type="radio" id="single_blogr" name="blogr" @change="handleRadioState" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -123,6 +145,7 @@
                 countArt
               }}</span>
             </div>
+            <button class="btn-new-account" @click="redirectLoginPage">log another account</button>
             <div class="logout_mob_wrapper w-full">
               <button
                 class="btn_logout_menu text-purple-500 f0nt-bold"
@@ -363,6 +386,12 @@ async function redirectLink(e, label) {
 
   userStore.$patch({ miniCustomIsVisible: false, customIsVisible: false })
 }
+
+function redirectLoginPage() {
+  const userStore = useUserStore()
+  userStore.$patch({ miniCustomIsVisible: false, customIsVisible: false })
+  router.push({ path: '/login' })
+}
 </script>
 
 <style scoped>
@@ -442,6 +471,12 @@ async function redirectLink(e, label) {
     font-size: calc(14px + 0.3vw);
   }
 
+  .btn-new-account {
+    @apply text-white text-left transition-all duration-1000 ease-in-out py-1  hover:font-medium hover:text-gray-900;
+
+    font-size: calc(14px + 0.35vw);
+  }
+
   .btn-new-post {
     @apply w-full h-full text-white;
     cursor: pointer;
@@ -487,13 +522,20 @@ async function redirectLink(e, label) {
     z-index: 3;
   }
 
-  .desk_custom_wrapper {
+  .desk_custom_wrap {
     position: absolute;
     top: 6.4rem;
     right: 0rem;
     width: 10rem;
-    height: 2.5rem;
-    @apply bg-gray-500;
+    padding: 0.5rem 0;
+    height: auto;
+    @apply bg-gray-500 z-10 flex flex-col gap-2;
+  }
+
+  .desk_feature_wrapper {
+    width: 100%;
+    padding: 0.5rem 0;
+    height: auto;
   }
 
   .custom_mob_wrap {
@@ -511,7 +553,7 @@ async function redirectLink(e, label) {
   }
 
   .select_blog {
-    @apply w-6/12 py-4 px-2 flex justify-start items-center;
+    @apply w-6/12 py-2 px-2  flex justify-start items-center;
     font-size: calc(14px + 0.2vw);
   }
 
@@ -639,7 +681,7 @@ async function redirectLink(e, label) {
     top: -3px;
   }
 
-  .desk_custom_wrapper {
+  .desk_custom_wrap {
     top: 6.7rem;
   }
 }

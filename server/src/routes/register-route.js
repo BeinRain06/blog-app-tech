@@ -54,7 +54,7 @@ router.post("/", async (req, res) => {
     }
 
     const session_token = jwt.sign({ userEmail: userCatch.email }, secret, {
-      expiresIn: "30s",
+      expiresIn: "6h",
     });
 
     const access_token = jwt.sign(
@@ -87,7 +87,7 @@ router.post("/", async (req, res) => {
 
     //send cookies
     const userId = user.id;
-    const maxAge = 2 * 24 * 60 * 60; // in sec
+    const maxAge = 6 * 60 * 60; // in sec
     const maxAge2 = 30;
 
     res.cookie(
@@ -95,7 +95,7 @@ router.post("/", async (req, res) => {
       { userId, userName, session_token },
       {
         httpOnly: true,
-        maxAge: maxAge2 * 1000,
+        maxAge: maxAge * 1000,
       }
     );
 

@@ -168,7 +168,10 @@ export default defineComponent({
 
     function resetUser(user) {
       setTimeout(() => {
-        inputPwd.value.setAttribute('type', 'password')
+        if (inputPwd.value !== null) {
+          inputPwd.value.setAttribute('type', 'password')
+        }
+
         const userKeys = Object.keys(user)
         userKeys.forEach((key) => (user[key] = ''))
       }, 4800)
