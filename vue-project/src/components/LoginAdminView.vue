@@ -8,7 +8,14 @@
         <div class="formal_content">
           <div class="form_control">
             <label for="email">Email</label>
-            <input type="email" id="email" class="input_content" name="email" placeholder="Email" />
+            <input
+              type="email"
+              id="email"
+              class="input_content"
+              name="email"
+              placeholder="Email"
+              v-model="user.email"
+            />
           </div>
           <div class="form_control">
             <label for="password">Password</label>
@@ -18,6 +25,7 @@
               class="input_content"
               name="password"
               placeholder="password"
+              v-model="user.password"
             />
           </div>
           <div class="form_control">
@@ -28,11 +36,12 @@
               class="input_content"
               name="custom"
               placeholder="custom"
+              v-model="user.secret"
             />
           </div>
           <div
             class="form_submit flex justify-center xsm:justify-around items-center"
-            @click.prevent="hideShowLogAdmin"
+            @click.prevent="handleLoginAdmin"
           >
             <input
               type="button"
@@ -48,37 +57,123 @@
               class="btn btn_submit"
               value="submit"
             />
+
+            <div
+              id="warning_msg"
+              class="warning_msg absolute bottom-1 w-full h-8 text-red-600 text-center bg-yellow-100"
+              v-if="warningUpStage"
+            >
+              <p>{{ warningUpMsg }}</p>
+            </div>
+
+            <div v-if="loadingStage" class="load_wrapper">
+              <ul
+                class="loading_content flex justify-center gap-2 justify-center items-center py-2"
+              >
+                <li><span class="loading_msg text-sm"> Please Wait . . .</span></li>
+              </ul>
+            </div>
           </div>
         </div>
       </fieldset>
     </form>
   </div>
 </template>
-<script setup>
-import { ref, computed } from 'vue'
-import { useUserStore } from '../stores/user.js'
+<script>
+import { ref, defineComponent } from 'vue'
+import { useUserStore } from '../stores/user'
+import { useWarningStore } from '@/stores/warning'
+import { initiateadminapi, loginadminapi } from '@/api/login-api.js'
+import { checkInputError, resetUser } from '@/reusable/collaborate-function.js'
 
-function hideShowLogAdmin(e) {
-  const userStore = useUserStore()
-
-  console.log(e.target.id)
-  if ((e.target.id = 'submit_log')) {
-    userStore.$patch({
-      isLogAdminOpen: false,
-      miniCustomIsVisible: false,
-      customIsVisible: false
+export default defineComponent({
+  setup() {
+    const user = ref({
+      email: '',
+      password: '',
+      secret: ''
     })
 
-    userStore.updateStateRadio('false', 'true')
-  } else if (e.target.id === 'cancel_log') {
-    userStore.$patch({
-      isLogAdminOpen: false,
-      miniCustomIsVisible: false,
-      customIsVisible: false
-    })
-    userStore.updateStateRadio('true', 'false')
+    return { user }
+  },
+  computed: {
+    warningUpStage: () => {
+      const warningStore = useWarningStore()
+      const stage = warningStore.warningStage
+      console.log(stage)
+      return stage
+    },
+    warningUpMsg: () => {
+      const warningStore = useWarningStore()
+      const msgWarn = warningStore.warningNews
+      console.log(msgWarn)
+      return msgWarn
+    },
+    loadingStage: () => {
+      const userStore = useUserStore()
+      return userStore.loadingState
+    }
+  },
+  methods: {
+    hideShowLogAdmin(label) {
+      const userStore = useUserStore()
+
+      userStore.$patch({
+        isLogAdminOpen: false,
+        miniCustomIsVisible: false,
+        customIsVisible: false
+      })
+
+      label === 'submit_log'
+        ? userStore.updateStateRadio('false', 'true')
+        : userStore.updateStateRadio('true', 'false')
+
+      resetUser(this.user, null, null)
+    },
+    handleLoginAdmin(e) {
+      let label
+      if (e.target.id === 'cancel_log') {
+        label = 'cancel'
+      } else if (e.target.id === 'submit_log') {
+        label = 'submit'
+        console.log('this-user', this.user)
+        this.submithandler(label)
+      }
+
+      this.hideShowLogAdmin(label)
+    },
+    async submithandler(label) {
+      const userStore = useUserStore()
+      console.log('this-user', this.user)
+
+      setTimeout(() => {
+        userStore.$patch({
+          loading: !userStore.loadingState
+        })
+      }, 5400)
+
+      userStore.$patch({
+        loading: !userStore.loadingState
+      })
+
+      const isStateWarning = checkInputError(this.user, 'loginadmin')
+
+      console.log('isStateWarning:', isStateWarning)
+
+      if (isStateWarning) {
+        return
+      }
+
+      //loginadminapi call
+
+      const initInfoUser = await initiateadminapi(this.user)
+
+      const isAuthenticate = await loginadminapi(initInfoUser)
+
+      console.log('isAuthenticate:', isAuthenticate)
+    }
   }
-}
+})
 </script>
 <style scoped>
 @media (min-width: 180px) {
@@ -152,6 +247,21 @@ function hideShowLogAdmin(e) {
   .input_content {
     height: 2.2rem;
     font-size: calc(10px + 0.3vw);
+    text-indent: 10px;
+    @apply bg-gray-800;
+  }
+
+  /* loading */
+  .load_wrapper {
+    position: absolute;
+    bottom: -2rem;
+    widrh: 140px;
+    height: 70px;
+  }
+
+  .loading_msg {
+    padding: 0.25rem 1rem;
+    animation: load-msg 2.4s ease-in-out infinite;
   }
 }
 

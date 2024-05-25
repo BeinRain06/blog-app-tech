@@ -81,6 +81,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user.js'
 import { useWarningStore } from '@/stores/warning.js'
 import { loginapi } from '../api/login-api.js'
+import { checkInputError, resetUser } from '@/reusable/collaborate-function.js'
 
 export default defineComponent({
   setup() {
@@ -106,15 +107,15 @@ export default defineComponent({
         loading: !userStore.loadingState
       })
 
-      const isStateWarning = checkInputError()
+      const user = { email: inputEml.value.value, password: inputPwd.value.value }
+
+      const isStateWarning = checkInputError(user, 'login')
 
       if (isStateWarning) {
         return
       }
 
       //loginapi call
-      const user = { email: inputEml.value.value, password: inputPwd.value.value }
-
       const newLoginUser = await loginapi(user)
       console.log('newLoginUser:', newLoginUser)
 
@@ -126,31 +127,9 @@ export default defineComponent({
 
       console.log('userStore usersLogin:', userStore.usersLogin)
 
-      resetUser(user)
+      resetUser(user, null, inputPwd)
 
       this.$router.push({ path: '/' })
-    }
-
-    function checkInputError() {
-      const reg = /^([\w\-]+)@(\w+)\.([A-Za-z]{2,5})$/
-
-      const user = { email: inputEml.value.value, password: inputPwd.value.value }
-
-      const warningPop = useWarningStore()
-
-      if (user.email === '' && user.password === '') {
-        setTimeout(() => {
-          warningPop.warningUpdate('input Fields Empty!', user)
-        }, 4100)
-        return true
-      } else if (!reg.test(user.email)) {
-        setTimeout(() => {
-          warningPop.warningUpdate('wrong Email! ', user)
-        }, 4100)
-        return true
-      }
-
-      return false
     }
 
     function showPassword(e) {
@@ -164,17 +143,6 @@ export default defineComponent({
           inputPwd.value.setAttribute('type', 'password')
         }
       }
-    }
-
-    function resetUser(user) {
-      setTimeout(() => {
-        if (inputPwd.value !== null) {
-          inputPwd.value.setAttribute('type', 'password')
-        }
-
-        const userKeys = Object.keys(user)
-        userKeys.forEach((key) => (user[key] = ''))
-      }, 4800)
     }
 
     return {

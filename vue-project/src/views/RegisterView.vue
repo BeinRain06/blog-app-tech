@@ -61,9 +61,7 @@
             </div>
             <div class="form_custom">
               <ul class="label_custom w-full flex justify-center items-center py-2 gap-2">
-                <label for="checkbox" class="pr-2">
-                  Custom (Optional-retriever password) {{ warningUpMsg }} }
-                </label>
+                <label for="checkbox" class="pr-2"> Custom (Optional-retriever password) </label>
                 <input
                   type="checkbox"
                   class="z-10"
@@ -81,6 +79,7 @@
                 placeholder="Custom"
                 v-model="user.custom"
                 :disabled="!checked"
+                @input="changeType"
               />
             </div>
             <div class="form_submit relative">
@@ -119,6 +118,7 @@ import { ref, defineComponent } from 'vue'
 import { registrationapi } from '../api/registration-api.js'
 import { useWarningStore } from '@/stores/warning.js'
 import { useUserStore } from '@/stores/user.js'
+import { checkInputError, resetUser } from '@/reusable/collaborate-function.js'
 
 export default defineComponent({
   setup() {
@@ -162,10 +162,13 @@ export default defineComponent({
     changeMsg() {
       this.msg = 'you got i-t!'
     },
+    changeType(e) {
+      setTimeout(() => {
+        e.target.setAttribute('type', 'password')
+      }, 15000)
+    },
     async handleRegistration() {
       const userStore = useUserStore()
-
-      this.checkInputError()
 
       console.log('user:', this.user)
 
@@ -179,6 +182,8 @@ export default defineComponent({
         loading: !userStore.loadingState
       })
 
+      checkInputError(this.user, 'register')
+
       const newUser = await registrationapi(this.user)
 
       userStore.usersListed(newUser)
@@ -189,56 +194,9 @@ export default defineComponent({
 
       console.log('loading:', userStore.loading)
 
-      this.resetUser(this.user)
+      resetUser(this.user, this.checked, null)
 
       this.$router.push({ path: '/' })
-    },
-
-    checkInputError() {
-      const reg = /^([\w\-]+)@(\w+)\.([A-Za-z]{2,5})$/
-
-      const reg2 = /\@/
-      const checkExc = reg2.exec(this.user.username)
-
-      const warningPop = useWarningStore()
-
-      if (
-        this.user.email === '' ||
-        this.user.username === '' ||
-        this.user.password === '' ||
-        this.user.confirm_password === ''
-      ) {
-        warningPop.warningUpdate('input Fields Empty!', this.user)
-        return
-      }
-
-      if (!reg.test(this.user.email)) {
-        warningPop.warningUpdate('invalid Email! Try again', this.user)
-        return
-      }
-
-      if (checkExc !== null) {
-        warningPop.warningUpdate('username cannot contains character - @', this.user)
-        return
-      } else if (this.user.username.length < 5) {
-        warningPop.warningUpdate('username, at least 5 characters', this.user)
-        return
-      }
-
-      if (this.user.password.length < 6 || this.user.confirm_password.length < 6) {
-        warningPop.warningUpdate('password could be at least 06 characters', this.user)
-        return
-      } else if (this.user.password !== this.user.confirm_password) {
-        warningPop.warningUpdate('password fields incorrect!', this.user)
-        return
-      }
-    },
-    resetUser(user) {
-      setTimeout(() => {
-        this.checked = false
-        const userKeys = Object.keys(user)
-        userKeys.forEach((key) => (user[key] = ''))
-      }, 4800)
     }
   }
 })

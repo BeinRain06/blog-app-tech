@@ -38,6 +38,11 @@ export const useUserStore = defineStore('user', {
             return shortname
           }
         }
+        if (username.split(' ').length === 1) {
+          shortname = username
+
+          return shortname
+        }
       }
     }
   },
@@ -56,3 +61,7 @@ export const useUserStore = defineStore('user', {
     }
   }
 })
+
+/* console.log('this-user', this.user)
+const initInfoUser = await initiateadminapi(this.user)
+const isAuthenticate = await loginadminapi(initInfoUser) */

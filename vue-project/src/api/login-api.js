@@ -24,8 +24,6 @@ export const loginapi = async (userInfo) => {
     password: userInfo.password
   }
 
-  console.log('user:', user)
-
   const userFetching = await fetch(`${base_url}/login`, {
     method: 'POST',
     body: JSON.stringify(user),
@@ -38,7 +36,49 @@ export const loginapi = async (userInfo) => {
     .then((res) => res.json())
     .then((newres) => newres.data)
 
-  console.log('userFetching:', userFetching)
-
   return userFetching
+}
+
+export const initiateadminapi = async (userInfo) => {
+  const user = {
+    email: userInfo.email,
+    password: userInfo.password,
+    secret: userInfo.secret
+  }
+
+  console.log('user:', user)
+
+  const userInitAdmin = await fetch(`${base_url}/login/admin/init`, {
+    method: 'POST',
+    body: JSON.stringify(user),
+    headers: {
+      'Content-Type': 'application/json'
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    credentials: 'include'
+  })
+    .then((res) => res.json())
+    .then((newres) => newres.data)
+
+  console.log('userInitAdmin:', userInitAdmin)
+
+  return userInitAdmin
+}
+
+export const loginadminapi = async (userInfo) => {
+  const booleanAdmin = await fetch(`${base_url}/login/admin/auth`, {
+    method: 'POST',
+    body: JSON.stringify(userInfo),
+    headers: {
+      'Content-Type': 'application/json'
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    credentials: 'include'
+  })
+    .then((res) => res.json())
+    .then((newres) => newres.data)
+
+  console.log('booleanAdmin :', booleanAdmin)
+
+  return booleanAdmin
 }

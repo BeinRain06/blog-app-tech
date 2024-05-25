@@ -48,20 +48,24 @@ router.post("/", async (req, res) => {
     const userEmail = userCatch.email;
     const userName = userCatch.username;
     if (userCatch.secret === process.env.admin_secret) {
-      secret = user.secret;
+      secret = userCatch.secret;
     } else {
       secret = process.env.common_secret;
     }
 
-    const session_token = jwt.sign({ userEmail: userCatch.email }, secret, {
-      expiresIn: "6h",
-    });
-
     const access_token = jwt.sign(
-      { userToken: userEmail.concat(userName) },
+      { userAccess: userEmail.concat(userName) },
       secret,
       {
         expiresIn: "10w",
+      }
+    );
+
+    const session_token = jwt.sign(
+      { userEmail: userCatch.email, userToken: access_token },
+      secret,
+      {
+        expiresIn: "6h",
       }
     );
 
