@@ -20,9 +20,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  secret: {
-    type: String,
-  },
   registrationDate: {
     type: String,
     default: "",

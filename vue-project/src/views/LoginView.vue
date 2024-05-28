@@ -116,13 +116,13 @@ export default defineComponent({
       }
 
       //loginapi call
-      const newLoginUser = await loginapi(user)
-      console.log('newLoginUser:', newLoginUser)
+      const newUserInfo = await loginapi(user)
+      console.log('newUserInfo:', newUserInfo)
 
       const exUsersArr = userStore.usersLogin
       userStore.$patch({
-        currentUsername: newLoginUser,
-        usersLogin: [...exUsersArr, newLoginUser]
+        currentUsername: newUserInfo.username,
+        usersLogin: [...exUsersArr, newUserInfo.username]
       })
 
       console.log('userStore usersLogin:', userStore.usersLogin)

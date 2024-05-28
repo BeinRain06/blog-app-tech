@@ -373,10 +373,12 @@ async function redirectLink(e, label) {
   const userStore = useUserStore()
   const usersLogin = userStore.usersLogin
   if (label === 'login') {
-    const nameOn = await redirectloginapi()
-    console.log('nameOn:', nameOn)
-    if (nameOn !== 'null') {
-      userStore.$patch({ currentUsername: nameOn, usersLogin: [...usersLogin, nameOn] })
+    const newUserInfo = await redirectloginapi()
+    console.log('newUserInfo:', newUserInfo)
+    if (newUserInfo !== 'null') {
+      userStore.$patch({ currentUsername: newUserInfo, usersLogin: [...usersLogin, newUserInfo] })
+
+      newUserInfo.admin ? userStore.$patch({ isAdmin: true }) : userStore.$patch({ isAdmin: false })
     } else {
       router.push({ path: '/login' })
     }
@@ -526,7 +528,7 @@ function redirectLoginPage() {
     position: absolute;
     top: 6.4rem;
     right: 0rem;
-    width: 10rem;
+    width: 14rem;
     padding: 0.5rem 0;
     height: auto;
     @apply bg-gray-500 z-10 flex flex-col gap-2;

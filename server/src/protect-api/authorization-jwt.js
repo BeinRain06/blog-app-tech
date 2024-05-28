@@ -1,69 +1,84 @@
-const jswebtok = require("jsonwebtoken");
-var { expressjwt: jwt } = require("express-jwt");
-const cookie = require("cookie-parser");
+const fs = require("fs");
+const jwt = require("jsonwebtoken");
 const path = require("path");
+const cookie = require("cookie-parser");
+const jwtPrivateKey = path.resolve("") + "/keys/private_key.pem";
+const jwtPublicKey = path.resolve("") + "/keys/public_key.pem";
+const jwtPrivateFakeKey = path.resolve("") + "/keys/private_key_fake.pem";
 
 require("dotenv").config({ path: path.join(__dirname, "..") });
 
-const authWithJwtZero = async function (err, req, res, next) {
-  const admin_secret = process.env.admin_secret;
-
-  console.log("common secret:", common_secret);
-
-  next();
-  return expressjwt({
-    secret: GetVerificationKey,
-    algorithm: ["HS256"],
-    /*  onExpired: onExpired,
-    IsRevoked: IsRevoked, */
-  });
+module.exports.generateToken = async function (payload, type, label) {
+  const token = await JWTSign(payload, type, label);
+  return token;
 };
 
-const GetVerificationKey = async function (req, payload, next) {
-  const user = req.body;
-  const admin_secret = process.env.admin_secret;
-  const access_token = req.body.access_token;
-  console.log("payload GetVerificationKey:", payload);
-  console.log("admin_secret:", admin_secret);
-  console.log("access_token", access_token);
-  console.log("user:", user);
+// allowInsecureKeySizes: true;
+function JWTSign(payload, type, label) {
+  const options =
+    label === "session"
+      ? { algorithm: "RS256", expiresIn: "6h" }
+      : { algorithm: "RS256", expiresIn: "15m" };
 
-  next();
+  const userEmail = payload.email;
+
+  if (type === "common") {
+    return new Promise((resolve, reject) => {
+      try {
+        /* const secret = process.env.common_secret; */
+        const secret = fs.readFileSync(jwtPrivateFakeKey);
+        const token = jwt.sign({ userEmail: payload.email }, secret, options);
+        console.log("token token 1:", token);
+        resolve(token);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  } else {
+    return new Promise((resolve, reject) => {
+      try {
+        const secret = fs.readFileSync(jwtPrivateKey);
+        const token = jwt.sign({ userEmail: payload.email }, secret, options);
+        console.log("token token 2:", token);
+        resolve(token);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+}
+
+module.exports.getPayloadFromToken = async function (token, label) {
+  const payload = await JWTVerify(token, label);
+  return payload;
 };
 
-const authWithJwt = async function (err, req, res, next) {
-  const admin_secret = process.env.admin_secret;
+module.exports.verifyToken = async function (token, label) {
+  const result = await JWTVerify(token, label);
+  return result;
+};
 
-  console.log("common secret:", common_secret);
+// allowInsecureKeySizes: true;
+function JWTVerify(token, label) {
+  const options =
+    label === "session"
+      ? { algorithm: "RS256", expiresIn: "6h" }
+      : { algorithm: "RS256", expiresIn: "15m" };
 
-  const checkedToken = jwt.verify(
-    userInfo.access_token,
-    secret,
-    function (err, decoded) {
-      if (err.name === "TokenExpiredError") {
-      } else if (
-        err.name === "JsonWebTokenError" ||
-        err.name === "NotBeforeError"
-      ) {
-        throw new Error(`wrong token -Err: ${err.name}`);
-      }
+  console.log("out token:", token);
 
-      console.log("decoded userAccess :", decoded.userAccess);
-
-      if (decoded.userAccess !== undefined) {
-        newObj = {
-          success: true,
-          data: {},
-        };
-      } else {
-        newObj = {
-          success: false,
-          data: {},
-        };
-      }
+  return new Promise((resolve, reject) => {
+    try {
+      const secret = fs.readFileSync(jwtPublicKey);
+      const result = jwt.verify(token, secret, options);
+      console.log("token token out :", token);
+      resolve(result);
+    } catch (err) {
+      reject(err);
     }
-  );
-  next();
-};
+  });
+}
 
-module.exports = authWithJwt;
+module.exports.errorToken = function (msgErr) {
+  throw new Error(msgErr);
+};

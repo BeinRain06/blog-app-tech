@@ -170,8 +170,6 @@ export default defineComponent({
     async handleRegistration() {
       const userStore = useUserStore()
 
-      console.log('user:', this.user)
-
       setTimeout(() => {
         userStore.$patch({
           loading: !userStore.loadingState
@@ -182,17 +180,18 @@ export default defineComponent({
         loading: !userStore.loadingState
       })
 
-      checkInputError(this.user, 'register')
+      const collectedData = await registrationapi(this.user)
 
-      const newUser = await registrationapi(this.user)
+      console.log('collectedData:', collectedData)
 
-      userStore.usersListed(newUser)
+      const newUser = collectedData.username
+
+      userStore.usersLists(newUser)
 
       userStore.$patch({
-        currentUsername: newUser
+        currentUsername: newUser,
+        access_token: collectedData.access
       })
-
-      console.log('loading:', userStore.loading)
 
       resetUser(this.user, this.checked, null)
 

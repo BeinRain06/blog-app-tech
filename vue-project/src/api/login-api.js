@@ -39,34 +39,8 @@ export const loginapi = async (userInfo) => {
   return userFetching
 }
 
-export const initiateadminapi = async (userInfo) => {
-  const user = {
-    email: userInfo.email,
-    password: userInfo.password,
-    secret: userInfo.secret
-  }
-
-  console.log('user:', user)
-
-  const userInitAdmin = await fetch(`${base_url}/login/admin/init`, {
-    method: 'POST',
-    body: JSON.stringify(user),
-    headers: {
-      'Content-Type': 'application/json'
-      // 'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    credentials: 'include'
-  })
-    .then((res) => res.json())
-    .then((newres) => newres.data)
-
-  console.log('userInitAdmin:', userInitAdmin)
-
-  return userInitAdmin
-}
-
 export const loginadminapi = async (userInfo) => {
-  const booleanAdmin = await fetch(`${base_url}/login/admin/auth`, {
+  const newUserInfo = await fetch(`${base_url}/login/admin/auth`, {
     method: 'POST',
     body: JSON.stringify(userInfo),
     headers: {
@@ -78,7 +52,5 @@ export const loginadminapi = async (userInfo) => {
     .then((res) => res.json())
     .then((newres) => newres.data)
 
-  console.log('booleanAdmin :', booleanAdmin)
-
-  return booleanAdmin
+  return newUserInfo
 }

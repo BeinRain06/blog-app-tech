@@ -10,8 +10,10 @@ export const useUserStore = defineStore('user', {
     customIsVisible: false,
     miniCustomIsVisible: false,
     isLogAdminOpen: false,
+    isAdmin: false,
     isCheckedSingle: false,
-    isCheckedAll: true
+    isCheckedAll: true,
+    access_token: null
   }),
   getters: {
     usersLoginList: (state) => {
@@ -44,10 +46,12 @@ export const useUserStore = defineStore('user', {
           return shortname
         }
       }
-    }
+    },
+    accessToken: (state) => state.access_token,
+    credAdmin: (state) => state.isAdmin
   },
   actions: {
-    usersListed(newUser) {
+    usersLists(newUser) {
       const items = this.usersLogin
       const newArr = [...items, newUser]
 

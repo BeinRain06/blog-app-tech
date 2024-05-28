@@ -450,3 +450,45 @@ Always remember the setup() is the **first** function to execute when we define 
 That's why applying **`<script setup>`** composition API without the **`defineComponent`** uses leads to some **restrictions**
 
 Thanks you for listening
+
+### Token Key with openssl linux and jsonwebtoken(jwt)
+
+private_key:
+
+#### 1 step
+
+cmd (exec in server folder) :
+
+`openssl genrsa -out private_key.pem 2048` **A**
+
+or
+
+`openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:2048` **B**
+
+#### 2 step
+
+extract public_key from priate_key:
+
+cmd (exec in server folder):
+
+`openssl rsa -in private_key.pem -out public-key.pem -outform PEM -pubout` **A**
+
+or
+
+`openssl rsa -pubout -in private_key.pem -out public_key.pem` **B**
+
+- move the two genrates key in the **keys** folder inside **server**
+
+although doing aboe i Run into the sticking Error **Error: secretOrPrivateKey must be an asymmetric key when using RS256** that stills shows up in my back console server. To **deal** with that i installed the package **_openssl_** on my linux mint system:
+
+`sudo apt-get install openssl`
+
+more with **openssl** syntax:
+
+[https://gist.github.com/Hakky54/b30418b25215ad7d18f978bc0b448d81](https://gist.github.com/Hakky54/b30418b25215ad7d18f978bc0b448d81)
+
+- **private_key** will serve to generate **access_token** or **session_tokon** (register/login action)
+- **public_key** will helps **achieve** verification **access_token** or **session_tokon**
+  (login action)
+- function **generateToken**
+- function **verifyToken**

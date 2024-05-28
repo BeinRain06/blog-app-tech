@@ -3,9 +3,14 @@ const path = require("path");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const requestInitUser = require("../protect-api/authenticate-pwd-user");
-const authWithJwt = require("../protect-api/authorization-jwt");
 const User = require("../models/user");
+const requestInitUser = require("../protect-api/authenticate-pwd-user");
+const { verifyToken, errorToken } = require("../protect-api/authorization-jwt");
+
+const {
+  applyNewToken,
+  checkAccessToken,
+} = require("../protect-api/renew-token");
 
 //subdirectory requiry .env variable( file located in root directory)
 require("dotenv").config({ path: path.join(__dirname, "..") });
@@ -14,116 +19,125 @@ router.use(express.urlencoded({ extended: false }));
 
 router.post("/", requestInitUser, async (req, res) => {
   try {
-    const secret = process.env.common_secret;
+    const user = req.requestInitUser;
+    const newUserInfo = await applyNewToken(user, "standard");
 
-    const session_token = jwt.sign(
-      { userEmail: userDetails.email, userToken: userAttribute.secret },
-      secret,
-      {
-        expiresIn: "6h",
-      }
-    );
-
-    const userId = userAttribute.id;
-    const userName = userAttribute.username;
-    const maxAge = 6 * 60 * 60; // in sec
-    const maxAge2 = 30;
+    const maxAge = 15 * 60; // in sec
 
     res.cookie(
       "userInfo",
-      { userId, userName, session_token },
-      { httpOnly: true, maxAge: maxAge * 1000 }
+      {
+        userId: newUserInfo.id,
+        userName: newUserInfo.username,
+        session_token: newUserInfo.access,
+      },
+      {
+        httpOnly: true,
+        maxAge: maxAge * 1000,
+      }
     );
 
-    res.status(200).json({ success: true, data: userName });
+    res.status(200).json({ success: true, data: newUserInfo });
   } catch (err) {
     console.log(err);
   }
 });
 
-router.post("/redirect", (req, res) => {
-  const prevCookie = req.cookies.userInfo;
-
-  if (prevCookie !== undefined) {
-    res.status(200).json({ success: true, data: prevCookie.userName });
-  } else {
-    res.status(200).json({ success: true, data: "null" });
-  }
-});
-
-router.post("/admin/init", requestInitUser, async (req, res) => {
+router.post("/redirect", async (req, res) => {
   try {
-    const userDetails = req.body;
+    const prevCookie = req.cookies.userInfo;
+    const access_token = req.body.access;
 
-    const userIn = req.requestInitUser;
+    /* console.log("prevCookie:", prevCookie.userId); */
 
-    res.status(200).json({ success: true, data: userIn });
-  } catch (err) {
-    console.log(err);
-  }
-});
+    if (prevCookie !== undefined) {
+      const userId = prevCookie.userId;
+      const userFetch = await User.findById(userId).select("-password");
 
-const authWithJwtZero = async function (err, req, res, next) {
-  const admin_secret = process.env.admin_secret;
+      const session_token = prevCookie.session_token;
+      console.log("prevCookie:", prevCookie.session_token);
 
-  console.log("req here:", req.body);
+      const checkSessionToken = await verifyToken(session_token, "session");
 
-  return expressjwt({
-    secret: GetVerificationKey(next),
-    algorithm: ["HS256"],
-    /*  onExpired: onExpired,
-    IsRevoked: IsRevoked, */
-  });
-};
+      console.log("checkSessionToken:", checkSessionToken);
 
-const GetVerificationKey = async function (req, payload, next) {
-  const user = req.body;
-  const admin_secret = process.env.admin_secret;
-  const access_token = req.body.access_token;
-  console.log("payload GetVerificationKey:", payload);
-  console.log("admin_secret:", admin_secret);
-  console.log("access_token", access_token);
-  console.log("user:", user);
+      //session_token with right admin_secret  or not
+      if (checkSessionToken) {
+        const validAccessToken = await verifyToken(access_token, "access");
 
-  next();
-};
+        const newUserInfo = await checkAccessToken(validAccessToken, userFetch);
 
-router.post("/admin/auth", authWithJwtZero, async (req, res) => {
-  try {
-    const userInfo = req.body;
-    console.log("userInfo:", userInfo);
-
-    let newObj;
-    let success;
-    /* const checkedToken = jwt.verify(
-      userInfo.access_token,
-      secret,
-      function (err, decoded) {
-        if (err.name === "TokenExpiredError") {
-        } else if (
-          err.name === "JsonWebTokenError" ||
-          err.name === "NotBeforeError"
+        return res.status(200).json({ success: true, data: newUserInfo });
+      } else {
+        //fallback (means common user) or potential errors
+        if (
+          checkSessionToken.name === "undefined" ||
+          checkSessionToken.name === "TokenExpiredError"
         ) {
-          throw new Error(`wrong token -Err: ${err.name}`);
-        }
+          const newUserInfo = await applyNewToken(userFetch, "standard");
 
-        console.log("decoded userAccess :", decoded.userAccess);
+          const maxAge = 15 * 60; // in sec
 
-        if (decoded.userAccess !== undefined) {
-          newObj = {
-            success: true,
-            data: {},
-          };
-        } else {
-          newObj = {
-            success: false,
-            data: {},
-          };
+          res.cookie(
+            "userInfo",
+            {
+              userId: newUserInfo.id,
+              userName: newUserInfo.username,
+              session_token: newUserInfo.access,
+            },
+            {
+              httpOnly: true,
+              maxAge: maxAge * 1000,
+            }
+          );
+
+          return res.status(200).json({ success: true, data: newUserInfo });
+        } else if (
+          checkSessionToken.name === "JsonWebTokenError" ||
+          checkSessionToken.name === "NotBeforeError"
+        ) {
+          errorToken("something went wrong parsing session_token jwt ! ");
         }
       }
-    ); */
+    } else {
+      //prevCookie === undefined
+      return res.status(200).json({ success: true, data: "null" });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
 
-    /*  res.status(200).json({ success: true, data: newUser }); */
+router.post("/admin/auth", requestInitUser, async (req, res) => {
+  try {
+    const user = req.requestInitUser;
+
+    console.log("user req.requestInitUser:", user);
+
+    if (!user.admin) {
+      return res.status(200).json({ success: false, data: "null" });
+    }
+
+    const newUserInfo = await applyNewToken(user, "admin");
+
+    console.log("newUserInfo:", newUserInfo);
+
+    const maxAge = 15 * 60; // in sec
+
+    res.cookie(
+      "userInfo",
+      {
+        userId: newUserInfo.id,
+        userName: newUserInfo.username,
+        session_token: newUserInfo.access,
+      },
+      {
+        httpOnly: true,
+        maxAge: maxAge * 1000,
+      }
+    );
+
+    res.status(200).json({ success: true, data: newUserInfo });
   } catch (err) {
     console.log(err);
   }

@@ -5,6 +5,10 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { format } = require("date-fns");
+const {
+  generaToken,
+  generateToken,
+} = require("../protect-api/authorization-jwt");
 
 const router = express.Router();
 
@@ -44,40 +48,29 @@ router.post("/", async (req, res) => {
     const passwordHash = bcrypt.hashSync(`${userCatch.password}`, 10); //10 autogen salt & hash
     let secret;
 
-    //generate session_token
-    const userEmail = userCatch.email;
+    //generate session_token & access_token
     const userName = userCatch.username;
+    let session_token;
+    let access_token;
     if (userCatch.secret === process.env.admin_secret) {
       secret = userCatch.secret;
+      //session_token
+      session_token = await generateToken(userCatch, "admin", "session");
+      //access_token
+      access_token = await generateToken(userCatch, "admin", "access");
     } else {
-      secret = process.env.common_secret;
+      //session_token
+      session_token = await generateToken(userCatch, "common", "session");
+      //access_token
+      access_token = await generateToken(userCatch, "common", "access");
     }
 
-    const access_token = jwt.sign(
-      { userAccess: userEmail.concat(userName) },
-      secret,
-      {
-        expiresIn: "10w",
-      }
-    );
-
-    const session_token = jwt.sign(
-      { userEmail: userCatch.email, userToken: access_token },
-      secret,
-      {
-        expiresIn: "6h",
-      }
-    );
-
     let date = format(new Date(), "dd, MMMM yyyy");
-
-    console.log("date:", date);
 
     let user = new User({
       email: userCatch.email,
       username: userCatch.username,
       password: passwordHash,
-      secret: access_token,
       registrationDate: date,
     });
 
@@ -87,9 +80,7 @@ router.post("/", async (req, res) => {
 
     /* console.log("req cookie:", req.cookies); */
 
-    /* res.redirect("http://localhost:5173"); */
-
-    //send cookies
+    //send session_tokies in cookie
     const userId = user.id;
     const maxAge = 6 * 60 * 60; // in sec
     const maxAge2 = 30;
@@ -103,8 +94,13 @@ router.post("/", async (req, res) => {
       }
     );
 
-    //send final json response
-    res.json({ success: true, data: user.username });
+    const collected = {
+      username: user.username,
+      access: access_token,
+    };
+
+    //send final json response (with access_token inside)
+    res.json({ success: true, data: collected });
   } catch (err) {
     console.log(err);
   }

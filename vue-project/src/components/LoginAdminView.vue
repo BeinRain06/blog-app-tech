@@ -83,7 +83,7 @@
 import { ref, defineComponent } from 'vue'
 import { useUserStore } from '../stores/user'
 import { useWarningStore } from '@/stores/warning'
-import { initiateadminapi, loginadminapi } from '@/api/login-api.js'
+import { loginadminapi } from '@/api/login-api.js'
 import { checkInputError, resetUser } from '@/reusable/collaborate-function.js'
 
 export default defineComponent({
@@ -166,11 +166,21 @@ export default defineComponent({
 
       //loginadminapi call
 
-      const initInfoUser = await initiateadminapi(this.user)
+      const newUserInfo = await loginadminapi(this.user)
 
-      const isAuthenticate = await loginadminapi(initInfoUser)
+      if (newUserInfo === 'null') {
+        alert('Bad Authentication ! or Access Disallowed')
+      }
 
-      console.log('isAuthenticate:', isAuthenticate)
+      console.log('newUserInfo:', newUserInfo)
+
+      const exUsersArr = userStore.usersLogin
+
+      userStore.$patch({
+        currentUsername: newUserInfo.username,
+        usersLogin: [...exUsersArr, newUserInfo.username],
+        isAdmin: true
+      })
     }
   }
 })
