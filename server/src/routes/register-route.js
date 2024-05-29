@@ -52,17 +52,20 @@ router.post("/", async (req, res) => {
     const userName = userCatch.username;
     let session_token;
     let access_token;
+    let admin = false;
     if (userCatch.secret === process.env.admin_secret) {
       secret = userCatch.secret;
       //session_token
       session_token = await generateToken(userCatch, "admin", "session");
       //access_token
       access_token = await generateToken(userCatch, "admin", "access");
+      admin = true;
     } else {
       //session_token
       session_token = await generateToken(userCatch, "common", "session");
       //access_token
       access_token = await generateToken(userCatch, "common", "access");
+      admin = false;
     }
 
     let date = format(new Date(), "dd, MMMM yyyy");
@@ -71,19 +74,19 @@ router.post("/", async (req, res) => {
       email: userCatch.email,
       username: userCatch.username,
       password: passwordHash,
+      admin: admin,
       registrationDate: date,
     });
 
     user = await user.save();
 
-    console.log("user saved :", user.username);
+    console.log("user saved :", user);
 
     /* console.log("req cookie:", req.cookies); */
 
     //send session_tokies in cookie
     const userId = user.id;
     const maxAge = 6 * 60 * 60; // in sec
-    const maxAge2 = 30;
 
     res.cookie(
       "userInfo",
@@ -97,6 +100,7 @@ router.post("/", async (req, res) => {
     const collected = {
       username: user.username,
       access: access_token,
+      admin: admin,
     };
 
     //send final json response (with access_token inside)

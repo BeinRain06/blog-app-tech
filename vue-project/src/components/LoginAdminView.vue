@@ -37,6 +37,7 @@
               name="custom"
               placeholder="custom"
               v-model="user.secret"
+              @input="changeType"
             />
           </div>
           <div
@@ -179,8 +180,16 @@ export default defineComponent({
       userStore.$patch({
         currentUsername: newUserInfo.username,
         usersLogin: [...exUsersArr, newUserInfo.username],
+        access_token: newUserInfo.access,
         isAdmin: true
       })
+
+      this.$router.push({ path: '/' })
+    },
+    changeType(e) {
+      setTimeout(() => {
+        e.target.setAttribute('type', 'password')
+      }, 8000)
     }
   }
 })

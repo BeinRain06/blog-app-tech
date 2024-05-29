@@ -1,16 +1,5 @@
 const { errorToken, generateToken } = require("./authorization-jwt");
 
-/* module.exports.applyNewAccessToken = async function (userFetch) {
-  const newAcessToken = generateToken(userFetch, "admin", "access");
-  const newUserInfo = {
-    username: userFetch.userName,
-    access: newAcessToken,
-    admin: false,
-  };
-
-  return newUserInfo;
-}; */
-
 const applyNewAccessToken = async function (userFetch) {
   const newAcessToken = generateToken(userFetch, "admin", "access");
   const newUserInfo = {
@@ -26,7 +15,7 @@ module.exports.checkAccessToken = async function (token, userFetch) {
   if (token) {
     const newUserInfo = {
       username: prevCookie.userName,
-      access: access_token,
+      access: token,
       admin: true, // 02 redirections -> standard login , or loginadmin
     };
     return newUserInfo;
@@ -57,6 +46,7 @@ module.exports.applyNewToken = async function (userFetch, identity) {
     id: userFetch.id,
     username: userFetch.username,
     access: newAcessToken,
+    session: newSessionToken,
     admin: admin,
   };
 

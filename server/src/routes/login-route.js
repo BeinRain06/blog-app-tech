@@ -5,7 +5,13 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const requestInitUser = require("../protect-api/authenticate-pwd-user");
-const { verifyToken, errorToken } = require("../protect-api/authorization-jwt");
+const {
+  verifyFakeToken,
+  verifyToken,
+  errorToken,
+} = require("../protect-api/authorization-jwt");
+
+const { checkPrevToken } = require("../protect-api/check-token");
 
 const {
   applyNewToken,
@@ -21,6 +27,8 @@ router.post("/", requestInitUser, async (req, res) => {
   try {
     const user = req.requestInitUser;
     const newUserInfo = await applyNewToken(user, "standard");
+
+    console.log("new New User:", newUserInfo);
 
     const maxAge = 15 * 60; // in sec
 
@@ -46,58 +54,46 @@ router.post("/", requestInitUser, async (req, res) => {
 router.post("/redirect", async (req, res) => {
   try {
     const prevCookie = req.cookies.userInfo;
-    const access_token = req.body.access;
-
-    /* console.log("prevCookie:", prevCookie.userId); */
 
     if (prevCookie !== undefined) {
       const userId = prevCookie.userId;
       const userFetch = await User.findById(userId).select("-password");
 
       const session_token = prevCookie.session_token;
-      console.log("prevCookie:", prevCookie.session_token);
+      const access_token = req.body.access;
 
-      const checkSessionToken = await verifyToken(session_token, "session");
+      if (access_token === null) {
+        return res.status(200).json({ success: true, data: "null" });
+      }
 
-      console.log("checkSessionToken:", checkSessionToken);
+      if (session_token) {
+        // ==> ==>
+        const newUserInfo = await checkPrevToken(
+          userFetch,
+          session_token,
+          access_token
+        );
 
-      //session_token with right admin_secret  or not
-      if (checkSessionToken) {
-        const validAccessToken = await verifyToken(access_token, "access");
+        if (newUserInfo === "null" || newUserInfo === undefined) {
+          return res.status(200).json({ success: true, data: "null" });
+        }
 
-        const newUserInfo = await checkAccessToken(validAccessToken, userFetch);
+        const maxAge = 15 * 60; // in sec
+
+        res.cookie(
+          "userInfo",
+          {
+            userId: newUserInfo.id,
+            userName: newUserInfo.username,
+            session_token: newUserInfo.session,
+          },
+          {
+            httpOnly: true,
+            maxAge: maxAge * 1000,
+          }
+        );
 
         return res.status(200).json({ success: true, data: newUserInfo });
-      } else {
-        //fallback (means common user) or potential errors
-        if (
-          checkSessionToken.name === "undefined" ||
-          checkSessionToken.name === "TokenExpiredError"
-        ) {
-          const newUserInfo = await applyNewToken(userFetch, "standard");
-
-          const maxAge = 15 * 60; // in sec
-
-          res.cookie(
-            "userInfo",
-            {
-              userId: newUserInfo.id,
-              userName: newUserInfo.username,
-              session_token: newUserInfo.access,
-            },
-            {
-              httpOnly: true,
-              maxAge: maxAge * 1000,
-            }
-          );
-
-          return res.status(200).json({ success: true, data: newUserInfo });
-        } else if (
-          checkSessionToken.name === "JsonWebTokenError" ||
-          checkSessionToken.name === "NotBeforeError"
-        ) {
-          errorToken("something went wrong parsing session_token jwt ! ");
-        }
       }
     } else {
       //prevCookie === undefined

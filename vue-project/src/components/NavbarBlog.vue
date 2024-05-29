@@ -343,8 +343,12 @@ function handleRadioState(e) {
 function handleCustom() {
   const userStore = useUserStore()
   const newState = !userStore.customIsVisible
+
   console.log('usersLogin :', userStore.usersLogin)
+
   userStore.$patch({ customIsVisible: newState })
+
+  console.log('user access:', userStore.access_token)
 }
 
 function handleMiniCustom() {
@@ -373,10 +377,17 @@ async function redirectLink(e, label) {
   const userStore = useUserStore()
   const usersLogin = userStore.usersLogin
   if (label === 'login') {
-    const newUserInfo = await redirectloginapi()
+    const access_token = userStore.access_token
+
+    const newUserInfo = await redirectloginapi(access_token)
+
     console.log('newUserInfo:', newUserInfo)
+
     if (newUserInfo !== 'null') {
-      userStore.$patch({ currentUsername: newUserInfo, usersLogin: [...usersLogin, newUserInfo] })
+      userStore.$patch({
+        currentUsername: newUserInfo.username,
+        usersLogin: [...usersLogin, newUserInfo.username]
+      })
 
       newUserInfo.admin ? userStore.$patch({ isAdmin: true }) : userStore.$patch({ isAdmin: false })
     } else {

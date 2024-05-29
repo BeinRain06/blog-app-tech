@@ -1,10 +1,12 @@
 const base_url = import.meta.env.VITE_API_URL
 
-export const redirectloginapi = async () => {
-  const user = {}
+export const redirectloginapi = async (access_token) => {
+  const access = {
+    access: access_token
+  }
   const catchUserName = await fetch(`${base_url}/login/redirect`, {
     method: 'POST',
-    body: JSON.stringify(user),
+    body: JSON.stringify(access),
     headers: {
       'Content-Type': 'application/json'
     },

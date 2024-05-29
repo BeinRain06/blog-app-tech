@@ -471,7 +471,7 @@ extract public_key from priate_key:
 
 cmd (exec in server folder):
 
-`openssl rsa -in private_key.pem -out public-key.pem -outform PEM -pubout` **A**
+`openssl rsa -in private_key.pem -out public_key.pem -outform PEM -pubout` **A**
 
 or
 
@@ -492,3 +492,18 @@ more with **openssl** syntax:
   (login action)
 - function **generateToken**
 - function **verifyToken**
+
+the `jwt.verify()` 335 method supports a **secretOrPublicKey** argument. This should be populated with a string or buffer containing either the **secret** (for HS256 ), or the PEM encoded **public key** (for RS256 ).
+<br>
+
+### ERROR: deal with JSONWebTokenError :"invalid signature"
+
+Like i have produce two kind of identification (_common_user_, and _admin_user_) i have to provide **private_key** and **private_Key_fake** for signing the both types of users.
+
+I had issue verifying _now_ which of the two are trying to login via login standard form or loginAdminForm
+
+Got Many Times Error **JSONWebTokenError: "invalid signature"**
+
+Write the entire logic `check-token.js` file to come up with a solution working!
+
+Then refer to this **file** some of the times you might be get stuck again with that type of Error!

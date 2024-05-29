@@ -190,7 +190,8 @@ export default defineComponent({
 
       userStore.$patch({
         currentUsername: newUser,
-        access_token: collectedData.access
+        access_token: collectedData.access,
+        isAdmin: collectedData.admin
       })
 
       resetUser(this.user, this.checked, null)

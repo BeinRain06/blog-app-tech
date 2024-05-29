@@ -4,6 +4,7 @@ const path = require("path");
 const cookie = require("cookie-parser");
 const jwtPrivateKey = path.resolve("") + "/keys/private_key.pem";
 const jwtPublicKey = path.resolve("") + "/keys/public_key.pem";
+const jwtPublicFakeKey = path.resolve("") + "/keys/public_key_fake.pem";
 const jwtPrivateFakeKey = path.resolve("") + "/keys/private_key_fake.pem";
 
 require("dotenv").config({ path: path.join(__dirname, "..") });
@@ -58,20 +59,45 @@ module.exports.verifyToken = async function (token, label) {
   return result;
 };
 
-// allowInsecureKeySizes: true;
+module.exports.verifyFakeToken = async function (token, label) {
+  const result = await JWTVerifyFake(token, label);
+  return result;
+};
+
 function JWTVerify(token, label) {
   const options =
     label === "session"
       ? { algorithm: "RS256", expiresIn: "6h" }
       : { algorithm: "RS256", expiresIn: "15m" };
 
-  console.log("out token:", token);
+  console.log("jwtPublicKey:", typeof jwtPublicKey);
 
   return new Promise((resolve, reject) => {
     try {
-      const secret = fs.readFileSync(jwtPublicKey);
-      const result = jwt.verify(token, secret, options);
-      console.log("token token out :", token);
+      const cert = fs.readFileSync(jwtPublicKey);
+
+      console.log("secret right:", cert);
+
+      const result = jwt.verify(token, cert, options);
+
+      resolve(result);
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
+function JWTVerifyFake(token, label) {
+  const options =
+    label === "session"
+      ? { algorithm: "RS256", expiresIn: "6h" }
+      : { algorithm: "RS256", expiresIn: "15m" };
+
+  return new Promise((resolve, reject) => {
+    try {
+      const cert = fs.readFileSync(jwtPublicFakeKey);
+
+      const result = jwt.verify(token, cert, options);
       resolve(result);
     } catch (err) {
       reject(err);

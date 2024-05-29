@@ -40,6 +40,8 @@ export const useUserStore = defineStore('user', {
             return shortname
           }
         }
+
+        console.log('in pinia username :', username)
         if (username.split(' ').length === 1) {
           shortname = username
 

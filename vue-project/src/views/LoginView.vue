@@ -122,7 +122,8 @@ export default defineComponent({
       const exUsersArr = userStore.usersLogin
       userStore.$patch({
         currentUsername: newUserInfo.username,
-        usersLogin: [...exUsersArr, newUserInfo.username]
+        usersLogin: [...exUsersArr, newUserInfo.username],
+        access_token: newUserInfo.access
       })
 
       console.log('userStore usersLogin:', userStore.usersLogin)
