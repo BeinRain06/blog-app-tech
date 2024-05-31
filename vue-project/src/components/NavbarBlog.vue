@@ -7,19 +7,31 @@
           >Bl<span class="text-blue-800">o</span>gPan<span class="text-green-500">i</span
           >a</RouterLink
         >
+        <li class="mini_admin_logo absolute" style="top: 0.5rem; left: 4.2rem" v-if="admin">
+          <span
+            class="text-white text-sm bg-green-600"
+            style="padding: 0 0.5rem; border-radius: 24px"
+            >admin</span
+          >
+        </li>
       </ul>
 
       <nav
-        v-if="currentUserIn !== null && currentUserIn !== undefined"
-        class="nav_desktop flex justify-center gap-1 md:gap-7 md:text-lg"
+        v-if="currentUserIn !== null && currentUserIn !== undefined && admin === false"
+        class="nav_desktop flex justify-center gap-1 text-base md:gap-7 md:text-lg"
       >
-        <div class="user_login_desk flex justify-end gap-1 md:justify-center items-center md:gap-4">
+        <div
+          class="user_login_desk flex justify-start gap-0 md:justify-center items-center md:gap-4"
+        >
           <p class="user_in">welcome @{{ shortyName }}</p>
 
-          <div
-            class="init_post w-24 h-6 bg-black text-center rounded-2xl hover:bg-green-700 transition-all duration-1000 ease-in-out"
-          >
-            <p id="init_new_post" class="btn-new-post">create a post</p>
+          <div class="init_post w-24">
+            <p
+              id="init_new_post"
+              class="btn-new-post w-full h-full text-white rounded-2xl bg-black hover:bg-green-700"
+            >
+              create a post
+            </p>
           </div>
         </div>
 
@@ -31,6 +43,159 @@
         </ul>
 
         <button class="btn-logout-desk" @click.prevent="logoutSession">Logout</button>
+      </nav>
+
+      <nav
+        v-if="currentUserIn !== null && currentUserIn !== undefined && admin === true"
+        class="nav_desktop_admin"
+      >
+        <div
+          class="user_login_desk flex justify-start gap-0 md:justify-center items-center md:gap-4"
+        >
+          <p class="user_in">welcome @{{ shortyName }}</p>
+
+          <div class="init_post w-24 md:w-30">
+            <p
+              id="init_new_post"
+              class="btn-new-post w-full h-full text-white rounded-2xl bg-black hover:bg-green-700"
+            >
+              create a post
+            </p>
+          </div>
+        </div>
+
+        <ul
+          id="custom_feature"
+          class="custom_features flex text-gray-300 justify-center items-center gap-1"
+          v-if="notadmin"
+        >
+          <li><span class="specs_blog_title">techreviews</span></li>
+        </ul>
+
+        <ul
+          id="custom_feature"
+          class="custom_features flex text-gray-300 justify-center items-center gap-1"
+          v-if="admin"
+        >
+          <li>
+            <div class="filter_wrapper">
+              <div class="filter_box">
+                <span style="font-size: calc(12px + 0.25vw)">Filter</span>
+                <div class="text-white flex items-center" @click="showFilter = !showFilter">
+                  <div class="thin_bar"></div>
+                  <div class="arrow_filter_wrap mx-2">
+                    <span
+                      class="arrow_filter relative cursor-pointer"
+                      style="top: 0.1rem; left: 0rem"
+                      >&#x25BE;</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="filter_box_selection">
+                <div
+                  class="filter_box_content w-full flex flex-col gap-1 px-2 py-1 justify-center items-center"
+                  @click="handleFilterSelection"
+                >
+                  <div class="control_selection">
+                    <label for="author">By Author</label>
+                    <input
+                      type="radio"
+                      id="author_filter"
+                      class="filter_select mx-2"
+                      name="author"
+                      ref="inputAuthor"
+                    />
+                  </div>
+                  <div class="control_selection">
+                    <label for="theme">By theme</label>
+                    <input
+                      type="radio"
+                      id="theme_filter"
+                      class="filter_select mx-2"
+                      name="theme"
+                      ref="inputTheme"
+                    />
+                  </div>
+                  <div class="control_selection">
+                    <label for="standard">Standard</label>
+                    <input
+                      type="radio"
+                      id="standard_filter"
+                      class="filter_select mx-2"
+                      name="standard"
+                      checked="true"
+                      ref="inputStandard"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="section_search relative md:top-1">
+                <ul class="search_content bg-yellow-600">
+                  <li class="w-9/12 h-full bg-blue-300">
+                    <input
+                      type="text"
+                      class="text_search w-full h-full flex justify-center items-center text-sm text-gray-600 outline-none"
+                      style="text-indent: 5px"
+                      name="search"
+                      :placeholder="pickMsg"
+                      @change="handleWordsSearch"
+                    />
+                  </li>
+                  <li class="w-3/12 h-full flex p-1 cursor-pointer">
+                    <span class="w-full flex justify-center items-center">&#128269;</span>
+                  </li>
+                </ul>
+                <div
+                  class="list_proposal"
+                  v-if="isList"
+                  @mouseleave="(e) => stickVisibleorNot(e, 'remove')"
+                >
+                  <ul
+                    id="content_proposal"
+                    class="content_proposal play_visible"
+                    ref="contentProposal"
+                    @mouseenter="(e) => stickVisibleorNot(e, 'add')"
+                  >
+                    <li class="item_proposal">pineapple</li>
+                    <li class="item_proposal">platform</li>
+                    <li class="item_proposal">partnership</li>
+                  </ul>
+                  <ul id="content_proposal_normal" class="content_proposal play_visible hidden">
+                    <li
+                      class="item_proposal"
+                      v-for="element in listSample"
+                      ref="contentProposal"
+                      @mouseenter="(e) => stickVisibleorNot(e, 'add')"
+                    >
+                      {{ element }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+        <div class="wrapper_logout_mode">
+          <button class="btn-logout-desk" @click.prevent="logoutSession">Logout</button>
+          <div id="dark_light" class="dark_light" v-if="admin" @click="(e) => switchDarkLight(e)">
+            <div id="light_mode" class="wrap_light_img z-10" v-if="light">
+              <img
+                src="../assets/sun.jpeg"
+                class="img_mode object-cover w-full h-full z-10"
+                alt="no light/dark mode"
+              />
+            </div>
+            <div id="dark_mode" class="wrap_dark_img z-10" v-if="dark">
+              <img
+                src="../assets/moon.jpeg"
+                class="img_mode object-cover w-full h-full z-10"
+                alt="no light/dark mode"
+              />
+            </div>
+          </div>
+        </div>
       </nav>
 
       <nav
@@ -126,12 +291,35 @@
         </ul>
 
         <div class="others_features flex flex-col rounded-md" v-if="custom">
-          <div class="aside_login_label w-full flex justify-end items-center">
-            <p
-              class="aside_login_label w-12 text-sm text-center text-gray-100 bg-purple-900 rounded-xl"
+          <div class="w-full flex">
+            <div class="aside_login_label w-3/12 flex justify-end items-center">
+              <p
+                class="aside_login_label w-12 text-sm text-center text-gray-100 bg-purple-900 rounded-xl"
+              >
+                login
+              </p>
+            </div>
+            <div
+              id="dark_light"
+              class="w-9/12 dark_light"
+              v-if="admin"
+              @click="(e) => switchDarkLight(e)"
             >
-              login
-            </p>
+              <div id="light_mode" class="wrap_light_img z-10" v-if="light">
+                <img
+                  src="../assets/cloud-sun-2-svgrepo-com.svg"
+                  class="img_mode object-cover w-full h-full"
+                  alt="no light/dark mode"
+                />
+              </div>
+              <div id="dark_mode" class="wrap_dark_img z-10" v-if="dark">
+                <img
+                  src="../assets/cloud-storm-svgrepo-com.svg"
+                  class="img_mode object-cover w-full h-full"
+                  alt="no light/dark mode"
+                />
+              </div>
+            </div>
           </div>
 
           <div class="p-2 text-lg xsm:text-base">
@@ -146,6 +334,97 @@
               }}</span>
             </div>
             <button class="btn-new-account" @click="redirectLoginPage">log another account</button>
+            <div class="filter_mob_wrapper" v-if="admin">
+              <div class="filter_box">
+                <span>Filter</span>
+                <div class="flex justify-center text-white" @click="showFilter = !showFilter">
+                  <div class="thin_bar"></div>
+                  <div class="arrow_filter_wrap mx-2">
+                    <span class="arrow_filter">&#x25BC;</span>
+                  </div>
+                </div>
+              </div>
+              <div class="filter_box_mobi_selection relative top-1 w-full h-auto">
+                <div
+                  class="filter_box_mobi_content w-full flex flex-col gap-1 px-2 py-1 justify-center items-center"
+                  @click="handleFilterSelection"
+                >
+                  <div class="control_selection">
+                    <label for="author">By Author</label>
+                    <input
+                      type="radio"
+                      id="author_filter"
+                      class="filter_select mx-2"
+                      name="author"
+                      ref="inputAuthor"
+                    />
+                  </div>
+                  <div class="control_selection">
+                    <label for="theme">By theme</label>
+                    <input
+                      type="radio"
+                      id="theme_filter"
+                      class="filter_select mx-2"
+                      name="theme"
+                      ref="inputTheme"
+                    />
+                  </div>
+                  <div class="control_selection">
+                    <label for="standard">standard</label>
+                    <input
+                      type="radio"
+                      id="standard_filter"
+                      class="filter_select mx-2"
+                      name="standard"
+                      checked="true"
+                      ref="inputStandard"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="section_search mx-1" v-if="admin">
+              <ul class="search_content w-auto h-5 flex justify-center items-center p-1">
+                <li class="h-4">
+                  <input
+                    type="text"
+                    class="text_search w-9/12 h-full"
+                    name="search"
+                    placeholder="pickMsg"
+                    @change="handleWordsSearch"
+                  />
+                </li>
+                <li class="w-3/12 h-full flex items-center justify-center">
+                  <span>&#128269;</span>
+                </li>
+              </ul>
+              <div
+                class="list_proposal_mob"
+                v-if="isList"
+                @mouseleave="(e) => stickVisibleorNot(e, 'remove')"
+              >
+                <ul
+                  id="content_proposal"
+                  class="content_proposal play_visible"
+                  ref="contentProposal"
+                  @mouseenter="(e) => stickVisibleorNot(e, 'add')"
+                >
+                  <li class="item_proposal">pineapple</li>
+                  <li class="item_proposal">platform</li>
+                  <li class="item_proposal">partnership</li>
+                </ul>
+                <ul id="content_proposal_normal" class="content_proposal play_visible hidden">
+                  <li
+                    class="item_proposal"
+                    v-for="element in listSample"
+                    ref="contentProposal"
+                    @mouseenter="(e) => stickVisibleorNot(e, 'remove')"
+                  >
+                    {{ element }}
+                  </li>
+                </ul>
+              </div>
+            </div>
             <div class="logout_mob_wrapper w-full">
               <button
                 class="btn_logout_menu text-purple-500 f0nt-bold"
@@ -282,6 +561,18 @@ const router = useRouter()
 
 const userStore = ref(useUserStore())
 
+let dark = ref(false)
+let light = ref(true)
+let showFilter = ref(false)
+let pickMsg = ref('enter a search')
+let listSample = ref(null)
+let isList = ref(false)
+
+const inputAuthor = ref(null)
+const inputTheme = ref(null)
+const inputStandard = ref(null)
+const contentProposal = ref(null)
+
 const currentUserIn = computed(() => {
   const userStore = useUserStore()
   return userStore.currentUser
@@ -325,6 +616,20 @@ const stateCheckedSingle = computed(() => {
 const isAdminOpen = computed(() => {
   const userStore = useUserStore()
   return userStore.isLogAdminOpen
+})
+
+const admin = computed(() => {
+  const userStore = useUserStore()
+  return userStore.isAdmin
+})
+
+const notadmin = computed(() => {
+  const userStore = useUserStore()
+  if (userStore.isAdmin === true) {
+    return false
+  } else {
+    return true
+  }
 })
 
 function handleRadioState(e) {
@@ -405,12 +710,67 @@ function redirectLoginPage() {
   userStore.$patch({ miniCustomIsVisible: false, customIsVisible: false })
   router.push({ path: '/login' })
 }
+
+function handleFilterSelection(e) {
+  if (e.target.id == 'standard_filter') {
+    pickMsg = 'enter a search'
+  } else if (e.target.id == 'theme_filter') {
+    pickMsg = 'look for ...'
+  } else if (e.target.id == 'theme_filter') {
+    pickMsg = 'enter an author'
+  }
+}
+
+async function handleWordsSearch(e) {
+  const str = e.target.value
+  let matchingResearch
+
+  if (pickMsg === 'enter an author') {
+    const listAuthors = JSON.parse(localStorage.getItem('list-authors'))
+
+    isList = true
+
+    matchingResearch = listAuthors.filter((elt) => elt.includes(str))
+
+    listSample = matchingResearch
+  } else if (pickMsg === 'look for ...') {
+    const listThemes = JSON.parse(localStorage.getItem('list-themes'))
+
+    isList = true
+
+    matchingResearch = listThemes.filter((elt) => elt.includes(str))
+
+    listSample = matchingResearch
+  } else if ((pickMsg = 'enter a search')) {
+    isList = true
+  }
+}
+
+function stickVisibleorNot(act) {
+  if (act === 'add') {
+    console.log('contentProposal:', contentProposal)
+    contentProposal.value.classList.remove('play_visible')
+  } else {
+    console.log('contentProposal:', contentProposal)
+    contentProposal.value.classList.add('play_visible')
+  }
+}
+
+function switchDarkLight(e) {
+  if (e.target.id === 'light_mode') {
+    light = true
+    dark = false
+  } else if (e.target.id === 'dark_mode') {
+    dark = true
+    light = false
+  }
+}
 </script>
 
 <style scoped>
 *,
-*:before,
-*:after {
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -446,8 +806,10 @@ function redirectLoginPage() {
 
   p.user_in {
     @apply text-white transition-all duration-1000 ease-in-out hover:text-red-700 py-2;
+    position: relative;
+
     width: calc(10rem + 3vw);
-    font-size: calc(0.86rem + 0.48vw);
+    font-size: calc(0.8rem + 0.48vw);
   }
 
   p.user_in_mob {
@@ -491,11 +853,12 @@ function redirectLoginPage() {
   }
 
   .btn-new-post {
-    @apply w-full h-full text-white;
     cursor: pointer;
     font-size: calc(10px + 0.1vw);
-    position: relative;
-    top: -3px;
+    padding: 0.25rem 0;
+    display: grid;
+    place-items: center;
+    transition: all 1s ease-in-out;
     z-index: 3;
   }
 
@@ -509,6 +872,10 @@ function redirectLoginPage() {
     display: flex;
   }
   .nav_desktop {
+    display: none;
+  }
+
+  .nav_desktop_admin {
     display: none;
   }
 
@@ -591,6 +958,177 @@ function redirectLoginPage() {
   .box_circle {
     padding-left: 0.5rem;
   }
+
+  /*style add admin*/
+
+  .nav_desktop_admin {
+    display: flex;
+    justify-content: space-between;
+    width: 60%;
+  }
+
+  /*.mini_admin_logo {
+    positon: absolute;
+    top: -2rem;
+    left: -1rem;
+    @apply rounded;
+  }*/
+
+  /*.mini_admin_logo span {
+    @apply text-white text-sm bg-green-600 py-1 px-4 rounded;
+  } */
+
+  /* filter wrapper admin*/
+
+  .thin_bar {
+    position: relative;
+    top: 0;
+    width: 0.65rem;
+    height: 1px;
+    background-color: #fff;
+  }
+
+  .thin_bar::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    width: 1.2rem;
+    height: 100%;
+    background-color: #fff;
+  }
+
+  .thin_bar:after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    width: 0.45rem;
+    height: 100%;
+    background-color: #fff;
+  }
+
+  .filter_wrapper {
+    position: absolute;
+    top: 4.2rem;
+    left: 3rem;
+    width: 100%;
+    padding: 0.5rem 0;
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .filter_box {
+    width: 3.8rem;
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .filter_box_selection {
+    position: absolute;
+    top: 2.8rem;
+    left: 0.4rem;
+    width: 12.4rem;
+    height: auto;
+    z-index: 3;
+    @apply bg-purple-800;
+  }
+
+  .filter_box_selection .control_selection {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 1rem;
+  }
+
+  .control_selection label {
+    width: 60%;
+    font-size: calc(12px + 0.3vw);
+  }
+
+  .search_content {
+    width: 6rem;
+    height: 1.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* list proposal */
+
+  .list_proposal {
+    position: abolute;
+    top: 2rem;
+    left: 0;
+    width: auto;
+  }
+
+  .content_proposal {
+    position: relative;
+    width: 10rem;
+    padding: 0.5rem;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: left;
+    gap: 1rem;
+    overscroll: auto;
+  }
+
+  .content_proposal.play_visible {
+    animation: proposal-visibility 5s ease-in-out forwards;
+  }
+
+  .content_proposal .item_proposal {
+    max-width: 100%;
+    font-size: calc(14px + 0.35vw);
+    transition: all 1s ease-in-out;
+    @apply bg-white py-2 hover:bg-yellow-100 hover:text-gray-700;
+  }
+
+  .list_proposal_mob {
+    display: none;
+    position: absolute;
+    top: 1rem;
+    right: calc(20rem - 10px);
+    width: 20rem;
+    height: auto;
+  }
+
+  /*dark-light mode*/
+
+  .wrapper_logout_mode {
+    display: none;
+    flex-direction: row;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  .dark_light {
+    width: 40px;
+    height: 30px;
+    border-radius: 50%;
+  }
+
+  .wrap_light_img,
+  .wrap_dark_img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 1px solid black;
+    outline-offset: -3px;
+    outline: 2px solid white;
+  }
+
+  .wrap_dark_img {
+    outline: 3px solid navy;
+  }
+
+  .img_mode {
+    border-radius: 50%;
+  }
 }
 
 @media (min-width: 375px) {
@@ -636,9 +1174,13 @@ function redirectLoginPage() {
   .logout_mob_wrapper {
     padding: 0.75rem 0;
   }
+
+  .list_proposal_mob {
+    display: block;
+  }
 }
 
-@media (min-width: 520px) {
+@media (min-width: 600px) {
   .nav_header {
     --var-font-size: 1.6em;
   }
@@ -659,7 +1201,12 @@ function redirectLoginPage() {
   .nav_mobile {
     display: none;
   }
+
   .nav_desktop {
+    display: flex;
+  }
+
+  .nav_desktop_admin {
     display: flex;
   }
 
@@ -667,9 +1214,17 @@ function redirectLoginPage() {
     width: calc(8rem + 3vw);
     font-size: calc(0.72rem + 0.48vw);
   }
+
+  .search_content {
+    width: 10rem;
+  }
+
+  .wrapper_logout_mode {
+    display: flex;
+  }
 }
 
-@media (min-width: 780px) {
+@media (min-width: 840px) {
   .nav_header {
     --var-font-size: calc(1.25rem + 1vw);
   }
@@ -678,24 +1233,76 @@ function redirectLoginPage() {
     font-size: var(--var-font-size);
   }
 
+  .btn-new-post {
+    position: relative;
+    top: -0.5rem;
+    left: 1rem;
+    font-size: calc(11px + 0.15vw);
+    padding: 0.25rem 0;
+  }
+
   .specs_blog_title {
     display: block;
   }
 
-  .nav_mobile {
-    display: none;
-  }
-
-  .nav_desktop {
-    display: flex;
-  }
-
-  .btn-new-post {
-    top: -3px;
-  }
-
   .desk_custom_wrap {
     top: 6.7rem;
+  }
+
+  p.user_in {
+    left: calc(2%);
+  }
+
+  /*style add admin*/
+
+  .nav_desktop_admin {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    gap: 1.25rem;
+  }
+
+  .search_content {
+    width: 11rem;
+    height: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .filter_wrapper {
+    position: relative;
+    padding: 0;
+    top: -0.25rem;
+    left: 0;
+  }
+
+  .filter_box_selection {
+    position: absolute;
+    top: 2.75rem;
+    left: 0;
+    width: 12.2rem;
+    height: auto;
+    z-index: 3;
+    @apply bg-purple-800;
+  }
+
+  .wrapper_logout_mode {
+    position: relative;
+
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+@keyframes proposal-visibility {
+  0% {
+    visibility: visibile;
+  }
+  100% {
+    visibility: hidden;
   }
 }
 </style>

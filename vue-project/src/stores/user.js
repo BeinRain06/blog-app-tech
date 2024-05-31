@@ -5,12 +5,12 @@ import { defineStore } from 'pinia'
 export const useUserStore = defineStore('user', {
   state: () => ({
     usersLogin: [],
-    currentUsername: null,
+    currentUsername: 'JohnnyT Spadra',
     loading: false,
     customIsVisible: false,
     miniCustomIsVisible: false,
     isLogAdminOpen: false,
-    isAdmin: false,
+    isAdmin: true,
     isCheckedSingle: false,
     isCheckedAll: true,
     access_token: null

@@ -173,6 +173,25 @@ export default defineComponent({
         alert('Bad Authentication ! or Access Disallowed')
       }
 
+      /* const authorsAndThemes= await getauthorsandthemesapi()
+      
+      if (localStorage.getItem('list-authors') === undefined) {
+        localStorage.setItem('list-authors', '[]')
+      }
+      if (localStorage.getItem('list-themes') === undefined) {
+        localStorage.setItem('list-themes', '[]')
+      }
+
+      let arrAuthors= JSON.parse(localStorage.getItem('list-authors'));
+
+      let arrThemes= JSON.parse(localStorage.getItem('list-themes'));
+
+      arrAuthors= [...arrAuthors, authorsAndThemes.authors]
+      arrThemes= [...arrThemes, authorsAndThemes.themes]
+
+      localStorage.setItem('list-authors', JSON.stringify(arrAuthors))
+      localStorage.setItem('list-themes', JSON.stringify(arrThemes)) */
+
       console.log('newUserInfo:', newUserInfo)
 
       const exUsersArr = userStore.usersLogin
