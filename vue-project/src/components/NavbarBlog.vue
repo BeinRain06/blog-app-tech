@@ -67,15 +67,6 @@
         <ul
           id="custom_feature"
           class="custom_features flex text-gray-300 justify-center items-center gap-1"
-          v-if="notadmin"
-        >
-          <li><span class="specs_blog_title">techreviews</span></li>
-        </ul>
-
-        <ul
-          id="custom_feature"
-          class="custom_features flex text-gray-300 justify-center items-center gap-1"
-          v-if="admin"
         >
           <li>
             <div class="filter_wrapper">
@@ -147,20 +138,10 @@
                   </li>
                 </ul>
                 <div
-                  class="list_proposal"
+                  class="list_proposal h-auto"
                   v-if="isList"
                   @mouseleave="(e) => stickVisibleorNot(e, 'remove')"
                 >
-                  <ul
-                    id="content_proposal"
-                    class="content_proposal play_visible"
-                    ref="contentProposal"
-                    @mouseenter="(e) => stickVisibleorNot(e, 'add')"
-                  >
-                    <li class="item_proposal">pineapple</li>
-                    <li class="item_proposal">platform</li>
-                    <li class="item_proposal">partnership</li>
-                  </ul>
                   <ul id="content_proposal_normal" class="content_proposal play_visible hidden">
                     <li
                       class="item_proposal"
@@ -265,7 +246,7 @@
       </nav>
 
       <nav
-        v-if="currentUserIn !== null && currentUserIn !== undefined"
+        v-if="currentUserIn !== null && currentUserIn !== undefined && admin === false"
         class="nav_mobile flex gap-3"
       >
         <div class="grid place-items-center">
@@ -299,22 +280,110 @@
                 login
               </p>
             </div>
+          </div>
+
+          <div class="p-2 text-lg xsm:text-base">
+            <p class="user_in">welcome {{ shortyName }}</p>
+            <p v-if="lastDateAction !== undefined" class="last_post">
+              last Post:{{ lastDateAction }}
+            </p>
+            <div class="written_wrapper w-full flex justify-between items-center h-8">
+              <span class="articles_label text-gray-500 font-bold">Articles</span>
+              <span class="count_articles w-3 text-center rounded-2xl bg-green-800">{{
+                countArt
+              }}</span>
+            </div>
+            <button class="btn-new-account" @click="redirectLoginPage">log another account</button>
+            <div class="logout_mob_wrapper w-full">
+              <button
+                class="btn_logout_menu text-purple-500 f0nt-bold"
+                @click.prevent="logoutSession"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+
+          <div class="custom_mob_wrap w-full text-white">
+            <p class="custom-p xsm:text-base">
+              <span>Custom</span>
+              <span class="relative top-2 cursor-pointer" @click="handleMiniCustom">&#65088;</span>
+            </p>
+            <div class="w-full h-10 text-base flex" v-if="minicustom">
+              <div class="select_blog">
+                <label for="all">all</label>
+                <div class="box_circle w-10 grid place-items-start">
+                  <input
+                    type="radio"
+                    id="all_blogger"
+                    name="blog"
+                    @change="handleRadioState"
+                    checked
+                  />
+                </div>
+              </div>
+              <div class="select_blog">
+                <label for="single">single</label>
+                <div class="box_circle w-10 grid place-items-start">
+                  <input type="radio" id="single_blogger" name="blog" @change="handleRadioState" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <nav
+        v-if="currentUserIn !== null && currentUserIn !== undefined && admin === true"
+        class="nav_mobile_admin flex gap-3"
+      >
+        <div class="grid place-items-center">
+          <p class="user_in_mob text-xl xsm:text-base text-white underline">{{ shortyName }}</p>
+        </div>
+        <ul
+          id="menu_wrap"
+          class="menu_wrap flex xxsm:flex-col xsm:flex-row justify-center py-1 gap-2 bg-gray-700 rounded"
+        >
+          <li>
+            <img
+              alt="account logo"
+              class="profile_logo"
+              src="@/assets/account-avatar-profile-user-9-svgrepo-com.svg"
+            />
+          </li>
+          <li
+            class="angle_bracket font-bold text-lg text-center text-white cursor-pointer"
+            @click="handleCustom"
+          >
+            &#65088;
+          </li>
+        </ul>
+
+        <div class="others_features flex flex-col rounded-md" v-if="custom">
+          <div class="w-full flex justify-between px-1">
+            <div class="aside_login_label w-3/12 flex justify-start items-center">
+              <p
+                class="aside_login_label w-12 text-sm text-center text-gray-100 bg-purple-900 rounded-xl"
+              >
+                login
+              </p>
+            </div>
             <div
               id="dark_light"
-              class="w-9/12 dark_light"
+              class="w-9/12 dark_light pr-1"
               v-if="admin"
               @click="(e) => switchDarkLight(e)"
             >
               <div id="light_mode" class="wrap_light_img z-10" v-if="light">
                 <img
-                  src="../assets/cloud-sun-2-svgrepo-com.svg"
+                  src="../assets/sun.jpeg"
                   class="img_mode object-cover w-full h-full"
                   alt="no light/dark mode"
                 />
               </div>
               <div id="dark_mode" class="wrap_dark_img z-10" v-if="dark">
                 <img
-                  src="../assets/cloud-storm-svgrepo-com.svg"
+                  src="../assets/moon.jpeg"
                   class="img_mode object-cover w-full h-full"
                   alt="no light/dark mode"
                 />
@@ -335,21 +404,22 @@
             </div>
             <button class="btn-new-account" @click="redirectLoginPage">log another account</button>
             <div class="filter_mob_wrapper" v-if="admin">
-              <div class="filter_box">
-                <span>Filter</span>
-                <div class="flex justify-center text-white" @click="showFilter = !showFilter">
+              <div class="filter_box_mob relative top-4 w-16 flex gap-1">
+                <span class="text-white" style="position: relative; bottom: 0.5rem">Filter</span>
+                <div class="w-5 flex justify-between text-white" @click="showFilter = !showFilter">
                   <div class="thin_bar"></div>
-                  <div class="arrow_filter_wrap mx-2">
-                    <span class="arrow_filter">&#x25BC;</span>
+                  <div class="arrow_filter_wrap relative bottom-1">
+                    <span class="arrow_filter">&#x25BE;</span>
                   </div>
                 </div>
               </div>
-              <div class="filter_box_mobi_selection relative top-1 w-full h-auto">
+              <div class="filter_box_mobi_selection relative top-4 w-full h-auto">
                 <div
-                  class="filter_box_mobi_content w-full flex flex-col gap-1 px-2 py-1 justify-center items-center"
+                  class="filter_box_mobi_content w-full flex flex-col gap-3 py-2 justify-center items-center font-bold text-gray-900"
+                  style="font-size: calc(14px + 0.28vw)"
                   @click="handleFilterSelection"
                 >
-                  <div class="control_selection">
+                  <div class="control_selection j w-full flex justify-center items-center gap-2">
                     <label for="author">By Author</label>
                     <input
                       type="radio"
@@ -359,7 +429,7 @@
                       ref="inputAuthor"
                     />
                   </div>
-                  <div class="control_selection">
+                  <div class="control_selection w-full flex justify-center items-center gap-2">
                     <label for="theme">By theme</label>
                     <input
                       type="radio"
@@ -369,7 +439,7 @@
                       ref="inputTheme"
                     />
                   </div>
-                  <div class="control_selection">
+                  <div class="control_selection w-full flex justify-center items-center gap-2">
                     <label for="standard">standard</label>
                     <input
                       type="radio"
@@ -383,18 +453,19 @@
                 </div>
               </div>
             </div>
-            <div class="section_search mx-1" v-if="admin">
-              <ul class="search_content w-auto h-5 flex justify-center items-center p-1">
-                <li class="h-4">
+            <div class="section_search" style="margin: 1rem 0 0" v-if="admin">
+              <ul class="search_content_mob w-full h-7 flex justify-center items-center p-1">
+                <li class="h-full">
                   <input
                     type="text"
-                    class="text_search w-9/12 h-full"
+                    class="text_search w-10/12 h-full text-sm outline-none"
+                    style="text-indent: 10px"
                     name="search"
-                    placeholder="pickMsg"
+                    :placeholder="pickMsg"
                     @change="handleWordsSearch"
                   />
                 </li>
-                <li class="w-3/12 h-full flex items-center justify-center">
+                <li class="cursor-pointer w-2/12 h-full flex items-center justify-center">
                   <span>&#128269;</span>
                 </li>
               </ul>
@@ -403,17 +474,7 @@
                 v-if="isList"
                 @mouseleave="(e) => stickVisibleorNot(e, 'remove')"
               >
-                <ul
-                  id="content_proposal"
-                  class="content_proposal play_visible"
-                  ref="contentProposal"
-                  @mouseenter="(e) => stickVisibleorNot(e, 'add')"
-                >
-                  <li class="item_proposal">pineapple</li>
-                  <li class="item_proposal">platform</li>
-                  <li class="item_proposal">partnership</li>
-                </ul>
-                <ul id="content_proposal_normal" class="content_proposal play_visible hidden">
+                <ul id="content_proposal" class="content_proposal play_visible hidden">
                   <li
                     class="item_proposal"
                     v-for="element in listSample"
@@ -565,8 +626,8 @@ let dark = ref(false)
 let light = ref(true)
 let showFilter = ref(false)
 let pickMsg = ref('enter a search')
-let listSample = ref(null)
-let isList = ref(false)
+let listSample = ref(['pineapple', 'orange', 'strawberries'])
+let isList = ref(true)
 
 const inputAuthor = ref(null)
 const inputTheme = ref(null)
@@ -962,9 +1023,13 @@ function switchDarkLight(e) {
   /*style add admin*/
 
   .nav_desktop_admin {
-    display: flex;
+    display: none;
     justify-content: space-between;
     width: 60%;
+  }
+
+  .nav_mobile_admin {
+    display: flex;
   }
 
   /*.mini_admin_logo {
@@ -1017,6 +1082,11 @@ function switchDarkLight(e) {
     gap: 0.5rem;
   }
 
+  .filter_mob_wrapper {
+    width: 100%;
+    height: 9rem;
+  }
+
   .filter_box {
     width: 3.8rem;
     display: flex;
@@ -1065,31 +1135,35 @@ function switchDarkLight(e) {
   }
 
   .content_proposal {
-    position: relative;
-    width: 10rem;
-    padding: 0.5rem;
-    height: 300px;
+    position: absolute;
+    top: 5rem;
+    right: -20rem;
+    width: 11.6rem;
+    padding: 0.5rem 0;
+    height: 198px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: left;
-    gap: 1rem;
+    background-color: #f4f4f4;
     overscroll: auto;
+    z-index: 10;
   }
 
   .content_proposal.play_visible {
-    animation: proposal-visibility 5s ease-in-out forwards;
+    //animation: proposal-visibility 5s ease-in-out forwards;
+    position: absolute;
   }
 
   .content_proposal .item_proposal {
     max-width: 100%;
     font-size: calc(14px + 0.35vw);
     transition: all 1s ease-in-out;
-    @apply bg-white py-2 hover:bg-yellow-100 hover:text-gray-700;
+    @apply text-gray-500 flex items-center px-1 hover:bg-gray-200;
   }
 
   .list_proposal_mob {
-    display: none;
+    display: flex;
     position: absolute;
     top: 1rem;
     right: calc(20rem - 10px);
@@ -1129,6 +1203,8 @@ function switchDarkLight(e) {
   .img_mode {
     border-radius: 50%;
   }
+
+  /*style add admin mobile*/
 }
 
 @media (min-width: 375px) {
@@ -1178,6 +1254,17 @@ function switchDarkLight(e) {
   .list_proposal_mob {
     display: block;
   }
+
+  .content_proposal {
+    position: absolute;
+    top: 7.4rem;
+    right: -2.5rem;
+    width: 12rem;
+    padding: 0.5rem 0;
+    height: 200px;
+    background-color: #f4f4f4;
+    overscroll: auto;
+  }
 }
 
 @media (min-width: 600px) {
@@ -1210,6 +1297,10 @@ function switchDarkLight(e) {
     display: flex;
   }
 
+  .nav_mobile_admin {
+    display: none;
+  }
+
   p.user_in {
     width: calc(8rem + 3vw);
     font-size: calc(0.72rem + 0.48vw);
@@ -1217,6 +1308,21 @@ function switchDarkLight(e) {
 
   .search_content {
     width: 10rem;
+  }
+
+  .content_proposal {
+    position: absolute;
+    top: 2rem;
+    width: 10rem;
+    padding: 0.5rem 0;
+    height: 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: left;
+    background-color: #f4f4f4;
+    overscroll: auto;
+    z-index: 10;
   }
 
   .wrapper_logout_mode {
@@ -1285,6 +1391,11 @@ function switchDarkLight(e) {
     height: auto;
     z-index: 3;
     @apply bg-purple-800;
+  }
+
+  .content_proposal {
+    top: 2.5rem;
+    height: 370px;
   }
 
   .wrapper_logout_mode {
