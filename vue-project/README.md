@@ -507,3 +507,68 @@ Got Many Times Error **JSONWebTokenError: "invalid signature"**
 Write the entire logic `check-token.js` file to come up with a solution working!
 
 Then refer to this **file** some of the times you might be get stuck again with that type of Error!
+
+<br>
+
+### update variable using Composition API `<script setup>`
+
+let's draw this simple `<script setup>` syntax :
+
+Script
+
+      `<script setup>
+        import {ref, computed} from 'vue'
+
+        let showFilter=ref(false)
+
+        const filterCompute= computed(() => showFilter)
+
+        function switchStateFilter() {
+          // trial *1*
+          showFilter= !showFilter
+          // trial *2*
+           showFilter.value = !showFilter.value
+        }
+      </script>`
+
+Template
+
+    `<template>
+      <button class="toggle_box">switch
+      </button>
+      <div class="filter_box text-white bg-pink-300" v-if="showFilter">
+        <p>Welcome To That Stage</p>
+      </div>
+    <template/>`
+
+<br>
+
+We aim to display or hide the div element of class `filter_box` using the **switch** button
+
+In our script above doing the **trial 1** will not work because `ref` attribute in **Vue** are object that need to be accessed targeting his **value** property
+
+here is a console log of **ref** named **showFilter** :
+
+`showFilter: 
+Object { __v_isShallow: false, dep: Map(1), __v_isRef: true, _rawValue: false, _value: false }`
+
+more depthly sees :
+
+    `showFilter: Object { __v_isShallow: false, dep: Map(1), __v_isRef: true, _rawValue: false, _value: false }
+
+    __v_isRef: true
+    __v_isShallow: false
+    _rawValue: false
+    _value: false
+    dep: Map { {…} → 3 }
+    <prototype>: Object { … } `
+
+<br>
+
+Theone syntax that is **going to work** in the script setup to change **variable** will be the one following syntax given by **# trial 2** that accessed the value given using **{ref}** tools from **vue**
+
+Of course the same goes when using **{defineComponent}** from **vue** to define `<script setup>` **syntax**
+
+In Case you use the **Optional Object Approach** your need to use **ref** isn't really required to define **variables**. Therefore you will access your variables in **computed** states or **functions** defined in `methods:{..}` using the key word **this** .
+
+ <p style="display:inline; margin: 0.5rem 0" >E.g :<span style="padding: 0 1rem;font-size:calc(1.15rem)"><span style="font-weight:bold">this</span>.showFilter</span> (thanks you listening)</p>

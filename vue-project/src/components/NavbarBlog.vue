@@ -69,21 +69,19 @@
           class="custom_features flex text-gray-300 justify-center items-center gap-1"
         >
           <li>
-            <div class="filter_wrapper">
+            <div class="filter_wrapper z-10">
               <div class="filter_box">
                 <span style="font-size: calc(12px + 0.25vw)">Filter</span>
-                <div class="text-white flex items-center" @click="showFilter = !showFilter">
+                <div class="text-white flex items-center cursor-pointer" @click="switchFilter">
                   <div class="thin_bar"></div>
                   <div class="arrow_filter_wrap mx-2">
-                    <span
-                      class="arrow_filter relative cursor-pointer"
-                      style="top: 0.1rem; left: 0rem"
+                    <span class="arrow_filter relative" style="top: 0.1rem; left: 0rem"
                       >&#x25BE;</span
                     >
                   </div>
                 </div>
               </div>
-              <div class="filter_box_selection">
+              <div class="filter_box_selection" ref="filterBox">
                 <div
                   class="filter_box_content w-full flex flex-col gap-1 px-2 py-1 justify-center items-center"
                   @click="handleFilterSelection"
@@ -94,8 +92,7 @@
                       type="radio"
                       id="author_filter"
                       class="filter_select mx-2"
-                      name="author"
-                      ref="inputAuthor"
+                      name="search"
                     />
                   </div>
                   <div class="control_selection">
@@ -104,8 +101,7 @@
                       type="radio"
                       id="theme_filter"
                       class="filter_select mx-2"
-                      name="theme"
-                      ref="inputTheme"
+                      name="search"
                     />
                   </div>
                   <div class="control_selection">
@@ -114,9 +110,8 @@
                       type="radio"
                       id="standard_filter"
                       class="filter_select mx-2"
-                      name="standard"
-                      checked="true"
-                      ref="inputStandard"
+                      name="search"
+                      checked
                     />
                   </div>
                 </div>
@@ -160,18 +155,31 @@
 
         <div class="wrapper_logout_mode">
           <button class="btn-logout-desk" @click.prevent="logoutSession">Logout</button>
-          <div id="dark_light" class="dark_light" v-if="admin" @click="(e) => switchDarkLight(e)">
-            <div id="light_mode" class="wrap_light_img z-10" v-if="light">
+
+          <div id="dark_light" class="dark_light" v-if="admin" @click="switchDarkLight">
+            <div
+              id="dark_light"
+              class="wrap_dark_img relative w-6 h-4 rounded cursor-pointer z-10"
+              v-if="dark === false"
+            >
               <img
                 src="../assets/sun.jpeg"
-                class="img_mode object-cover w-full h-full z-10"
+                id="storm"
+                class="img_mode absolute w-hull h-full object-cover"
+                style="z-index: 1"
                 alt="no light/dark mode"
               />
             </div>
-            <div id="dark_mode" class="wrap_dark_img z-10" v-if="dark">
+            <div
+              id="dark_light"
+              class="wrap_dark_img relative w-6 h-4 rounded cursor-pointer z-10"
+              v-if="dark"
+            >
               <img
                 src="../assets/moon.jpeg"
-                class="img_mode object-cover w-full h-full z-10"
+                id="storm"
+                class="img_mode absolute w-hull h-full object-cover"
+                style="z-index: 1"
                 alt="no light/dark mode"
               />
             </div>
@@ -374,7 +382,7 @@
               v-if="admin"
               @click="(e) => switchDarkLight(e)"
             >
-              <div id="light_mode" class="wrap_light_img z-10" v-if="light">
+              <div id="light_mode" class="wrap_light_img z-10" v-if="dark === false">
                 <img
                   src="../assets/sun.jpeg"
                   class="img_mode object-cover w-full h-full"
@@ -404,22 +412,25 @@
             </div>
             <button class="btn-new-account" @click="redirectLoginPage">log another account</button>
             <div class="filter_mob_wrapper" v-if="admin">
-              <div class="filter_box_mob relative top-4 w-16 flex gap-1">
+              <div class="filter_box_mob relative top-4 w-16 h-auto flex gap-1">
                 <span class="text-white" style="position: relative; bottom: 0.5rem">Filter</span>
-                <div class="w-5 flex justify-between text-white" @click="showFilter = !showFilter">
+                <div
+                  class="w-5 flex justify-between text-white cursor-pointer"
+                  @click="switchFilter"
+                >
                   <div class="thin_bar"></div>
                   <div class="arrow_filter_wrap relative bottom-1">
                     <span class="arrow_filter">&#x25BE;</span>
                   </div>
                 </div>
               </div>
-              <div class="filter_box_mobi_selection relative top-4 w-full h-auto">
+              <div class="filter_box_mobi_selection" ref="filterBox">
                 <div
                   class="filter_box_mobi_content w-full flex flex-col gap-3 py-2 justify-center items-center font-bold text-gray-900"
                   style="font-size: calc(14px + 0.28vw)"
                   @click="handleFilterSelection"
                 >
-                  <div class="control_selection j w-full flex justify-center items-center gap-2">
+                  <div class="control_selection w-full flex justify-center items-center gap-2">
                     <label for="author">By Author</label>
                     <input
                       type="radio"
@@ -453,7 +464,7 @@
                 </div>
               </div>
             </div>
-            <div class="section_search" style="margin: 1rem 0 0" v-if="admin">
+            <div class="section_search" v-if="admin">
               <ul class="search_content_mob w-full h-7 flex justify-center items-center p-1">
                 <li class="h-full">
                   <input
@@ -607,6 +618,7 @@
     <LoginAdminView />
   </div>
 </template>
+light
 
 <script setup>
 import { RouterLink, useRouter } from 'vue-router'
@@ -623,16 +635,13 @@ const router = useRouter()
 const userStore = ref(useUserStore())
 
 let dark = ref(false)
-let light = ref(true)
 let showFilter = ref(false)
 let pickMsg = ref('enter a search')
 let listSample = ref(['pineapple', 'orange', 'strawberries'])
-let isList = ref(true)
+let isList = ref(false)
 
-const inputAuthor = ref(null)
-const inputTheme = ref(null)
-const inputStandard = ref(null)
 const contentProposal = ref(null)
+const filterBox = ref(null)
 
 const currentUserIn = computed(() => {
   const userStore = useUserStore()
@@ -773,12 +782,13 @@ function redirectLoginPage() {
 }
 
 function handleFilterSelection(e) {
+  console.log('er target:', e.target)
   if (e.target.id == 'standard_filter') {
-    pickMsg = 'enter a search'
+    pickMsg.value = 'enter a search'
   } else if (e.target.id == 'theme_filter') {
-    pickMsg = 'look for ...'
-  } else if (e.target.id == 'theme_filter') {
-    pickMsg = 'enter an author'
+    pickMsg.value = 'look for ...'
+  } else if (e.target.id == 'author_filter') {
+    pickMsg.value = 'search by author'
   }
 }
 
@@ -817,13 +827,16 @@ function stickVisibleorNot(act) {
   }
 }
 
-function switchDarkLight(e) {
-  if (e.target.id === 'light_mode') {
-    light = true
-    dark = false
-  } else if (e.target.id === 'dark_mode') {
-    dark = true
-    light = false
+function switchDarkLight() {
+  dark.value = !dark.value
+}
+
+function switchFilter() {
+  showFilter.value = !showFilter.value
+  if (showFilter.value === false) {
+    filterBox.value.classList.add('hide_selection')
+  } else {
+    filterBox.value.classList.remove('hide_selection')
   }
 }
 </script>
@@ -1082,11 +1095,6 @@ function switchDarkLight(e) {
     gap: 0.5rem;
   }
 
-  .filter_mob_wrapper {
-    width: 100%;
-    height: 9rem;
-  }
-
   .filter_box {
     width: 3.8rem;
     display: flex;
@@ -1098,18 +1106,57 @@ function switchDarkLight(e) {
     top: 2.8rem;
     left: 0.4rem;
     width: 12.4rem;
-    height: auto;
+    height: 140px;
+    display: grid;
     z-index: 3;
+    transition: all 1s ease-in-out;
     @apply bg-purple-800;
+  }
+
+  .filter_box_mobi_selection {
+    position: relative;
+    top: 0rem;
+    width: 100%;
+    height: 6rem;
+    margin: 0.75rem 0 1rem;
+    transition: all 600ms ease-in-out;
+  }
+
+  .filter_box_selection.hide_selection {
+    display: grid;
+    height: 0;
+  }
+
+  .filter_box_mobi_selection.hide_selection {
+    height: 0;
   }
 
   .filter_box_selection .control_selection {
     width: 100%;
+    visibility: visible;
+    opacity: 1;
     display: flex;
     justify-content: flex-start;
     align-items: center;
     gap: 0.5rem;
     padding: 0.25rem 1rem;
+    transition: all 1s ease-in-out;
+  }
+
+  .filter_box_selection.hide_selection .control_selection {
+    visibility: hidden;
+    opacity: 0.1;
+  }
+
+  .filter_box_mobi_selection .control_selection {
+    opacity: 1;
+    transition: all 450ms ease-in-out 400ms;
+  }
+
+  .filter_box_mobi_selection.hide_selection .control_selection {
+    visibility: hidden;
+    opacity: 0.1;
+    transition: all 450ms ease-in-out;
   }
 
   .control_selection label {
