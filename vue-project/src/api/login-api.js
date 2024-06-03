@@ -56,3 +56,18 @@ export const loginadminapi = async (userInfo) => {
 
   return newUserInfo
 }
+
+export const getauthorsandthemesapi = async () => {
+  const authorsAndThemes = await fetch(`${base_url}/login/admin/authors-themes`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    credentials: 'include'
+  })
+    .then((res) => res.json())
+    .then((newres) => newres.data)
+
+  return authorsAndThemes
+}

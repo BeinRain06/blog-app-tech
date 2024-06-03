@@ -124,6 +124,7 @@
                       class="text_search w-full h-full flex justify-center items-center text-sm text-gray-600 outline-none"
                       style="text-indent: 5px"
                       name="search"
+                      ref="inputSearch"
                       :placeholder="pickMsg"
                       @change="handleWordsSearch"
                     />
@@ -135,14 +136,19 @@
                 <div
                   class="list_proposal h-auto"
                   v-if="isList"
-                  @mouseleave="(e) => stickVisibleorNot(e, 'remove')"
+                  @mouseleave="(e) => stickVisibleorNot(e, 'add')"
                 >
-                  <ul id="content_proposal_normal" class="content_proposal play_visible hidden">
+                  <ul
+                    id="content_proposal_normal"
+                    class="content_proposal play_visible_vanish"
+                    ref="contentProposal"
+                    @mouseenter="(e) => stickVisibleorNot(e, 'remove')"
+                  >
                     <li
-                      class="item_proposal"
-                      v-for="element in listSample"
-                      ref="contentProposal"
-                      @mouseenter="(e) => stickVisibleorNot(e, 'add')"
+                      class="item_proposal transition-all duration-1000 ease-in-out"
+                      v-for="(element, index) in listSample"
+                      key="index"
+                      @click="forwardsSearch"
                     >
                       {{ element }}
                     </li>
@@ -640,6 +646,7 @@ let pickMsg = ref('enter a search')
 let listSample = ref(['pineapple', 'orange', 'strawberries'])
 let isList = ref(false)
 
+const inputSearch = ref(null)
 const contentProposal = ref(null)
 const filterBox = ref(null)
 
@@ -796,34 +803,39 @@ async function handleWordsSearch(e) {
   const str = e.target.value
   let matchingResearch
 
+  if (e.target.value === '') {
+    listSample.value = null
+    isList.value = false
+  }
+
   if (pickMsg === 'enter an author') {
     const listAuthors = JSON.parse(localStorage.getItem('list-authors'))
 
-    isList = true
+    isList.value = true
 
     matchingResearch = listAuthors.filter((elt) => elt.includes(str))
 
-    listSample = matchingResearch
+    listSample.value = matchingResearch
   } else if (pickMsg === 'look for ...') {
     const listThemes = JSON.parse(localStorage.getItem('list-themes'))
 
-    isList = true
+    isList.value = true
 
     matchingResearch = listThemes.filter((elt) => elt.includes(str))
 
-    listSample = matchingResearch
+    listSample.value = matchingResearch
   } else if ((pickMsg = 'enter a search')) {
-    isList = true
+    isList.value = true
   }
 }
 
 function stickVisibleorNot(act) {
   if (act === 'add') {
     console.log('contentProposal:', contentProposal)
-    contentProposal.value.classList.remove('play_visible')
+    contentProposal.value.classList.add('play_visible_vanish')
   } else {
     console.log('contentProposal:', contentProposal)
-    contentProposal.value.classList.add('play_visible')
+    contentProposal.value.classList.remove('play_visible_vanish')
   }
 }
 
@@ -838,6 +850,15 @@ function switchFilter() {
   } else {
     filterBox.value.classList.remove('hide_selection')
   }
+}
+
+function forwardsSearch(e) {
+  const enhanceValue = e.target.value
+  inputSearch.value = enhanceValue
+  e.target.style.fontWeight = 'bold'
+  setTimeout(() => {
+    e.target.style.fontWeight = 'normal'
+  }, 3000)
 }
 </script>
 
@@ -1197,8 +1218,8 @@ function switchFilter() {
     z-index: 10;
   }
 
-  .content_proposal.play_visible {
-    //animation: proposal-visibility 5s ease-in-out forwards;
+  .content_proposal.play_visible_vanish {
+    animation: proposal-visibility 5s ease-in-out forwards;
     position: absolute;
   }
 

@@ -4,6 +4,7 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const Post = require("../models/post");
 const requestInitUser = require("../protect-api/authenticate-pwd-user");
 const {
   verifyFakeToken,
@@ -22,6 +23,27 @@ const {
 require("dotenv").config({ path: path.join(__dirname, "..") });
 
 router.use(express.urlencoded({ extended: false }));
+
+router.get("/admin/authors-themes", async (req, res) => {
+  try {
+    const allPosts = await Post.find().populate("author", "username");
+
+    const postsInfos = allPosts.reduce((acc, val) => {
+      const obj = {
+        theme: val.title,
+        author: val.author,
+      };
+      acc.push(obj);
+      return acc;
+    }, []);
+
+    console.log("postsInfos:", postsInfos);
+
+    res.status(200).json({ success: true, data: postsInfos });
+  } catch (err) {
+    console.log(err);
+  }
+});
 
 router.post("/", requestInitUser, async (req, res) => {
   try {

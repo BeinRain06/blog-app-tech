@@ -173,8 +173,11 @@ export default defineComponent({
         alert('Bad Authentication ! or Access Disallowed')
       }
 
-      /* const authorsAndThemes= await getauthorsandthemesapi()
-      
+      const authorsAndThemes = await getauthorsandthemesapi()
+
+      const allThemes = authorsAndThemes.map((item) => item.theme)
+      const allAuthors = authorsAndThemes.map((item) => item.author)
+
       if (localStorage.getItem('list-authors') === undefined) {
         localStorage.setItem('list-authors', '[]')
       }
@@ -182,15 +185,20 @@ export default defineComponent({
         localStorage.setItem('list-themes', '[]')
       }
 
-      let arrAuthors= JSON.parse(localStorage.getItem('list-authors'));
+      let arrAuthors = JSON.parse(localStorage.getItem('list-authors'))
 
-      let arrThemes= JSON.parse(localStorage.getItem('list-themes'));
+      let arrThemes = JSON.parse(localStorage.getItem('list-themes'))
 
-      arrAuthors= [...arrAuthors, authorsAndThemes.authors]
-      arrThemes= [...arrThemes, authorsAndThemes.themes]
+      if (arrThemes.length !== allThemes.length) {
+        arrThemes = allThemes
+      }
+
+      if (arrAuthors.length !== allAuthors.length) {
+        arrAuthors = allAuthors
+      }
 
       localStorage.setItem('list-authors', JSON.stringify(arrAuthors))
-      localStorage.setItem('list-themes', JSON.stringify(arrThemes)) */
+      localStorage.setItem('list-themes', JSON.stringify(arrThemes))
 
       console.log('newUserInfo:', newUserInfo)
 
