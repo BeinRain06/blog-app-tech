@@ -1,14 +1,11 @@
+const User = require("../models/user");
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/user");
 const { format } = require("date-fns");
-const {
-  generaToken,
-  generateToken,
-} = require("../protect-api/authorization-jwt");
+const { generateToken } = require("../protect-api/authorization-jwt");
 
 const router = express.Router();
 
@@ -99,6 +96,7 @@ router.post("/", async (req, res) => {
 
     const collected = {
       username: user.username,
+      userId: userId,
       access: access_token,
       admin: admin,
     };

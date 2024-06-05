@@ -122,11 +122,12 @@ export default defineComponent({
       const exUsersArr = userStore.usersLogin
       userStore.$patch({
         currentUsername: newUserInfo.username,
+        currentUserId: newUserInfo.id,
         usersLogin: [...exUsersArr, newUserInfo.username],
         access_token: newUserInfo.access
       })
 
-      console.log('userStore usersLogin:', userStore.usersLogin)
+      console.log('userStore access_token:', userStore.access_token)
 
       resetUser(user, null, inputPwd)
 

@@ -82,7 +82,11 @@ function JWTVerify(token, label) {
 
       resolve(result);
     } catch (err) {
-      reject(err);
+      if (err.name !== "TokenExpiredError") {
+        reject(err);
+      } else {
+        resolve(err);
+      }
     }
   });
 }
@@ -100,7 +104,11 @@ function JWTVerifyFake(token, label) {
       const result = jwt.verify(token, cert, options);
       resolve(result);
     } catch (err) {
-      reject(err);
+      if (err.name !== "TokenExpiredError") {
+        reject(err);
+      } else {
+        resolve(err);
+      }
     }
   });
 }

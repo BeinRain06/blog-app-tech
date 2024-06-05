@@ -572,3 +572,171 @@ Of course the same goes when using **{defineComponent}** from **vue** to define 
 In Case you use the **Optional Object Approach** your need to use **ref** isn't really required to define **variables**. Therefore you will access your variables in **computed** states or **functions** defined in `methods:{..}` using the key word **this** .
 
  <p style="display:inline; margin: 0.5rem 0" >E.g :<span style="padding: 0 1rem;font-size:calc(1.15rem)"><span style="font-weight:bold">this</span>.showFilter</span> (thanks you listening)</p>
+
+### Use store states in pinia as **v-model** in input of a Component (Composition API)
+
+There are several ways to hnle **states** variables in pinia to become `v-model` variables for specific input (except **input type="file"**) insie Component
+
+You may use **toRefs** reference:
+
+    `<script setup>
+       import {useUserStore} from '@/stores/user'
+
+       const {currentUsername}= toRefs(useUserStore())
+
+       //console.log(currentUsername.value)
+    </script>`
+
+Now you can use `currentUsername` as **v-model** in an input( location `<template></template` Tag) .
+
+You also may use **storeToRefs** see **documentation**
+
+**N.B :** Remember all the **ref()** above when used in **script** you need to a the suffix **value** (E.g: **console.log(currentUsername.value)** )
+
+You could rather to use an other approach : **writable computed** here you have a control over the **read** and **write**(or update) of the state accessed in component but located in a specific store in **pinia**
+
+The underneath syntax is a sample that could be set inside a component and use the **computed** data as v-model in an input component.
+
+    `<script setup>
+       import {computed} from 'vue'
+       import {useUserStore} from '@/stores/user'
+
+       const userStore= useUserStore()
+
+       const myInput= computed({
+         get() {
+          return userStore.currentUsername
+         }
+         set(newValue) {
+          userStore.currentUsername= newValue
+         }
+       })
+
+       //console.log(currentUsername.value)
+    </script>`
+
+### Error MulterError: Unexpected field at wrappedFileFilter
+
+I bump into the same issue using pinia store for input file
+
+I manage rewritng a `ref()` input (called **inputFile**) with **<script setup></script>** and set the **name** of the input in `<template></template>`tag as `name="file" `
+
+here is what i have done in front end app :
+
+    `<template>
+      <div class="form_control">
+                <label for="image">Image</label>
+                <input
+                  type="file"
+                  id="image"
+                  name="file" // <-- here
+                  accept="image/png, image/jpeg, image/webp"
+                  ref="inputFile" // <-- here
+                />
+      </div>
+
+    </template>`
+
+script
+
+    `<script setup>
+      import { ref } from 'vue'
+
+      const inputFile = ref(null)
+
+      async function createPost() {
+        const myInputFile = inputFile.value
+
+        //send img post
+      const image = await primarimageapi(myInputFile)
+      }
+    </script>`
+
+On the api function **primarimageapi** i make this:
+
+    `export const primarimageapi = async (myInputFile) => {
+      try {
+        const file = myInputFile.files[0] <--  Here File Grabbed
+
+        console.log('our api file:', file)
+
+        //formData instance
+        const formData = new FormData()
+
+        //add element
+        formData.append('file', file)
+
+        const prePostImg = await fetch(`${base_url}/post/image/create`, {
+          method: 'POST',
+          body: formData
+        })
+          .then((res) => res.json())
+          .then((newres) => newres.image_url)
+
+        console.log('image_url:', prePostImg)
+
+        return prePostImg} catch (err) {
+        console.log(err)}}`
+
+my blog app three elements
+was organized like below:
+
+    `blog*app --|
+                |
+                |* \_ _client
+                |
+                |
+                |_ \_ _server
+                |
+                |_ _src
+                      |
+                      |_ _public
+                      | |
+                      | |_ _images
+                      |
+                      |
+                      |_ _routes
+                                |
+                                |_ \_post-routes.js (file)`
+
+In `post-route.js` file i **wrote this** :
+
+//multer
+
+    `const storage = multer.diskStorage({destination: function (req, file, callback) {
+    callback(null, path.join(__dirname, "../public/images"));
+    },
+    filename: function (req, file, callback) {
+    const filename = `${file.fieldname}_${Date.now()}${path.extname(
+      file.originalname
+    )}`;
+
+    callback(null, filename);},
+    })
+
+    const upload = multer({
+      storage: storage,
+      limits: { fileSize: 1000000 },
+      });
+    `
+
+//middleware destination image - express
+
+    `router.use(`/images`, express.static(path.join(__dirname, "../public/images")))`
+
+//router
+
+    `router.post("/image/create", upload.single("file"), (req, res) => {
+      try {
+        const base_url = process.env.API_URL;
+
+        res.status(200).json({
+          success: true,
+          image_url: `/${base_url}/images/${req.file.filename}`,
+        });
+        } catch (err) {
+          console.log(err);
+          }
+     })`
+
+then i obtain inside `src/public/images` my first image : `file_1717587794699.jpg`

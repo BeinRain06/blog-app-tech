@@ -30,4 +30,9 @@ const postSchema = new mongoose.Schema({
 
 const Post = mongoose.model("post", postSchema);
 
+postSchema.virtual("id").get(function () {
+  return this._id.toHexString();
+});
+postSchema.set("toJSON", { virtuals: true });
+
 module.exports = Post;

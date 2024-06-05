@@ -26,12 +26,13 @@
           <p class="user_in">welcome @{{ shortyName }}</p>
 
           <div class="init_post w-24">
-            <p
+            <RouterLink
               id="init_new_post"
               class="btn-new-post w-full h-full text-white rounded-2xl bg-black hover:bg-green-700"
+              to="/create"
             >
               create a post
-            </p>
+            </RouterLink>
           </div>
         </div>
 
@@ -72,7 +73,7 @@
             <div class="filter_wrapper z-10">
               <div class="filter_box">
                 <span style="font-size: calc(12px + 0.25vw)">Filter</span>
-                <div class="text-white flex items-center cursor-pointer" @click="switchFilter">
+                <div class="text-white flex items-center cursor-pointer z-20" @click="switchFilter">
                   <div class="thin_bar"></div>
                   <div class="arrow_filter_wrap mx-2">
                     <span class="arrow_filter relative" style="top: 0.1rem; left: 0rem"
@@ -81,7 +82,7 @@
                   </div>
                 </div>
               </div>
-              <div class="filter_box_selection" ref="filterBox">
+              <div class="filter_box_selection hide_selection" ref="filterBoxOne">
                 <div
                   class="filter_box_content w-full flex flex-col gap-1 px-2 py-1 justify-center items-center"
                   @click="handleFilterSelection"
@@ -430,7 +431,7 @@
                   </div>
                 </div>
               </div>
-              <div class="filter_box_mobi_selection" ref="filterBox">
+              <div class="filter_box_mobi_selection hide_selection" ref="filterBox">
                 <div
                   class="filter_box_mobi_content w-full flex flex-col gap-3 py-2 justify-center items-center font-bold text-gray-900"
                   style="font-size: calc(14px + 0.28vw)"
@@ -518,23 +519,49 @@
               <span>Custom</span>
               <span class="relative top-2 cursor-pointer" @click="handleMiniCustom">&#65088;</span>
             </p>
-            <div class="w-full h-10 text-base flex" v-if="minicustom">
-              <div class="select_blog">
-                <label for="all">all</label>
-                <div class="box_circle w-10 grid place-items-start">
-                  <input
-                    type="radio"
-                    id="all_blogger"
-                    name="blog"
-                    @change="handleRadioState"
-                    checked
-                  />
-                </div>
+            <div class="gather_custom w-full text-sm gap-1" v-if="minicustom">
+              <div class="w-full flex justify-end cursor-pointer">
+                <button
+                  class="bg-gray-600 rounded"
+                  style="padding: 0 0.5rem; margin: 0.25rem 0"
+                  @click="() => reachTo('edit')"
+                >
+                  edit a post
+                </button>
               </div>
-              <div class="select_blog">
-                <label for="single">single</label>
-                <div class="box_circle w-10 grid place-items-start">
-                  <input type="radio" id="single_blogger" name="blog" @change="handleRadioState" />
+              <div class="inline-flex cursor-pointer">
+                <button
+                  class="bg-green-700 rounded-xl"
+                  style="padding: 0.15rem 0.5rem; margin: 0.25rem 0"
+                  @click="() => reachTo(create)"
+                >
+                  create a post
+                </button>
+              </div>
+              <span class="block" style="margin: 1.5rem 0 0.25rem">Features</span>
+              <div class="w-full h-10 text-base flex">
+                <div class="select_blog">
+                  <label for="all">all</label>
+                  <div class="box_circle w-10 grid place-items-start">
+                    <input
+                      type="radio"
+                      id="all_blogger"
+                      name="blog"
+                      @change="handleRadioState"
+                      checked
+                    />
+                  </div>
+                </div>
+                <div class="select_blog">
+                  <label for="single">single</label>
+                  <div class="box_circle w-10 grid place-items-start">
+                    <input
+                      type="radio"
+                      id="single_blogger"
+                      name="blog"
+                      @change="handleRadioState"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -649,6 +676,7 @@ let isList = ref(false)
 const inputSearch = ref(null)
 const contentProposal = ref(null)
 const filterBox = ref(null)
+const filterBoxOne = ref(null)
 
 const currentUserIn = computed(() => {
   const userStore = useUserStore()
@@ -749,7 +777,11 @@ async function logoutSession() {
 
   const newArr = exArr.filter((item) => item !== userToLogout)
   console.log('newArr:', newArr)
-  userStore.$patch({ usersLogin: newArr, currentUsername: null })
+  userStore.$patch({
+    usersLogin: newArr,
+    currentUsername: null,
+    currentUserId: null
+  })
 
   router.push({ path: '/' })
 }
@@ -761,6 +793,8 @@ async function redirectLink(e, label) {
   if (label === 'login') {
     const access_token = userStore.access_token
 
+    console.log('access_token:', access_token)
+
     const newUserInfo = await redirectloginapi(access_token)
 
     console.log('newUserInfo:', newUserInfo)
@@ -768,6 +802,7 @@ async function redirectLink(e, label) {
     if (newUserInfo !== 'null') {
       userStore.$patch({
         currentUsername: newUserInfo.username,
+        access_token: newUserInfo.access,
         usersLogin: [...usersLogin, newUserInfo.username]
       })
 
@@ -843,12 +878,32 @@ function switchDarkLight() {
   dark.value = !dark.value
 }
 
-function switchFilter() {
+function reachTo(label) {
+  const userStore = useUserStore()
+
+  setTimeout(() => {
+    showFilter.value === false
+    userStore.$patch({ miniCustomIsVisible: false, customIsVisible: false })
+  }, 800)
+
+  setTimeout(() => {
+    if (label === 'edit') {
+      router.push({ path: '/edit' })
+    } else {
+      router.push({ path: '/create' })
+    }
+  }, 1100)
+}
+
+function switchFilter(e) {
+  console.log(e.target)
   showFilter.value = !showFilter.value
   if (showFilter.value === false) {
     filterBox.value.classList.add('hide_selection')
+    filterBoxOne.value.classList.add('hide_selection')
   } else {
     filterBox.value.classList.remove('hide_selection')
+    filterBoxOne.value.classList.remove('hide_selection')
   }
 }
 
@@ -1016,6 +1071,7 @@ function forwardsSearch(e) {
   .custom_mob_wrap {
     position: relative;
     top: -0.5rem;
+    height: auto;
   }
 
   .logout_mob_wrapper {

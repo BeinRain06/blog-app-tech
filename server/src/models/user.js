@@ -38,3 +38,5 @@ userSchema.virtual("id").get(function () {
 userSchema.set("toJSON", { virtuals: true });
 
 module.exports = User;
+
+exports.userSchema = userSchema;

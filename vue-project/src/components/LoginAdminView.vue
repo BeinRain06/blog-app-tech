@@ -206,6 +206,7 @@ export default defineComponent({
 
       userStore.$patch({
         currentUsername: newUserInfo.username,
+        currentUserId: newUserInfo.id,
         usersLogin: [...exUsersArr, newUserInfo.username],
         access_token: newUserInfo.access,
         isAdmin: true

@@ -1,7 +1,5 @@
 const base_url = import.meta.env.VITE_API_URL
 
-console.log('base_url:', base_url)
-
 export const registrationapi = async (userInfo) => {
   const user = {
     email: userInfo.email,

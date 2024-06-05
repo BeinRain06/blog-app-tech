@@ -190,6 +190,7 @@ export default defineComponent({
 
       userStore.$patch({
         currentUsername: newUser,
+        currentUserId: collectedData.userId,
         access_token: collectedData.access,
         isAdmin: collectedData.admin
       })

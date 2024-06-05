@@ -18,8 +18,11 @@ module.exports.checkPrevToken = async function (
 
   if (!isAdmin) {
     session = await verifyFakeToken(session_token, "session");
+    console.log("session AA:", session);
   } else {
     session = isUsingTheMatchLogin(session_token);
+
+    console.log("session BB:", session);
 
     if ((session = "null")) {
       newUserInfo = "null";
@@ -39,6 +42,7 @@ module.exports.checkPrevToken = async function (
   if (session && isAdmin) {
     if (access_token) {
       let accessOne = await verifyToken(access_token, "access");
+      console.log("accessOne CC:", accessOne);
       if (accessOne || accessOne.name === "TokenExpiredError") {
         newUserInfo = applyNewToken(userFetch, "admin");
         return newUserInfo;
@@ -50,6 +54,7 @@ module.exports.checkPrevToken = async function (
   } else if (session && !isAdmin) {
     if (access_token) {
       let accessTwo = await verifyFakeToken(access_token, "access");
+      console.log("accessTwo DD:", accessTwo);
       if (accessTwo || accessTwo.name === "TokenExpiredError") {
         newUserInfo = applyNewToken(userFetch, "standard");
         return newUserInfo;

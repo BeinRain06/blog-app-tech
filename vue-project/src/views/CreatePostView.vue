@@ -8,31 +8,40 @@
             <div class="form_content">
               <div class="form_control">
                 <label for="title">Title</label>
-                <input type="text" id="title" name="title" placeholder="title" />
+                <input type="text" id="title" name="title" placeholder="title" v-model="newTitle" />
               </div>
               <div class="form_control">
                 <label for="summary">Summary</label>
-                <input type="text" id="summary" name="summary" placeholder="summary" />
+                <input
+                  type="text"
+                  id="summary"
+                  name="summary"
+                  placeholder="summary"
+                  v-model="newSummary"
+                />
               </div>
               <div class="form_control">
                 <label for="image">Image</label>
                 <input
                   type="file"
                   id="image"
-                  name="image"
+                  name="file"
                   accept="image/png, image/jpeg, image/webp"
+                  ref="inputFile"
+                  @change="grabImage"
                 />
               </div>
               <div class="form_editor py-3">
-                <Editor vue-model="value" editorStyle="height: 280px" />
+                <Editor v-model="newContent" editorStyle="height: 280px" />
               </div>
               <div class="form_submit w-full">
                 <input
                   type="submit"
                   id="btn_create"
                   name="create_post"
-                  class="py-2 px-4 text-white text-base bg-black rounded-3xl"
+                  class="py-2 px-4 text-white text-base bg-black cursor-pointer rounded-3xl"
                   value="Create Post"
+                  @click.prevent="createPost"
                 />
               </div>
             </div>
@@ -43,7 +52,107 @@
   </main>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref, computed } from 'vue'
+import { usePostStore } from '../stores/post.js'
+import { useUserStore } from '../stores/user.js'
+import { primarimageapi, createpostapi } from '@/api/post-api'
+
+const inputFile = ref(null)
+
+const userStore = useUserStore()
+const postStore = usePostStore()
+
+const newTitle = computed({
+  get() {
+    return postStore.title
+  },
+  set(newValue) {
+    postStore.title = newValue
+  }
+})
+
+const newSummary = computed({
+  get() {
+    return postStore.summary
+  },
+  set(newValue) {
+    postStore.summary = newValue
+  }
+})
+
+const newContent = computed({
+  get() {
+    return postStore.content
+  },
+  set(newValue) {
+    postStore.content = newValue
+  }
+})
+
+const thisUserId = computed({
+  get() {
+    return userStore.currentUserId
+  }
+})
+
+async function createPost() {
+  console.log('newTitle:', newTitle)
+
+  const userStore = useUserStore()
+  const postStore = usePostStore()
+
+  //get info post
+
+  console.log('inputFile:', inputFile)
+
+  const myInputFile = inputFile.value
+
+  //send info post
+  const image_path = await primarimageapi(myInputFile, thisUserId.value) // img_url
+
+  let postElt = {
+    title: newTitle.value,
+    summary: newSummary.value,
+    image_path: image_path,
+    content: newContent.value
+  }
+
+  console.log('postElt:', postElt)
+
+  const postInfos = await createpostapi(postElt, thisUserId.value)
+
+  console.log('postInfos:', postInfos)
+
+  //upadate lastPost {title, date} and countArticles --post Store
+  const lastUpdate = {
+    title: postInfos.title,
+    author: postInfos.author,
+    date: postInfos.date
+  }
+
+  console.log('lastUpdate:', lastUpdate)
+
+  const countPost = postInfos.countPost
+
+  postStore.$patch({
+    lastPost: lastUpdate,
+    countArticles: countPost,
+    title: '',
+    summary: '',
+    content: ''
+  })
+
+  userStore.$patch({ access_token: postInfos.access_token })
+
+  inputFile.value = null
+}
+
+function grabImage(e) {
+  const filename = e.target.files[0]
+  console.log('file:', filename)
+}
+</script>
 
 <style scoped>
 @media (min-width: 180px) {
@@ -108,7 +217,7 @@
 }
 
 @media (min-width: 300px) {
-  .create_post_content {
+  .creation_post_content {
     width: 80%;
     height: 52rem;
     max-width: 48rem;
@@ -116,7 +225,7 @@
 }
 
 @media (min-width: 620px) {
-  .create_post_content {
+  .creation_post_content {
     width: 60%;
     max-width: 46rem;
   }
