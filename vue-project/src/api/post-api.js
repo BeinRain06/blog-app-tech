@@ -49,3 +49,21 @@ export const primarimageapi = async (myInputFile, thisUserId) => {
     console.log(err)
   }
 }
+
+export const getpostsapi = async () => {
+  try {
+    const posts = await fetch(`${base_url}/post/all`, {
+      mehod: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+      .then((res) => res.json())
+      .then((newres) => newres.data)
+
+    return posts
+  } catch (err) {
+    console.log(err)
+  }
+}

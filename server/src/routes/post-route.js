@@ -139,4 +139,28 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/all", async (req, res) => {
+  try {
+    let posts = await Post.find();
+
+    const postsReady = await Promise.all(
+      posts.map(async (post) => {
+        let username = post.username;
+        if (username === undefined) {
+          const userId = post.author;
+          const user = await User.findById(userId);
+
+          username = user.username;
+          const newPost = { ...post, username };
+          return newPost;
+        }
+      })
+    );
+
+    res.status(200).json({ success: true, data: postsReady });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 module.exports = router;

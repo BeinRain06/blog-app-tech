@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { getpostsapi } from '@/api/post-api'
 
 //using Options Object
 
@@ -8,14 +9,21 @@ export const usePostStore = defineStore('post', {
     countArticles: 0,
     title: '',
     summary: '',
-    content: ''
+    content: '',
+    allposts: null
   }),
   getters: {
-    lastDate: (state) => state.lastPost.date
+    lastDate: (state) => state.lastPost.date,
+    fetchPosts: (state) => state.allposts
   },
   actions: {
-    editPost(exPostData) {
-      console.log(exPostData)
+    async updateHomePage() {
+      const posts = await getpostsapi()
+      this.allposts = posts
+
+      console.log('postsFetch posts:', posts)
+
+      return posts
     }
   }
 })

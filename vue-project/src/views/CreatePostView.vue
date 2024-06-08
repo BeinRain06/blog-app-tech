@@ -54,6 +54,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { usePostStore } from '../stores/post.js'
 import { useUserStore } from '../stores/user.js'
 import { primarimageapi, createpostapi } from '@/api/post-api'
@@ -62,6 +63,8 @@ const inputFile = ref(null)
 
 const userStore = useUserStore()
 const postStore = usePostStore()
+
+const router = useRouter()
 
 const newTitle = computed({
   get() {
@@ -145,7 +148,9 @@ async function createPost() {
 
   userStore.$patch({ access_token: postInfos.access_token })
 
-  inputFile.value = null
+  inputFile.value.Files[0] = {}
+
+  router.push({ path: '/' })
 }
 
 function grabImage(e) {

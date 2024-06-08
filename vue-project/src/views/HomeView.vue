@@ -2,15 +2,15 @@
   <main>
     <div id="home_page" class="home_page w-full px-0 py-2 xsm:p-4">
       <div
-        v-for="(postItem, i) in dataPostsList"
-        key="{{postItem.id}}"
+        v-for="(postItem, i) in allposts"
+        key="{{postItem._doc.id}}"
         class="card_out_wrapper max-w-full p-1 xsm:p-2"
       >
         <div class="card_in_wrapper">
           <div class="card_img_wrap p-0 xsm:p-1">
             <img
               class="card_img object-cover w-full h-full p-1"
-              :src="postItem.image"
+              :src="postItem._doc.image"
               alt="post picture"
             />
           </div>
@@ -19,15 +19,15 @@
               class="card_content_wrap relative w-full flex flex-col justify-center items-center rounded-sm gap-3"
             >
               <div class="wrap_post_title w-full px-2 py-1 sm:p-2">
-                <h1 class="post_title font-bold">{{ postItem.Title }}</h1>
+                <h1 class="post_title font-bold">{{ postItem._doc.title }}</h1>
               </div>
               <div class="author_info_wrapper w-full">
                 <div
                   class="author_info_content max-w-6/12 flex flex-col xsm:flex-row gap-1 justify-center items-center text-center xsm:tex-left"
                 >
-                  <h4 class="author_name text-sm xsm:text-base">{{ postItem.Author }} |</h4>
+                  <h4 class="author_name text-sm xsm:text-base">{{ postItem.username }} |</h4>
                   <span class="posted_at font-light text-sm md:text-base"
-                    >{{ postItem.date }} |</span
+                    >{{ postItem._doc.date }} |</span
                   >
                   <button class="btn-edit-link" @click.prevent="redirectEditPage">
                     <img
@@ -44,7 +44,7 @@
                     <h3 class="summary_title w-full font-medium">Summary</h3>
                   </div>
                   <div class="paragraph_container">
-                    <p class="paragraph_inner_content text-xl">{{ postItem.summary }}</p>
+                    <p class="paragraph_inner_content text-xl">{{ postItem._doc.summary }}</p>
                   </div>
                 </div>
               </div>
@@ -57,12 +57,35 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import TheWelcome from '../components/TheWelcome.vue'
 import { arrayImg, dataPostsList } from '../assets/images-blog-post/index.js'
 import { useUserStore } from '@/stores/user.js'
+import { usePostStore } from '@/stores/post.js'
 
 const router = useRouter()
+
+const postStore = usePostStore()
+
+const userStore = useUserStore()
+
+const posts = onMounted(async () => {
+  const postStore = usePostStore()
+  const postsFetch = await postStore.updateHomePage()
+
+  setTimeout(() => {
+    console.log('time delay')
+  }, 5000)
+
+  return postsFetch
+})
+
+const allposts = computed(() => {
+  const postStore = usePostStore()
+
+  return postStore.fetchPosts
+})
 
 function redirectEditPage() {
   const userStore = useUserStore()
