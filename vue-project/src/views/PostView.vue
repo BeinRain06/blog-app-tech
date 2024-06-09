@@ -1,15 +1,16 @@
 <template>
   <main id="post_page-wrap">
-    <div class="back_page_box">
-      <ul class="fly_back list-none inline-flex justify-center relative m-4" v-if="deskIn">
+    <div class="back_page_box" @scroll="playBandBarHome">
+      <ul class="fly_back list-none inline-flex justify-center relative m-4">
         <li class="transition-all cursor-pointer">
           <div
             class="relative top-1 w-6 flex items-center justify-center bg-white hover:bg-purple-600 hover:outline-black"
             style="border-radius: 50%"
           >
             <span
-              class="w-full text-black hover:transition-all duration-1000 ease-in-out hover:text-gray-300"
+              class="w-full text-black hover:transition-all duration-1000 ease-in-out z-10 hover:text-gray-300"
               style="position: relative; top: -2px; left: 4px"
+              @click="backHome"
             >
               &#x25C0;</span
             >
@@ -18,15 +19,16 @@
         <li class="text-xl mx-2">Home</li>
       </ul>
       <ul
-        class="mob_fly_back w-screen absolute top-0 left-0 flex justify-between items-center h-10 transition-all duration-1000 ease-in-out py-2 px-4"
-        v-if="deskIn === false"
+        class="mob_fly_back w-screen flex justify-between items-center h-10 transition-all duration-1000 ease-in-out py-2 px-4"
+        ref="mobFlyRef"
       >
         <li
-          class="text-lg cursor-pointer transition-all duration-1000 ease-in-out hover:font-bold hover:text-purple-500"
+          class="text-2xl cursor-pointer z-10 transition-all duration-1000 ease-in-out hover:font-bold hover:text-purple-500"
+          @click="backHome"
         >
           &larr;
         </li>
-        <li class="text-lg">...Home</li>
+        <li class="text-base">...Home</li>
       </ul>
     </div>
     <div class="lift_prepost_details">
@@ -47,7 +49,23 @@
     </div>
     <div class="page_content_wrap grid place-items-center px-2">
       <div class="page_content_inside">
-        <p>
+        <p class="my-2">
+          The art of sewing is at least 20,000 years old. Ancient peoples joined pieces of material
+          using bone and horn needles and animal sinew for thread. Around the 14th century iron
+          needles were invented, and by the 15th century there were eyed needles. Later sewing
+          needles were made of steel, as they still are today. In the 1800s the first practical
+          sewing machine appeared, and today most sewing is done by machine, though some sewers
+          still choose to perform fine sewing and finishing by hand
+        </p>
+        <p class="my-2">
+          The art of sewing is at least 20,000 years old. Ancient peoples joined pieces of material
+          using bone and horn needles and animal sinew for thread. Around the 14th century iron
+          needles were invented, and by the 15th century there were eyed needles. Later sewing
+          needles were made of steel, as they still are today. In the 1800s the first practical
+          sewing machine appeared, and today most sewing is done by machine, though some sewers
+          still choose to perform fine sewing and finishing by hand
+        </p>
+        <p class="my-2">
           The art of sewing is at least 20,000 years old. Ancient peoples joined pieces of material
           using bone and horn needles and animal sinew for thread. Around the 14th century iron
           needles were invented, and by the 15th century there were eyed needles. Later sewing
@@ -60,14 +78,36 @@
   </main>
 </template>
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePostStore } from '@/stores/post.js'
 import { useUserStore } from '@/stores/user.js'
 
-const deskIn = ref(true)
-
 const authorRef = ref(null)
+
+const mobFlyRef = ref(null)
+
+let lastKnownScrollPosition = ref(0)
+
+const router = useRouter()
+
+onMounted(() => {
+  window.addEventListener('scroll', playBandBarHome)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', playBandBarHome)
+})
+
+const authorBg = onMounted(() => {
+  const pallettesColor = ['#5ec28b', '#005b94', '#467f8e', '#9db0a3', '#b8d56a', '#f4eb75']
+  const index = Math.floor(Math.random() * (5 - 0) + 0)
+  const pickedColor = pallettesColor[index]
+
+  console.log(authorRef)
+
+  authorRef.value.style.backgroundColor = pickedColor
+})
 
 const postPage = computed(() => {
   const postStore = usePostStore()
@@ -81,20 +121,44 @@ const currentUsername = computed(() => {
   return userStore.currentUsername
 })
 
-const authorBg = onMounted(() => {
-  const pallettesColor = ['#5ec28b', '#005b94', '#467f8e', '#9db0a3', '#b8d56a', '#f4eb75']
-  const index = Math.floor(Math.random() * (5 - 0) + 0)
-  const pickedColor = pallettesColor[index]
+function playBandBarHome() {
+  let newKnownScrollPosition = window.scrollY
 
-  console.log(authorRef)
+  let deltaX = newKnownScrollPosition - lastKnownScrollPosition.value
 
-  authorRef.value.style.backgroundColor = pickedColor
-})
+  if (deltaX > 0) {
+    mobFlyRef.value.style.visibility = 'hidden'
+    mobFlyRef.value.style.transform = 'translateY(-50px)'
+    lastKnownScrollPosition.value = window.scrollY
+  } else if (deltaX < -10) {
+    console.log('mobFlyRef:', mobFlyRef)
+    mobFlyRef.value.style.visibility = 'visible'
+    mobFlyRef.value.style.transform = 'translateY(0px)'
+    lastKnownScrollPosition.value = window.scrollY
+  }
+}
+
+function backHome() {
+  router.push({ path: '/' })
+}
 </script>
 <style scoped>
 @media (min-width: 180px) {
   .mob_fly_back {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 40px;
+    padding: 0 1rem;
+    background-color: #f4f4f4;
+    visibility: visible;
+    transform: translate(0);
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 5;
+    transition: all 1.4s ease;
   }
   .fly_back {
     display: none;
@@ -169,6 +233,7 @@ const authorBg = onMounted(() => {
   .lift_prepost_details {
     width: 100%;
     position: relative;
+    padding-top: 0.5rem;
     display: grid;
     grid-template-areas:
       'postTitle postTitle postTitle postTitle'
@@ -226,6 +291,7 @@ const authorBg = onMounted(() => {
 
   .lift_prepost_details {
     width: 100%;
+    padding: 0;
     display: grid;
     grid-template-areas:
       'artRef artRef artRef artRef'

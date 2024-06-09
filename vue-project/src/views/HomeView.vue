@@ -85,7 +85,7 @@ const posts = onMounted(async () => {
 
   setTimeout(() => {
     console.log('time delay')
-  }, 5000)
+  }, 4000)
 
   return postsFetch
 })
