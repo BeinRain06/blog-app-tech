@@ -1,5 +1,5 @@
 <template>
-  <header class="nav_header bg-gray-800">
+  <header class="nav_header bg-gray-800" v-if="postPage === null">
     <div class="w-full flex justify-between">
       <ul class="flex justify-center items-center space-x-0 xsm:space-x-1 text-sm md:text-lg">
         <img alt="generic logo" class="generic_logo" src="@/assets/content-svgrepo-com.svg" />
@@ -737,6 +737,11 @@ const notadmin = computed(() => {
   }
 })
 
+const postPage = computed(() => {
+  const postStore = usePostStore()
+  return postStore.postInPage
+})
+
 function handleRadioState(e) {
   console.log(e.target)
   const userStore = useUserStore()
@@ -807,6 +812,7 @@ async function redirectLink(e, label) {
       })
 
       newUserInfo.admin ? userStore.$patch({ isAdmin: true }) : userStore.$patch({ isAdmin: false })
+      router.push({ path: '/' })
     } else {
       router.push({ path: '/login' })
     }

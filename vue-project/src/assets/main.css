@@ -19,3 +19,27 @@
   font-weight: normal;
   overflow-x: hidden;
 }
+
+/* <uniquifier>: Use a unique and descriptive class name */
+/* <weight>: Use a value from 100 to 800 */
+
+/* .ubuntu-sans-<uniquifier> {
+  font-family: "Ubuntu Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+} */
+
+/* .reddit-sans-<uniquifier> {
+  font-family: "Reddit Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+} */
+
+/* font-family: 'Reddit Sans', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal; */

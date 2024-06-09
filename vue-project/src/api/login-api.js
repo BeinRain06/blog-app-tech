@@ -4,7 +4,7 @@ export const redirectloginapi = async (access_token) => {
   const access = {
     access: access_token
   }
-  const catchUserName = await fetch(`${base_url}/login/redirect`, {
+  const newUserInfo = await fetch(`${base_url}/login/redirect`, {
     method: 'POST',
     body: JSON.stringify(access),
     headers: {
@@ -15,9 +15,9 @@ export const redirectloginapi = async (access_token) => {
     .then((res) => res.json())
     .then((newres) => newres.data)
 
-  console.log('catch username', catchUserName)
+  console.log('catch username', newUserInfo)
 
-  return catchUserName
+  return newUserInfo
 }
 
 export const loginapi = async (userInfo) => {

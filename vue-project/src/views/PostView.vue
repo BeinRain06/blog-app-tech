@@ -1,0 +1,291 @@
+<template>
+  <main id="post_page-wrap">
+    <div class="back_page_box">
+      <ul class="fly_back list-none inline-flex justify-center relative m-4" v-if="deskIn">
+        <li class="transition-all cursor-pointer">
+          <div
+            class="relative top-1 w-6 flex items-center justify-center bg-white hover:bg-purple-600 hover:outline-black"
+            style="border-radius: 50%"
+          >
+            <span
+              class="w-full text-black hover:transition-all duration-1000 ease-in-out hover:text-gray-300"
+              style="position: relative; top: -2px; left: 4px"
+            >
+              &#x25C0;</span
+            >
+          </div>
+        </li>
+        <li class="text-xl mx-2">Home</li>
+      </ul>
+      <ul
+        class="mob_fly_back w-screen absolute top-0 left-0 flex justify-between items-center h-10 transition-all duration-1000 ease-in-out py-2 px-4"
+        v-if="deskIn === false"
+      >
+        <li
+          class="text-lg cursor-pointer transition-all duration-1000 ease-in-out hover:font-bold hover:text-purple-500"
+        >
+          &larr;
+        </li>
+        <li class="text-lg">...Home</li>
+      </ul>
+    </div>
+    <div class="lift_prepost_details">
+      <div class="art_post_reference">
+        <p class="datePosted">16 Jun, 2024</p>
+        <p class="timePosted">at 04:36 A.M</p>
+        <p class="readingTime"><span>10min</span> read</p>
+        <div class="author_customization">
+          <div class="author_logo" ref="authorRef">
+            {{ postPage?.username[0].toLowerCase() }}
+          </div>
+          <p class="author_current_name">britannic kid</p>
+        </div>
+      </div>
+      <div class="art_post_title">
+        <span class="page_title">{{ postPage?._doc.title }}</span>
+      </div>
+    </div>
+    <div class="page_content_wrap grid place-items-center px-2">
+      <div class="page_content_inside">
+        <p>
+          The art of sewing is at least 20,000 years old. Ancient peoples joined pieces of material
+          using bone and horn needles and animal sinew for thread. Around the 14th century iron
+          needles were invented, and by the 15th century there were eyed needles. Later sewing
+          needles were made of steel, as they still are today. In the 1800s the first practical
+          sewing machine appeared, and today most sewing is done by machine, though some sewers
+          still choose to perform fine sewing and finishing by hand
+        </p>
+      </div>
+    </div>
+  </main>
+</template>
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { usePostStore } from '@/stores/post.js'
+import { useUserStore } from '@/stores/user.js'
+
+const deskIn = ref(true)
+
+const authorRef = ref(null)
+
+const postPage = computed(() => {
+  const postStore = usePostStore()
+  return postStore.postInPage
+})
+
+console.log('postPage:', postPage)
+
+const currentUsername = computed(() => {
+  const userStore = useUserStore()
+  return userStore.currentUsername
+})
+
+const authorBg = onMounted(() => {
+  const pallettesColor = ['#5ec28b', '#005b94', '#467f8e', '#9db0a3', '#b8d56a', '#f4eb75']
+  const index = Math.floor(Math.random() * (5 - 0) + 0)
+  const pickedColor = pallettesColor[index]
+
+  console.log(authorRef)
+
+  authorRef.value.style.backgroundColor = pickedColor
+})
+</script>
+<style scoped>
+@media (min-width: 180px) {
+  .mob_fly_back {
+    display: flex;
+  }
+  .fly_back {
+    display: none;
+  }
+
+  .author_logo {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 2.4rem;
+    height: 2.4rem;
+    color: #fff;
+    text-align: center;
+    font-size: calc(14px + 0.32vw);
+    border-radius: 50%;
+    outline: 2px solid white;
+    outline-offset: -2px;
+    border: 1px solid #ddd;
+  }
+
+  .author_customization {
+    grid-area: postAuthor;
+    position: relative;
+    right: -0.35rem;
+  }
+
+  .datePosted {
+    grid-area: postDate;
+    font-family: 'Reddit Sans', sans-serif;
+    font-optical-sizing: auto;
+    font-size: calc(12px + 0.42vw);
+    text-align: right;
+    padding-right: 1rem;
+  }
+
+  .timePosted {
+    grid-area: postTime;
+    font-family: 'Ubuntu Sans', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+    font-variation-settings: 'wdth' 100;
+    font-style: italic;
+    font-size: calc(12px + 0.18vw);
+    text-align: right;
+    padding-right: 1rem;
+  }
+
+  .readingTime {
+    grid-area: minutesStamp;
+    position: relative;
+    top: -2rem;
+    font-family: 'Ubuntu Sans', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+    font-variation-settings: 'wdth' 100;
+    padding-left: 1rem;
+    font-size: calc(12px + 0.25vw);
+    transform: skew(-5deg);
+  }
+
+  .art_post_title {
+    grid-area: postTitle;
+    font-family: 'Poetsen One', sans-serif;
+    font-weight: bold;
+    font-style: normal;
+    display: grid;
+    place-items: center;
+  }
+
+  .lift_prepost_details {
+    width: 100%;
+    position: relative;
+    display: grid;
+    grid-template-areas:
+      'postTitle postTitle postTitle postTitle'
+      'artRef artRef artRef artRef';
+  }
+
+  .art_post_reference {
+    width: 100%;
+    grid-area: artRef;
+    display: grid;
+    grid-template-areas:
+      'postAuthor . . .'
+      '. . . postDate'
+      '. . . postTime'
+      'minutesStamp . . .';
+  }
+
+  .art_post_title {
+    grid-area: postTitle;
+    width: 100vw;
+    font-size: calc(22px + 0.3vw);
+    padding: 0 0.5rem;
+  }
+
+  .page_content_inside {
+    position: relative;
+    top: -0.5rem;
+    width: 100%;
+    padding: 0.5rem;
+    max-width: 1100px;
+    font-family: 'Reddit Sans', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+    font-size: calc(13px + 0.25vw);
+    display: grid;
+    place-items: center;
+  }
+}
+
+@media (min-width: 375px) {
+  .art_post_title {
+    grid-area: postTitle;
+    font-size: calc(24px + 0.3vw);
+  }
+}
+
+@media (min-width: 650px) {
+  .mob_fly_back {
+    display: none;
+  }
+  .fly_back {
+    display: inline-flex;
+  }
+
+  .lift_prepost_details {
+    width: 100%;
+    display: grid;
+    grid-template-areas:
+      'artRef artRef artRef artRef'
+      'postTitle postTitle postTitle postTitle';
+  }
+
+  .art_post_reference {
+    width: 100%;
+    padding: 0 1rem;
+    grid-area: artRef;
+    display: grid;
+    grid-template-areas:
+      'postDate . . postAuthor'
+      'postTime . . .'
+      'minutesStamp . . .';
+  }
+
+  .datePosted {
+    grid-area: postDate;
+    font-size: calc(13px + 0.42vw);
+    text-align: unset;
+    padding: 0;
+  }
+
+  .timePosted {
+    grid-area: postTime;
+    padding: 0 0 0 0.25rem;
+    font-size: calc(12px + 0.18vw);
+    text-align: unset;
+  }
+
+  .readingTime {
+    grid-area: minutesStamp;
+    position: relative;
+    top: 0;
+    font-size: calc(10px + 0.3vw);
+    padding: 3px 0 0 0;
+    transform: skew(0deg);
+  }
+
+  .author_customization {
+    grid-area: postAuthor;
+    position: absolute;
+    top: 0;
+    right: 1rem;
+    display: grid;
+    place-items: center;
+  }
+
+  .art_post_title {
+    font-size: calc(28px + 0.3vw);
+    padding: 0;
+  }
+
+  .page_content_inside {
+    position: relative;
+    top: 0;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: calc(14px + 0.1vw);
+  }
+}
+</style>

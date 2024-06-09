@@ -4,9 +4,12 @@
       <div
         v-for="(postItem, i) in allposts"
         key="{{postItem._doc.id}}"
+        id="{{postItem._doc.id}}"
+        data-author="{{postItem._doc.author}}"
         class="card_out_wrapper max-w-full p-1 xsm:p-2"
+        ref="postRef"
       >
-        <div class="card_in_wrapper">
+        <div class="card_in_wrapper" @click="reachPostPage">
           <div class="card_img_wrap p-0 xsm:p-1">
             <img
               class="card_img object-cover w-full h-full p-1"
@@ -19,7 +22,9 @@
               class="card_content_wrap relative w-full flex flex-col justify-center items-center rounded-sm gap-3"
             >
               <div class="wrap_post_title w-full px-2 py-1 sm:p-2">
-                <h1 class="post_title font-bold">{{ postItem._doc.title }}</h1>
+                <h1 id="post_title" class="post_title font-bold cursor-pointer z-10">
+                  {{ postItem._doc.title }}
+                </h1>
               </div>
               <div class="author_info_wrapper w-full">
                 <div
@@ -43,8 +48,10 @@
                   <div class="w-full flex">
                     <h3 class="summary_title w-full font-medium">Summary</h3>
                   </div>
-                  <div class="paragraph_container">
-                    <p class="paragraph_inner_content text-xl">{{ postItem._doc.summary }}</p>
+                  <div class="paragraph_container cursor-pointer">
+                    <p id="inner_summary" class="paragraph_inner_content text-xl z-10">
+                      {{ postItem._doc.summary }}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -63,6 +70,8 @@ import TheWelcome from '../components/TheWelcome.vue'
 import { arrayImg, dataPostsList } from '../assets/images-blog-post/index.js'
 import { useUserStore } from '@/stores/user.js'
 import { usePostStore } from '@/stores/post.js'
+
+const postRef = ref(null)
 
 const router = useRouter()
 
@@ -87,13 +96,34 @@ const allposts = computed(() => {
   return postStore.fetchPosts
 })
 
-function redirectEditPage() {
+function redirectEditPage(e) {
   const userStore = useUserStore()
-  if (userStore.currentUsername !== null) {
+  const userId = useUserStore.currentUserId
+
+  const useridInPost = e.target.closest('.card_out_wrapper').getAttribute('data-author')
+
+  if (userStore.currentUsername !== null && userId === useridInPost) {
     router.push({ path: '/edit' })
   } else {
-    alert("can't edit this post, not login")
+    alert("can't edit this post, not login or not the author")
     return
+  }
+}
+
+function reachPostPage(e) {
+  const postId = e.target.closest('.card_out_wrapper').id
+
+  if (e.target.id === 'post_title' || e.target.id === 'inner_summary') {
+    const postStore = usePostStore()
+
+    const posts = postStore.fetchPosts
+    const postTargeted = posts.find((item) => item)
+
+    console.log('postTargeted:', postTargeted)
+
+    postStore.$patch({ postInPage: postTargeted })
+
+    router.push({ path: '/page' })
   }
 }
 </script>

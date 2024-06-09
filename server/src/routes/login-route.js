@@ -81,7 +81,7 @@ router.post("/redirect", async (req, res) => {
 
     console.log("req cookies:", req.cookies);
 
-    if (prevCookie.userId !== undefined) {
+    if (prevCookie !== undefined) {
       const userId = prevCookie.userId;
       const userFetch = await User.findById(userId).select("-password");
 

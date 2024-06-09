@@ -10,7 +10,8 @@ export const usePostStore = defineStore('post', {
     title: '',
     summary: '',
     content: '',
-    allposts: null
+    allposts: null,
+    postInPage: null
   }),
   getters: {
     lastDate: (state) => state.lastPost.date,
