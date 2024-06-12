@@ -85,7 +85,11 @@ import { ref, defineComponent } from 'vue'
 import { useUserStore } from '../stores/user'
 import { useWarningStore } from '@/stores/warning'
 import { loginadminapi } from '@/api/login-api.js'
-import { checkInputError, resetUser } from '@/reusable/collaborate-function.js'
+import {
+  populateLocalStorage,
+  checkInputError,
+  resetUser
+} from '@/reusable/collaborate-function.js'
 
 export default defineComponent({
   setup() {
@@ -173,32 +177,7 @@ export default defineComponent({
         alert('Bad Authentication ! or Access Disallowed')
       }
 
-      const authorsAndThemes = await getauthorsandthemesapi()
-
-      const allThemes = authorsAndThemes.map((item) => item.theme)
-      const allAuthors = authorsAndThemes.map((item) => item.author)
-
-      if (localStorage.getItem('list-authors') === undefined) {
-        localStorage.setItem('list-authors', '[]')
-      }
-      if (localStorage.getItem('list-themes') === undefined) {
-        localStorage.setItem('list-themes', '[]')
-      }
-
-      let arrAuthors = JSON.parse(localStorage.getItem('list-authors'))
-
-      let arrThemes = JSON.parse(localStorage.getItem('list-themes'))
-
-      if (arrThemes.length !== allThemes.length) {
-        arrThemes = allThemes
-      }
-
-      if (arrAuthors.length !== allAuthors.length) {
-        arrAuthors = allAuthors
-      }
-
-      localStorage.setItem('list-authors', JSON.stringify(arrAuthors))
-      localStorage.setItem('list-themes', JSON.stringify(arrThemes))
+      await populateLocalStorage()
 
       console.log('newUserInfo:', newUserInfo)
 

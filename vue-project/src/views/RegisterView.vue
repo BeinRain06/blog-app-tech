@@ -118,7 +118,11 @@ import { ref, defineComponent } from 'vue'
 import { registrationapi } from '../api/registration-api.js'
 import { useWarningStore } from '@/stores/warning.js'
 import { useUserStore } from '@/stores/user.js'
-import { checkInputError, resetUser } from '@/reusable/collaborate-function.js'
+import {
+  populateLocalStorage,
+  checkInputError,
+  resetUser
+} from '@/reusable/collaborate-function.js'
 
 export default defineComponent({
   setup() {
@@ -176,11 +180,20 @@ export default defineComponent({
         })
       }, 5400)
 
+      checkInputError(this.user, 'register')
+
+      const collectedData = await registrationapi(this.user)
+
+      if (collectedData === null) {
+        const warningStore = useWarningStore()
+
+        warningStore.warningUpdate('this user already exist!', this.user)
+        return
+      }
+
       userStore.$patch({
         loading: !userStore.loadingState
       })
-
-      const collectedData = await registrationapi(this.user)
 
       console.log('collectedData:', collectedData)
 
@@ -194,6 +207,10 @@ export default defineComponent({
         access_token: collectedData.access,
         isAdmin: collectedData.admin
       })
+
+      if (collectedData.admin) {
+        await populateLocalStorage()
+      }
 
       resetUser(this.user, this.checked, null)
 
@@ -329,7 +346,7 @@ export default defineComponent({
 
 @media (min-width: 240px) {
   .register {
-    height: calc(126vh);
+    height: calc(134vh);
   }
 
   .register_wrapper {
@@ -360,7 +377,7 @@ export default defineComponent({
   }
 
   .register {
-    height: calc(130vh);
+    height: calc(140vh);
   }
 
   .register_wrapper {

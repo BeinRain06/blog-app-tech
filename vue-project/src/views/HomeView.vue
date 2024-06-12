@@ -96,14 +96,30 @@ const allposts = computed(() => {
   return postStore.fetchPosts
 })
 
-function redirectEditPage(e) {
+async function redirectEditPage(e) {
+  const postStore = usePostStore()
   const userStore = useUserStore()
   const userId = useUserStore.currentUserId
 
   const useridInPost = e.target.closest('.card_out_wrapper').getAttribute('data-author')
 
+  console.log('useridInPost', useridInPost)
+
+  const postId = e.target.closest('.card_out_wrapper').id
+
+  console.log('postId', postId)
+
   if (userStore.currentUsername !== null && userId === useridInPost) {
-    router.push({ path: '/edit' })
+    // const postEdit = await retrievepostapi(postId)
+
+    const postEdit = postStore.allposts.find((post) => post._doc.id === postId)
+
+    usePostStore.$patch({ postInPage: postEdit })
+
+    setTimeout(() = {
+      router.push({ path: '/edit' })
+    }, 3000)
+
   } else {
     alert("can't edit this post, not login or not the author")
     return

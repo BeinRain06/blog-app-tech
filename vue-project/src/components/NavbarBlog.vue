@@ -55,12 +55,12 @@
         >
           <p class="user_in">welcome @{{ shortyName }}</p>
 
-          <div class="init_post w-24 md:w-30">
+          <div class="init_post w-24 z-10 md:w-30">
             <p
               id="init_new_post"
               class="btn-new-post w-full h-full text-white rounded-2xl bg-black hover:bg-green-700"
             >
-              create a post
+              <RouterLink to="/create">create a postA</RouterLink>
             </p>
           </div>
         </div>

@@ -25,7 +25,7 @@
                 <input
                   type="file"
                   id="image"
-                  name="file"
+                  name="cover"
                   accept="image/png, image/jpeg, image/webp"
                   ref="inputFile"
                   @change="grabImage"
@@ -147,8 +147,6 @@ async function createPost() {
   })
 
   userStore.$patch({ access_token: postInfos.access_token })
-
-  inputFile.value.Files[0] = {}
 
   router.push({ path: '/' })
 }

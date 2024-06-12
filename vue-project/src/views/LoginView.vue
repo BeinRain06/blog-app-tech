@@ -124,6 +124,7 @@ export default defineComponent({
         currentUsername: newUserInfo.username,
         currentUserId: newUserInfo.id,
         usersLogin: [...exUsersArr, newUserInfo.username],
+        isAdmin: false,
         access_token: newUserInfo.access
       })
 

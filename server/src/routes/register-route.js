@@ -41,6 +41,13 @@ router.post("/", async (req, res) => {
       secret: req.body.secret,
     };
 
+    const checkExistUser = await User.findOne({ username: userCatch.username });
+
+    if (checkExistUser) {
+      const collected = null;
+      return res.json({ success: true, data: collected });
+    }
+
     // encrypt password
     const passwordHash = bcrypt.hashSync(`${userCatch.password}`, 10); //10 autogen salt & hash
     let secret;

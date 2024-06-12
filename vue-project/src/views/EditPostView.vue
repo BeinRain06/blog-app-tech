@@ -8,25 +8,38 @@
             <div class="form_content">
               <div class="form_control">
                 <label for="title">Title</label>
-                <input type="text" id="title" name="title" placeholder="title" />
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  placeholder="title"
+                  v-model="postItem.title"
+                />
               </div>
               <div class="form_control">
                 <label for="summary">Summary</label>
-                <input type="text" id="summary" name="summary" placeholder="summary" />
+                <input
+                  type="text"
+                  id="summary"
+                  name="summary"
+                  placeholder="summary"
+                  v-model="postItem.summary"
+                />
               </div>
               <div class="form_control">
                 <label for="image">Image</label>
                 <input
                   type="file"
                   id="image"
-                  name="image"
+                  name="cover"
                   accept="image/png, image/jpeg, image/webp"
+                  ref="myInputFileEdit"
                 />
               </div>
               <div class="form_editor py-3">
-                <Editor vue-model="value" editorStyle="height: 280px" />
+                <Editor vue-model="value" editorStyle="height: 280px" v-model="postItem.content" />
               </div>
-              <div class="form_submit w-full">
+              <div class="form_submit w-full z-10" @click="submitEditedPost">
                 <input
                   type="submit"
                   id="btn_edit"
@@ -43,7 +56,69 @@
   </main>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { usePostStore } from '@/stores/post'
+
+const router = useRouter()
+
+const myInputFileEdit = ref(null)
+
+let postItem = ref({
+  id: '',
+  title: '',
+  image: '',
+  summary: '',
+  content: '',
+  author: ''
+})
+
+onMounted(() => {
+  const postStore = usePostStore()
+  const postToEdit = postStore.postInPage
+
+  postItem.value.id = postToEdit._doc.id
+  postItem.value.title = postToEdit._doc.title
+  postItem.value.image = postToEdit._doc.image
+  postItem.value.summary = postToEdit._doc.summary
+  postItem.value.content = postToEdit._doc.content
+  postItem.value.author = postToEdit._doc.author
+})
+
+async function submitEditedPost() {
+  const post = postItem.value
+  const userId = postItem.value.author
+  let newImageUrl
+
+  if (myInputFileEdit.value !== undefined) {
+    const exUrlImgArr = postItem.value.image.split('/')
+
+    const nameExImg = exUrlImgArr[exUrlImgArr.length - 1]
+
+    console.log('nameExImg:', nameExImg)
+
+    const removeImage = await deleteimageapi(nameImg)
+
+    console.log('removeImage:', removeImage)
+
+    newImageUrl = await primarimageapi(myInputFileEdit.value, userId)
+  } else {
+    newImageUrl = null
+  }
+
+  postItem.value.image = newImageUrl !== null ? newImageUrl : ''
+
+  const sendEdit = await editpostapi(post)
+
+  if (sendEdit.success) {
+    usePostStore.$patch({ postInPage: null })
+    setTimeout(() => {
+      router.push({ path: '/' })
+    }, 2000)
+  }
+}
+</script>
 
 <style scoped>
 @media (min-width: 180px) {

@@ -23,8 +23,9 @@ const requestInitUser = async function (req, res, next) {
   let admin = false;
 
   if (userDetails.secret === process.env.admin_secret && userAttribute.admin) {
-    const check = s;
-    userDetails.secret === process.env.admin_secret ? true : false;
+    const check =
+      userDetails.secret === process.env.admin_secret ? true : false;
+
     admin = check;
   }
 

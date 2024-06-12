@@ -27,12 +27,12 @@ export const primarimageapi = async (myInputFile, thisUserId) => {
   try {
     const file = myInputFile.files[0]
 
-    console.log('our api file:', file)
+    console.log('our api cover:', file)
 
     //formData instance
     const formData = new FormData()
     //add element
-    formData.append('file', file)
+    formData.append('cover', file)
     formData.append('userid', thisUserId)
 
     const prePostImg = await fetch(`${base_url}/post/image/create`, {
@@ -45,6 +45,24 @@ export const primarimageapi = async (myInputFile, thisUserId) => {
     console.log('image_path:', prePostImg)
 
     return prePostImg
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+export const deleteimageapi = async (nameImg) => {
+  try {
+    const sendImage = await fetch(`${base_url}/post/image/delete/${nameImg}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+      .then((res) => res.json())
+      .then((newres) => newres)
+
+    return sendImage
   } catch (err) {
     console.log(err)
   }
@@ -63,6 +81,28 @@ export const getpostsapi = async () => {
       .then((newres) => newres.data)
 
     return posts
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+export const editpostapi = async (post) => {
+  try {
+    const postId = post.id
+
+    const updatedPost = await fetch(`${base_url}/post/edit/${postId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    })
+      .then((res) => res.json())
+      .then((newres) => newres)
+
+    console.log('updatedPost:', updatedPost)
+
+    return updatedPost
   } catch (err) {
     console.log(err)
   }

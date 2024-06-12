@@ -6,6 +6,7 @@ const compareAsc = require("date-fns/compareAsc");
 const path = require("path");
 const multer = require("multer");
 const cors = require("cors");
+const fs = require("fs").promises;
 const router = express.Router();
 const { format } = require("date-fns");
 const { generateToken } = require("../protect-api/authorization-jwt");
@@ -48,7 +49,7 @@ const upload = multer({
 //middleware destination image - express
 router.use(`/images`, express.static(path.join(__dirname, "../public/images")));
 
-router.post("/image/create", upload.single("file"), (req, res) => {
+router.post("/image/create", upload.single("cover"), (req, res) => {
   try {
     console.log("req body img create :", req.body);
     if (req.body.userid !== null || req.body.userid !== undefined) {
@@ -134,6 +135,69 @@ router.post("/", async (req, res) => {
     console.log("infosNewPost send :", infosNewPost);
 
     res.status(200).json({ success: true, data: infosNewPost });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+router.post("/edit/:postId", async (req, res) => {
+  try {
+    const postId = req.params.id;
+
+    let date = format(new Date(), "dd MMM yyyy ,  hh:mm a");
+
+    const newPost = req.body;
+
+    let updationPost;
+
+    if (req.body.image !== "") {
+      updationPost = await Post.findByIdAndUpdate(
+        postId,
+        {
+          $set: {
+            title: newPost.title,
+            summary: newPost.summary,
+            image: newPost.image,
+            content: newPost.content,
+            date: date,
+          },
+        },
+        { new: true }
+      );
+    } else {
+      updationPost = await Post.findByIdAndUpdate(
+        postId,
+        {
+          $set: {
+            title: newPost.title,
+            summary: newPost.summary,
+            content: newPost.content,
+            date: date,
+          },
+        },
+        { new: true }
+      );
+    }
+
+    res.status(200).json({ success: true, data: updationPost });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+router.post("/image/delete/:nameImg", async (req, res) => {
+  try {
+    const nameImg = req.params.nameImg;
+
+    const filePath = express.static(
+      path.join(__dirname, `../public/images/${nameImg}`)
+    );
+
+    await fs.unlink(filePath);
+
+    console.log(`File ${filePath} has been deleted.`);
+
+    res.status(200).json({ success: true, data: {} });
   } catch (err) {
     console.log(err);
   }
