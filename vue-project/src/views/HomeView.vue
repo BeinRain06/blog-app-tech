@@ -34,7 +34,7 @@
                   <span class="posted_at font-light text-sm md:text-base"
                     >{{ postItem._doc.date }} |</span
                   >
-                  <button class="btn-edit-link" @click.prevent="redirectEditPage">
+                  <button class="btn-edit-link" @click.prevent="(e) => redirectEditPage(e, i)">
                     <img
                       class="svg_edit w-6 h-4 cursor-pointer"
                       src="../assets/edit-svgrepo-com.svg"
@@ -93,33 +93,32 @@ const posts = onMounted(async () => {
 const allposts = computed(() => {
   const postStore = usePostStore()
 
+  console.log('postStore:', postStore)
+
   return postStore.fetchPosts
 })
 
-async function redirectEditPage(e) {
+async function redirectEditPage(e, i) {
   const postStore = usePostStore()
   const userStore = useUserStore()
-  const userId = useUserStore.currentUserId
+  const userId = userStore.currentUserId
 
-  const useridInPost = e.target.closest('.card_out_wrapper').getAttribute('data-author')
+  const postEdit = postStore.allposts[i]
 
-  console.log('useridInPost', useridInPost)
+  const postId = postEdit._doc.id
 
-  const postId = e.target.closest('.card_out_wrapper').id
+  const useridInPost = postEdit._doc.author
 
-  console.log('postId', postId)
+  console.log('postEdit :', postEdit)
+
+  console.log('userId', userId)
 
   if (userStore.currentUsername !== null && userId === useridInPost) {
-    // const postEdit = await retrievepostapi(postId)
+    postStore.$patch({ postInPage: postEdit })
 
-    const postEdit = postStore.allposts.find((post) => post._doc.id === postId)
-
-    usePostStore.$patch({ postInPage: postEdit })
-
-    setTimeout(() = {
+    setTimeout(() => {
       router.push({ path: '/edit' })
-    }, 3000)
-
+    }, 1500)
   } else {
     alert("can't edit this post, not login or not the author")
     return

@@ -1,6 +1,6 @@
 <template>
   <main>
-    <div class="edit_post_wrap w-full h-screen">
+    <div class="edit_post_wrap relative w-full h-screen">
       <div class="edit_post_content">
         <form class="edit_form relative h-full">
           <fieldset class="fieldset_edit_post">
@@ -37,7 +37,12 @@
                 />
               </div>
               <div class="form_editor py-3">
-                <Editor vue-model="value" editorStyle="height: 280px" v-model="postItem.content" />
+                <Editor
+                  :v-model="postItem.content"
+                  ref="editorRef"
+                  placeholder="edit area"
+                  editorStyle="height: 280px"
+                />
               </div>
               <div class="form_submit w-full z-10" @click="submitEditedPost">
                 <input
@@ -52,18 +57,30 @@
           </fieldset>
         </form>
       </div>
+      <RouterLink to="/" v-scroll-to="`#${postItem.id}`"
+        ><p
+          class="absolute top-0 left-2 text-gray-800 rounded"
+          style="padding: 2px 10px; border-bottom: 1px solid #333"
+        >
+          <span class="text-lg mx-1">&larr;</span> back
+        </p></RouterLink
+      >
     </div>
   </main>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 import { usePostStore } from '@/stores/post'
 
 const router = useRouter()
 
 const myInputFileEdit = ref(null)
+
+const editorRef = ref(null)
+
+let commonContent = ref('trying hard dealing with')
 
 let postItem = ref({
   id: '',
@@ -84,6 +101,24 @@ onMounted(() => {
   postItem.value.summary = postToEdit._doc.summary
   postItem.value.content = postToEdit._doc.content
   postItem.value.author = postToEdit._doc.author
+})
+
+watch(editorRef, (editor) => {
+  if (!editor) return
+  // Hack needed for Quill v2: https://github.com/primefaces/primevue/issues/5606#issuecomment-2093536386
+  editor.renderValue = function renderValue(value) {
+    if (this.quill) {
+      console.log('yeah')
+      if (postItem.value.content) {
+        console.log('yeah yeah')
+        const delta = this.quill.clipboard.convert({ html: postItem.value.content })
+        this.quill.setContents(delta, 'silent')
+      } else {
+        console.log('no no')
+        this.quill.setText('')
+      }
+    }
+  }.bind(editor) // Bind needed for production build
 })
 
 async function submitEditedPost() {

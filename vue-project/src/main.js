@@ -7,6 +7,7 @@ import Editor from 'primevue/editor'
 
 import App from './App.vue'
 import router from './router'
+import VueScrollTo from 'vue-scrollto'
 
 const app = createApp(App)
 
@@ -22,6 +23,7 @@ curly logical OR (&#8910; | &#x22CE;)
 app.use(createPinia())
 app.use(router)
 app.use(PrimeVue)
+app.use(VueScrollTo)
 
 app.component('Editor', Editor)
 

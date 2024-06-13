@@ -807,6 +807,7 @@ async function redirectLink(e, label) {
     if (newUserInfo !== 'null') {
       userStore.$patch({
         currentUsername: newUserInfo.username,
+        currentUserId: newUserInfo.id,
         access_token: newUserInfo.access,
         usersLogin: [...usersLogin, newUserInfo.username]
       })

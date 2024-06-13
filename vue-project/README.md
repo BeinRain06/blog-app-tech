@@ -740,3 +740,25 @@ In `post-route.js` file i **wrote this** :
      })`
 
 then i obtain inside `src/public/images` my first image : `file_1717587794699.jpg`
+
+<br>
+
+### Editor: v-model not updating with Quill v2.0 #5606
+
+find for soluton here : [https://github.com/primefaces/primevue/issues/5606](https://github.com/primefaces/primevue/issues/5606)
+using
+script setup what worked for me
+
+> ```js
+> <Editor
+> ```
+
+                  :v-model="postItem.content"
+                  ref="editorRef"
+                  placeholder="edit area"
+                  editorStyle="height: 280px"
+                />
+
+> ```
+>
+> ```
