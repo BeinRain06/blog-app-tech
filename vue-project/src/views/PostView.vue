@@ -33,14 +33,16 @@
     </div>
     <div class="lift_prepost_details">
       <div class="art_post_reference">
-        <p class="datePosted">16 Jun, 2024</p>
-        <p class="timePosted">at 04:36 A.M</p>
-        <p class="readingTime"><span>10min</span> read</p>
+        <p class="datePosted">{{ datePost }}</p>
+        <p class="timePosted">at {{ timePost }}</p>
+        <p class="readingTime">
+          <span>{{ numbMinRead }}min</span> read
+        </p>
         <div class="author_customization">
           <div class="author_logo" ref="authorRef">
             {{ postPage?.username[0].toLowerCase() }}
           </div>
-          <p class="author_current_name">britannic kid</p>
+          <p class="author_current_name">{{ postPage?.username }}</p>
         </div>
       </div>
       <div class="art_post_title">
@@ -48,32 +50,7 @@
       </div>
     </div>
     <div class="page_content_wrap grid place-items-center px-2">
-      <div class="page_content_inside">
-        <p class="my-2">
-          The art of sewing is at least 20,000 years old. Ancient peoples joined pieces of material
-          using bone and horn needles and animal sinew for thread. Around the 14th century iron
-          needles were invented, and by the 15th century there were eyed needles. Later sewing
-          needles were made of steel, as they still are today. In the 1800s the first practical
-          sewing machine appeared, and today most sewing is done by machine, though some sewers
-          still choose to perform fine sewing and finishing by hand
-        </p>
-        <p class="my-2">
-          The art of sewing is at least 20,000 years old. Ancient peoples joined pieces of material
-          using bone and horn needles and animal sinew for thread. Around the 14th century iron
-          needles were invented, and by the 15th century there were eyed needles. Later sewing
-          needles were made of steel, as they still are today. In the 1800s the first practical
-          sewing machine appeared, and today most sewing is done by machine, though some sewers
-          still choose to perform fine sewing and finishing by hand
-        </p>
-        <p class="my-2">
-          The art of sewing is at least 20,000 years old. Ancient peoples joined pieces of material
-          using bone and horn needles and animal sinew for thread. Around the 14th century iron
-          needles were invented, and by the 15th century there were eyed needles. Later sewing
-          needles were made of steel, as they still are today. In the 1800s the first practical
-          sewing machine appeared, and today most sewing is done by machine, though some sewers
-          still choose to perform fine sewing and finishing by hand
-        </p>
-      </div>
+      <div class="page_content_inside" ref="pageInside"></div>
     </div>
   </main>
 </template>
@@ -89,10 +66,22 @@ const mobFlyRef = ref(null)
 
 let lastKnownScrollPosition = ref(0)
 
+const pageInside = ref(null)
+
+let timePost = ref(null)
+let datePost = ref(null)
+let numbMinRead = ref(null)
+
 const router = useRouter()
 
 onMounted(() => {
   window.addEventListener('scroll', playBandBarHome)
+
+  const postStore = usePostStore()
+
+  const paragraphContent = postStore.postInPage._doc.content
+
+  pageInside.value.innerHTML = paragraphContent
 })
 
 onUnmounted(() => {
@@ -111,7 +100,23 @@ const authorBg = onMounted(() => {
 
 const postPage = computed(() => {
   const postStore = usePostStore()
-  return postStore.postInPage
+
+  const callPost = postStore.postInPage
+
+  const dateTimeArr = callPost._doc.date.split(',')
+
+  const paragraphContent = callPost._doc.content
+
+  const lengthContent = paragraphContent.length
+
+  const wordsPerMinutes = 220
+
+  numbMinRead.value = Math.ceil(lengthContent / wordsPerMinutes)
+
+  timePost.value = dateTimeArr[0]
+  datePost.value = dateTimeArr[1]
+
+  return callPost
 })
 
 console.log('postPage:', postPage)
@@ -139,6 +144,9 @@ function playBandBarHome() {
 }
 
 function backHome() {
+  const postStore = usePostStore()
+  postStore.$patch({ postInPage: null })
+
   router.push({ path: '/' })
 }
 </script>
@@ -226,6 +234,7 @@ function backHome() {
     font-family: 'Poetsen One', sans-serif;
     font-weight: bold;
     font-style: normal;
+    margin-top: 2rem;
     display: grid;
     place-items: center;
   }

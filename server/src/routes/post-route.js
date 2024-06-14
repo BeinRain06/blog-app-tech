@@ -1,6 +1,5 @@
 const User = require("../models/user.js");
 const Post = require("../models/post.js");
-
 const express = require("express");
 const compareAsc = require("date-fns/compareAsc");
 const path = require("path");
@@ -142,11 +141,25 @@ router.post("/", async (req, res) => {
 
 router.post("/edit/:postId", async (req, res) => {
   try {
-    const postId = req.params.id;
+    const postId = req.params.postId;
+
+    console.log("postId:", postId);
 
     let date = format(new Date(), "dd MMM yyyy ,  hh:mm a");
 
     const newPost = req.body;
+
+    console.log("newPost req body :", newPost);
+
+    const PORT = process.env.PORT;
+
+    const base_url = process.env.API_BASE;
+
+    const image_path = newPost.image;
+
+    const image_url = `http://localhost:${PORT}/${base_url}/post/${image_path}`;
+
+    console.log("image_url:", image_url);
 
     let updationPost;
 
@@ -157,7 +170,7 @@ router.post("/edit/:postId", async (req, res) => {
           $set: {
             title: newPost.title,
             summary: newPost.summary,
-            image: newPost.image,
+            image: image_url,
             content: newPost.content,
             date: date,
           },
@@ -168,16 +181,16 @@ router.post("/edit/:postId", async (req, res) => {
       updationPost = await Post.findByIdAndUpdate(
         postId,
         {
-          $set: {
-            title: newPost.title,
-            summary: newPost.summary,
-            content: newPost.content,
-            date: date,
-          },
+          title: newPost.title,
+          summary: newPost.summary,
+          content: newPost.content,
+          date: date,
         },
         { new: true }
       );
     }
+
+    console.log("newPost req body :", updationPost);
 
     res.status(200).json({ success: true, data: updationPost });
   } catch (err) {
@@ -189,9 +202,7 @@ router.post("/image/delete/:nameImg", async (req, res) => {
   try {
     const nameImg = req.params.nameImg;
 
-    const filePath = express.static(
-      path.join(__dirname, `../public/images/${nameImg}`)
-    );
+    const filePath = path.join(__dirname, `../public/images/${nameImg}`);
 
     await fs.unlink(filePath);
 

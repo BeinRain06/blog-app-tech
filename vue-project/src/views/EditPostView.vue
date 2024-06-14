@@ -33,23 +33,24 @@
                   id="image"
                   name="cover"
                   accept="image/png, image/jpeg, image/webp"
-                  ref="myInputFileEdit"
+                  ref="inputFileEdit"
+                  @change="grabImage"
                 />
               </div>
               <div class="form_editor py-3">
                 <Editor
-                  :v-model="postItem.content"
+                  v-model="postItem.content"
                   ref="editorRef"
                   placeholder="edit area"
                   editorStyle="height: 280px"
                 />
               </div>
-              <div class="form_submit w-full z-10" @click="submitEditedPost">
+              <div class="form_submit w-full z-10" @click.prevent="submitEditedPost">
                 <input
                   type="submit"
                   id="btn_edit"
                   name="edit_post"
-                  class="py-2 px-4 text-white text-base bg-black rounded-3xl"
+                  class="py-2 px-4 text-white text-base bg-black cursor-pointer rounded-3xl"
                   value="Edit Post"
                 />
               </div>
@@ -73,14 +74,15 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { usePostStore } from '@/stores/post'
+import { deleteimageapi, primarimageapi, editpostapi } from '@/api/post-api.js'
 
 const router = useRouter()
 
-const myInputFileEdit = ref(null)
+const inputFileEdit = ref(null)
 
 const editorRef = ref(null)
 
-let commonContent = ref('trying hard dealing with')
+let originalNameImg = ref(null)
 
 let postItem = ref({
   id: '',
@@ -95,12 +97,14 @@ onMounted(() => {
   const postStore = usePostStore()
   const postToEdit = postStore.postInPage
 
-  postItem.value.id = postToEdit._doc.id
-  postItem.value.title = postToEdit._doc.title
-  postItem.value.image = postToEdit._doc.image
-  postItem.value.summary = postToEdit._doc.summary
-  postItem.value.content = postToEdit._doc.content
-  postItem.value.author = postToEdit._doc.author
+  console.log('postToEdit:', postToEdit)
+
+  postItem.value.id = postToEdit?._doc._id
+  postItem.value.title = postToEdit?._doc.title
+  postItem.value.image = postToEdit?._doc.image
+  postItem.value.summary = postToEdit?._doc.summary
+  postItem.value.content = postToEdit?._doc.content
+  postItem.value.author = postToEdit?._doc.author
 })
 
 watch(editorRef, (editor) => {
@@ -108,36 +112,55 @@ watch(editorRef, (editor) => {
   // Hack needed for Quill v2: https://github.com/primefaces/primevue/issues/5606#issuecomment-2093536386
   editor.renderValue = function renderValue(value) {
     if (this.quill) {
-      console.log('yeah')
       if (postItem.value.content) {
-        console.log('yeah yeah')
         const delta = this.quill.clipboard.convert({ html: postItem.value.content })
         this.quill.setContents(delta, 'silent')
       } else {
-        console.log('no no')
         this.quill.setText('')
       }
     }
   }.bind(editor) // Bind needed for production build
 })
 
+function grabImage(e) {
+  const filename = e.target.files[0]
+  originalNameImg.value = filename
+
+  console.log('file:', filename)
+}
+
 async function submitEditedPost() {
+  const postStore = usePostStore()
+
   const post = postItem.value
   const userId = postItem.value.author
   let newImageUrl
 
-  if (myInputFileEdit.value !== undefined) {
+  if (inputFileEdit.value.files[0] !== undefined) {
     const exUrlImgArr = postItem.value.image.split('/')
 
-    const nameExImg = exUrlImgArr[exUrlImgArr.length - 1]
+    const postToEdit = postStore.postInPage
 
-    console.log('nameExImg:', nameExImg)
+    console.log(postToEdit)
 
-    const removeImage = await deleteimageapi(nameImg)
+    let nameExImg = exUrlImgArr[exUrlImgArr.length - 1]
 
-    console.log('removeImage:', removeImage)
+    if (nameExImg !== 'undefined') {
+      let arrExImg = nameExImg.split(' ')
 
-    newImageUrl = await primarimageapi(myInputFileEdit.value, userId)
+      let newNameExImg = `${arrExImg[0]}`
+
+      console.log('newNameExImg:', newNameExImg)
+
+      const removeImage = await deleteimageapi(newNameExImg)
+      console.log('removeImage:', removeImage)
+    }
+
+    const myInputFileEdit = inputFileEdit.value
+
+    console.log('inputFileEdit value:', inputFileEdit.value)
+
+    newImageUrl = await primarimageapi(myInputFileEdit, userId)
   } else {
     newImageUrl = null
   }
@@ -146,11 +169,18 @@ async function submitEditedPost() {
 
   const sendEdit = await editpostapi(post)
 
+  console.log('sendEdit:', sendEdit)
+
   if (sendEdit.success) {
-    usePostStore.$patch({ postInPage: null })
+    console.log('sendEdit success !')
+
+    await postStore.updateHomePage()
+
+    postStore.$patch({ postInPage: null })
+
     setTimeout(() => {
       router.push({ path: '/' })
-    }, 2000)
+    }, 1800)
   }
 }
 </script>

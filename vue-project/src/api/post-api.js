@@ -90,8 +90,11 @@ export const editpostapi = async (post) => {
   try {
     const postId = post.id
 
+    console.log('postId:', postId)
+
     const updatedPost = await fetch(`${base_url}/post/edit/${postId}`, {
       method: 'POST',
+      body: JSON.stringify(post),
       headers: {
         'Content-Type': 'application/json'
       },

@@ -1,5 +1,5 @@
 <template>
-  <header class="nav_header bg-gray-800" v-if="postPage === null">
+  <header class="nav_header bg-gray-800">
     <div class="w-full flex justify-between">
       <ul class="flex justify-center items-center space-x-0 xsm:space-x-1 text-sm md:text-lg">
         <img alt="generic logo" class="generic_logo" src="@/assets/content-svgrepo-com.svg" />
@@ -655,7 +655,7 @@ light
 
 <script setup>
 import { RouterLink, useRouter } from 'vue-router'
-import { ref, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { defineComponent } from 'vue'
 import { useUserStore } from '@/stores/user.js'
 import { usePostStore } from '@/stores/post.js'
@@ -735,11 +735,6 @@ const notadmin = computed(() => {
   } else {
     return true
   }
-})
-
-const postPage = computed(() => {
-  const postStore = usePostStore()
-  return postStore.postInPage
 })
 
 function handleRadioState(e) {

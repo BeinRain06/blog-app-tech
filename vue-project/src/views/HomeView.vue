@@ -9,7 +9,7 @@
         class="card_out_wrapper max-w-full p-1 xsm:p-2"
         ref="postRef"
       >
-        <div class="card_in_wrapper" @click="reachPostPage">
+        <div class="card_in_wrapper" @click="(e) => reachPostPage(e, i)">
           <div class="card_img_wrap p-0 xsm:p-1">
             <img
               class="card_img object-cover w-full h-full p-1"
@@ -85,7 +85,7 @@ const posts = onMounted(async () => {
 
   setTimeout(() => {
     console.log('time delay')
-  }, 4000)
+  }, 3400)
 
   return postsFetch
 })
@@ -125,17 +125,15 @@ async function redirectEditPage(e, i) {
   }
 }
 
-function reachPostPage(e) {
-  const postId = e.target.closest('.card_out_wrapper').id
+function reachPostPage(e, i) {
+  // const postId = e.target.closest('.card_out_wrapper').id
+
+  const postStore = usePostStore()
+  const postTargeted = postStore.allposts[i]
+
+  const postId = postTargeted._doc.id
 
   if (e.target.id === 'post_title' || e.target.id === 'inner_summary') {
-    const postStore = usePostStore()
-
-    const posts = postStore.fetchPosts
-    const postTargeted = posts.find((item) => item)
-
-    console.log('postTargeted:', postTargeted)
-
     postStore.$patch({ postInPage: postTargeted })
 
     router.push({ path: '/page' })
