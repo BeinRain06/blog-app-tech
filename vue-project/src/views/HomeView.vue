@@ -3,17 +3,17 @@
     <div id="home_page" class="home_page w-full px-0 py-2 xsm:p-4">
       <div
         v-for="(postItem, i) in allposts"
-        key="{{postItem._doc.id}}"
-        id="{{postItem._doc.id}}"
-        data-author="{{postItem._doc.author}}"
-        class="card_out_wrapper max-w-full p-1 xsm:p-2"
+        key="{{postItem.id}}"
+        id="{{postItem.id}}"
+        data-author="{{postItem.author}}"
+        class="card_out_wrapper max-w-full p-1 xsm:p-2 z-10"
         ref="postRef"
       >
         <div class="card_in_wrapper" @click="(e) => reachPostPage(e, i)">
           <div class="card_img_wrap p-0 xsm:p-1">
             <img
               class="card_img object-cover w-full h-full p-1"
-              :src="postItem._doc.image"
+              :src="postItem.image"
               alt="post picture"
             />
           </div>
@@ -23,16 +23,18 @@
             >
               <div class="wrap_post_title w-full px-2 py-1 sm:p-2">
                 <h1 id="post_title" class="post_title font-bold cursor-pointer z-10">
-                  {{ postItem._doc.title }}
+                  {{ postItem.title }}
                 </h1>
               </div>
               <div class="author_info_wrapper w-full">
                 <div
                   class="author_info_content max-w-6/12 flex flex-col xsm:flex-row gap-1 justify-center items-center text-center xsm:tex-left"
                 >
-                  <h4 class="author_name text-sm xsm:text-base">{{ postItem.username }} |</h4>
+                  <h4 class="author_name text-sm xsm:text-base">
+                    {{ postItem.author.username }} |
+                  </h4>
                   <span class="posted_at font-light text-sm md:text-base"
-                    >{{ postItem._doc.date }} |</span
+                    >{{ postItem.date }} |</span
                   >
                   <button class="btn-edit-link" @click.prevent="(e) => redirectEditPage(e, i)">
                     <img
@@ -50,7 +52,7 @@
                   </div>
                   <div class="paragraph_container cursor-pointer">
                     <p id="inner_summary" class="paragraph_inner_content text-xl z-10">
-                      {{ postItem._doc.summary }}
+                      {{ postItem.summary }}
                     </p>
                   </div>
                 </div>
@@ -105,9 +107,11 @@ async function redirectEditPage(e, i) {
 
   const postEdit = postStore.allposts[i]
 
-  const postId = postEdit._doc.id
+  const postId = postEdit.id
 
-  const useridInPost = postEdit._doc.author
+  const useridInPost = postEdit.author.id
+
+  console.log('useridInPost:', useridInPost)
 
   console.log('postEdit :', postEdit)
 
@@ -126,12 +130,10 @@ async function redirectEditPage(e, i) {
 }
 
 function reachPostPage(e, i) {
-  // const postId = e.target.closest('.card_out_wrapper').id
-
   const postStore = usePostStore()
   const postTargeted = postStore.allposts[i]
 
-  const postId = postTargeted._doc.id
+  const postId = postTargeted.id
 
   if (e.target.id === 'post_title' || e.target.id === 'inner_summary') {
     postStore.$patch({ postInPage: postTargeted })

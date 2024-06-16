@@ -99,12 +99,12 @@ onMounted(() => {
 
   console.log('postToEdit:', postToEdit)
 
-  postItem.value.id = postToEdit?._doc._id
-  postItem.value.title = postToEdit?._doc.title
-  postItem.value.image = postToEdit?._doc.image
-  postItem.value.summary = postToEdit?._doc.summary
-  postItem.value.content = postToEdit?._doc.content
-  postItem.value.author = postToEdit?._doc.author
+  postItem.value.id = postToEdit?._id
+  postItem.value.title = postToEdit?.title
+  postItem.value.image = postToEdit?.image
+  postItem.value.summary = postToEdit?.summary
+  postItem.value.content = postToEdit?.content
+  postItem.value.author = postToEdit?.author.id
 })
 
 watch(editorRef, (editor) => {
@@ -133,7 +133,7 @@ async function submitEditedPost() {
   const postStore = usePostStore()
 
   const post = postItem.value
-  const userId = postItem.value.author
+  const userId = postItem.value.author.id
   let newImageUrl
 
   if (inputFileEdit.value.files[0] !== undefined) {

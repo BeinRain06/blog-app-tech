@@ -82,7 +82,7 @@
                   </div>
                 </div>
               </div>
-              <div class="filter_box_selection hide_selection" ref="filterBoxOne">
+              <div class="filter_box_selection hide_selection" ref="filterBox">
                 <div
                   class="filter_box_content w-full flex flex-col gap-1 px-2 py-1 justify-center items-center"
                   @click="handleFilterSelection"
@@ -127,26 +127,17 @@
                       name="search"
                       ref="inputSearch"
                       :placeholder="pickMsg"
-                      @change="handleWordsSearch"
+                      @input="(e) => handleWordsSearch(e, 'desk')"
                     />
                   </li>
-                  <li class="w-3/12 h-full flex p-1 cursor-pointer">
+                  <li class="w-3/12 h-full flex p-1 cursor-pointer z-10" @click="submitSearch">
                     <span class="w-full flex justify-center items-center">&#128269;</span>
                   </li>
                 </ul>
-                <div
-                  class="list_proposal h-auto"
-                  v-if="isList"
-                  @mouseleave="(e) => stickVisibleorNot(e, 'add')"
-                >
-                  <ul
-                    id="content_proposal_normal"
-                    class="content_proposal play_visible_vanish"
-                    ref="contentProposal"
-                    @mouseenter="(e) => stickVisibleorNot(e, 'remove')"
-                  >
+                <div v-if="isAList" class="list_proposal">
+                  <ul id="content_proposal_normal" class="content_proposal">
                     <li
-                      class="item_proposal transition-all duration-1000 ease-in-out"
+                      class="item_proposal relative cursor-pointer transition-all duration-1000 ease-in-out my-4"
                       v-for="(element, index) in listSample"
                       key="index"
                       @click="forwardsSearch"
@@ -480,7 +471,7 @@
                     style="text-indent: 10px"
                     name="search"
                     :placeholder="pickMsg"
-                    @change="handleWordsSearch"
+                    @input="(e) => handleWordsSearch(e, 'mob')"
                   />
                 </li>
                 <li class="cursor-pointer w-2/12 h-full flex items-center justify-center">
@@ -489,14 +480,17 @@
               </ul>
               <div
                 class="list_proposal_mob"
-                v-if="isList"
+                v-if="isAList"
                 @mouseleave="(e) => stickVisibleorNot(e, 'remove')"
               >
-                <ul id="content_proposal" class="content_proposal play_visible hidden">
+                <ul
+                  id="content_proposal_mob"
+                  class="content_proposal_mob play_visible hidden"
+                  ref="contentProposal"
+                >
                   <li
-                    class="item_proposal"
+                    class="item_proposal_mob"
                     v-for="element in listSample"
-                    ref="contentProposal"
                     @mouseenter="(e) => stickVisibleorNot(e, 'remove')"
                   >
                     {{ element }}
@@ -662,6 +656,7 @@ import { usePostStore } from '@/stores/post.js'
 import LoginAdminView from './LoginAdminView.vue'
 import { logoutapi } from '@/api/logout-api.js'
 import { redirectloginapi } from '@/api/login-api.js'
+import { fetchspecificarticlesapi } from '@/api/post-api.js'
 
 const router = useRouter()
 
@@ -670,10 +665,20 @@ const userStore = ref(useUserStore())
 let dark = ref(false)
 let showFilter = ref(false)
 let pickMsg = ref('enter a search')
-let listSample = ref(['pineapple', 'orange', 'strawberries'])
+let listSample = ref(null)
 let isList = ref(false)
 
-const inputSearch = ref(null)
+let inputSearch = ref(null)
+
+const myInput = computed({
+  get() {
+    return inputSearch.value
+  },
+  set(newValue) {
+    inputSearch.value = newValue
+  }
+})
+
 const contentProposal = ref(null)
 const filterBox = ref(null)
 const filterBoxOne = ref(null)
@@ -736,6 +741,8 @@ const notadmin = computed(() => {
     return true
   }
 })
+
+const isAList = computed(() => isList.value)
 
 function handleRadioState(e) {
   console.log(e.target)
@@ -827,46 +834,19 @@ function redirectLoginPage() {
 
 function handleFilterSelection(e) {
   console.log('er target:', e.target)
-  if (e.target.id == 'standard_filter') {
+  if (e.target.id === 'standard_filter') {
     pickMsg.value = 'enter a search'
-  } else if (e.target.id == 'theme_filter') {
+    switchFilter(e)
+  } else if (e.target.id === 'theme_filter') {
     pickMsg.value = 'look for ...'
-  } else if (e.target.id == 'author_filter') {
+    switchFilter(e)
+  } else if (e.target.id === 'author_filter') {
     pickMsg.value = 'search by author'
+    switchFilter(e)
   }
 }
 
-async function handleWordsSearch(e) {
-  const str = e.target.value
-  let matchingResearch
-
-  if (e.target.value === '') {
-    listSample.value = null
-    isList.value = false
-  }
-
-  if (pickMsg === 'enter an author') {
-    const listAuthors = JSON.parse(localStorage.getItem('list-authors'))
-
-    isList.value = true
-
-    matchingResearch = listAuthors.filter((elt) => elt.includes(str))
-
-    listSample.value = matchingResearch
-  } else if (pickMsg === 'look for ...') {
-    const listThemes = JSON.parse(localStorage.getItem('list-themes'))
-
-    isList.value = true
-
-    matchingResearch = listThemes.filter((elt) => elt.includes(str))
-
-    listSample.value = matchingResearch
-  } else if ((pickMsg = 'enter a search')) {
-    isList.value = true
-  }
-}
-
-function stickVisibleorNot(act) {
+function stickVisibleorNot(e, act) {
   if (act === 'add') {
     console.log('contentProposal:', contentProposal)
     contentProposal.value.classList.add('play_visible_vanish')
@@ -902,20 +882,94 @@ function switchFilter(e) {
   showFilter.value = !showFilter.value
   if (showFilter.value === false) {
     filterBox.value.classList.add('hide_selection')
-    filterBoxOne.value.classList.add('hide_selection')
   } else {
     filterBox.value.classList.remove('hide_selection')
-    filterBoxOne.value.classList.remove('hide_selection')
+  }
+}
+
+function handleWordsSearch(e, screen) {
+  const str = e.target.value
+
+  console.log(str)
+  let matchingResearch
+
+  if (e.target.value.length <= 1) {
+    isList.value = false
+    listSample.value = null
+  }
+
+  if (pickMsg.value === 'search by author' && e.target.value !== '') {
+    let listAuthors = JSON.parse(localStorage.getItem('list-authors'))
+
+    listAuthors = Array.from(listAuthors)
+
+    console.log('listAuthors:', listAuthors)
+
+    isList.value = true
+
+    matchingResearch = listAuthors.reduce((acc, val) => {
+      const user = val.username.toLowerCase()
+      if (user.includes(str)) {
+        const usernameAlready = acc.find((elt) => (elt = val.username))
+
+        if (usernameAlready === undefined) acc.push(val.username)
+      }
+      return acc
+    }, [])
+
+    console.log('matchingResearch:', matchingResearch)
+
+    listSample.value = matchingResearch
+  } else if (pickMsg.value === 'look for ...' && e.target.value !== '') {
+    const listThemes = JSON.parse(localStorage.getItem('list-themes'))
+
+    isList.value = true
+
+    matchingResearch = listThemes.filter((elt) => elt.includes(str))
+
+    listSample.value = matchingResearch
+  } else if (pickMsg.value === 'enter a search') {
+    isList.value = false
+
+    listSample.value = null
   }
 }
 
 function forwardsSearch(e) {
-  const enhanceValue = e.target.value
-  inputSearch.value = enhanceValue
-  e.target.style.fontWeight = 'bold'
+  inputSearch.value.value = e.target.innerHTML
+
+  e.target.style.color = 'green'
   setTimeout(() => {
-    e.target.style.fontWeight = 'normal'
-  }, 3000)
+    e.target.style.color = '#555'
+    isList.value = false
+    listSample.value = null
+  }, 1600)
+}
+
+async function submitSearch() {
+  const postStore = usePostStore()
+  let newPosts
+  if (pickMsg.value === 'look for ...') {
+    console.log('myInput1', myInput)
+    newPosts = await fetchspecificarticlesapi('theme', inputSearch.value.value, null)
+  } else if (pickMsg.value === 'search by author') {
+    console.log('myInput2', myInput)
+    let allAuthors = JSON.parse(localStorage.getItem('list-authors'))
+
+    allAuthors = Array.from(allAuthors)
+
+    const thisAuthor = allAuthors.find((author) => author.username === inputSearch.value.value)
+    newPosts = await fetchspecificarticlesapi('author', inputSearch.value.value, thisAuthor.id)
+  } else {
+    console.log('myInput3', myInput)
+    newPosts = await fetchspecificarticlesapi('standard', inputSearch.value.value, null)
+  }
+
+  console.log('newPosts:', newPosts)
+
+  postStore.$patch({ allposts: newPosts })
+
+  inputSearch.value.value = null
 }
 </script>
 
@@ -1253,14 +1307,33 @@ function forwardsSearch(e) {
 
   /* list proposal */
 
-  .list_proposal {
-    position: abolute;
-    top: 2rem;
-    left: 0;
-    width: auto;
+  .list_proposal_mob {
+    display: flex;
+    position: absolute;
+    top: 1rem;
+    right: calc(20rem - 10px);
+    width: 20rem;
+    height: auto;
   }
 
-  .content_proposal {
+  .content_proposal_mob {
+    position: absolute;
+    top: 5rem;
+    right: -20rem;
+    width: 11.6rem;
+    padding: 0.5rem 0;
+    max-height: 198px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: left;
+    background-color: #f4f4f4;
+    overflow-y: scroll;
+    z-index: 10;
+  }
+
+  .content_proposal_mob.play_visible_vanish {
+    animation: proposal-visibility 5s ease-in-out forwards infinite;
     position: absolute;
     top: 5rem;
     right: -20rem;
@@ -1276,25 +1349,13 @@ function forwardsSearch(e) {
     z-index: 10;
   }
 
-  .content_proposal.play_visible_vanish {
-    animation: proposal-visibility 5s ease-in-out forwards;
-    position: absolute;
-  }
-
+  .content_proposal_mob .item_proposal_mob,
   .content_proposal .item_proposal {
     max-width: 100%;
     font-size: calc(14px + 0.35vw);
     transition: all 1s ease-in-out;
-    @apply text-gray-500 flex items-center px-1 hover:bg-gray-200;
-  }
-
-  .list_proposal_mob {
-    display: flex;
-    position: absolute;
-    top: 1rem;
-    right: calc(20rem - 10px);
-    width: 20rem;
-    height: auto;
+    color: #555;
+    @apply flex items-center px-1 hover:bg-purple-600 hover:text-gray-100;
   }
 
   /*dark-light mode*/
@@ -1381,7 +1442,7 @@ function forwardsSearch(e) {
     display: block;
   }
 
-  .content_proposal {
+  .content_proposal_mob {
     position: absolute;
     top: 7.4rem;
     right: -2.5rem;
@@ -1436,19 +1497,33 @@ function forwardsSearch(e) {
     width: 10rem;
   }
 
-  .content_proposal {
+  /* list proposal */
+
+  .list_proposal {
     position: absolute;
+    top: 2rem;
+    left: 0;
+  }
+
+  .content_proposal {
+    position: relative;
     top: 2rem;
     width: 10rem;
     padding: 0.5rem 0;
-    height: 350px;
+    max-height: 300px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: left;
-    background-color: #f4f4f4;
-    overscroll: auto;
-    z-index: 10;
+    background-color: #fff;
+    overflow-y: scroll;
+    visibility: visible;
+    transition: all 3s ease-in-out;
+  }
+
+  .item_proposal {
+    border-bottom: 1px solid #bbb;
+    z-index: 100;
   }
 
   .wrapper_logout_mode {

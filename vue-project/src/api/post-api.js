@@ -110,3 +110,26 @@ export const editpostapi = async (post) => {
     console.log(err)
   }
 }
+
+export const fetchspecificarticlesapi = async (label, inputValue, authorId) => {
+  try {
+    const grabArticles = await fetch(
+      `${base_url}/post/dedicate/${label}?input=${inputValue}&author=${authorId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-TYpe': 'application/json'
+        },
+        credentials: 'include'
+      }
+    )
+      .then((res) => res.json())
+      .then((newres) => newres.data)
+
+    console.log('grabArticles:', grabArticles)
+
+    return grabArticles
+  } catch (err) {
+    console.log(err)
+  }
+}

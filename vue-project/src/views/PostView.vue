@@ -46,7 +46,7 @@
         </div>
       </div>
       <div class="art_post_title">
-        <span class="page_title">{{ postPage?._doc.title }}</span>
+        <span class="page_title">{{ postPage.title }}</span>
       </div>
     </div>
     <div class="page_content_wrap grid place-items-center px-2">
@@ -103,9 +103,9 @@ const postPage = computed(() => {
 
   const callPost = postStore.postInPage
 
-  const dateTimeArr = callPost._doc.date.split(',')
+  const dateTimeArr = callPost.date.split(',')
 
-  const paragraphContent = callPost._doc.content
+  const paragraphContent = callPost.content
 
   const lengthContent = paragraphContent.length
 

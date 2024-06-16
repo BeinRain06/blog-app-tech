@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const User = mongoose.model("user", userSchema);
+const User = mongoose.model("User", userSchema);
 
 userSchema.virtual("id").get(function () {
   return this._id.toHexString();

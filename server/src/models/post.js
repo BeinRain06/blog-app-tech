@@ -28,7 +28,7 @@ const postSchema = new mongoose.Schema({
   },
 });
 
-const Post = mongoose.model("post", postSchema);
+const Post = mongoose.model("Post", postSchema);
 
 postSchema.virtual("id").get(function () {
   return this._id.toHexString();

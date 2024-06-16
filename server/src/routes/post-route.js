@@ -214,11 +214,45 @@ router.post("/image/delete/:nameImg", async (req, res) => {
   }
 });
 
+router.get("/dedicate/:label", async (req, res) => {
+  try {
+    const label = req.params.label;
+    const valueOfSearch = req.query.input;
+    const authorId = req.query.author;
+
+    let posts = await Post.find().populate("author", ["id", "username"]);
+
+    if (label === "theme") {
+      posts = posts.filter((post) => {
+        if (
+          post.title.includes(valueOfSearch) ||
+          post.summary.includes(valueOfSearch)
+        ) {
+          return post;
+        }
+      });
+    } else if (label === "author") {
+      console.log(authorId);
+      const userPostId = await User.findById(authorId);
+      console.log("userPostId:", userPostId);
+      posts = posts.filter((post) => post.author.id === authorId);
+    } else if (label === "standard") {
+      posts = posts.filter((post) => {
+        if (post.content.includes(valueOfSearch)) return post;
+      });
+    }
+
+    res.status(200).json({ success: true, data: posts });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 router.get("/all", async (req, res) => {
   try {
-    let posts = await Post.find();
+    let posts = await Post.find().populate("author", "username");
 
-    const postsReady = await Promise.all(
+    /* const postsReady = await Promise.all(
       posts.map(async (post) => {
         let username = post.username;
         if (username === undefined) {
@@ -230,9 +264,11 @@ router.get("/all", async (req, res) => {
           return newPost;
         }
       })
-    );
+    ); */
 
-    res.status(200).json({ success: true, data: postsReady });
+    console.log("posts HomeView:", posts);
+
+    res.status(200).json({ success: true, data: posts });
   } catch (err) {
     console.log(err);
   }
