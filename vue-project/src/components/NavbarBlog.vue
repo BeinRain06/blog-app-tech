@@ -424,7 +424,7 @@
               </div>
               <div class="filter_box_mobi_selection hide_selection" ref="filterBox">
                 <div
-                  class="filter_box_mobi_content w-full flex flex-col gap-3 py-2 justify-center items-center font-bold text-gray-900"
+                  class="filter_box_mobi_content w-full flex flex-col gap-3 py-2 justify-center items-center font-bold text-gray-900 z-10"
                   style="font-size: calc(14px + 0.28vw)"
                   @click="handleFilterSelection"
                 >
@@ -464,34 +464,30 @@
             </div>
             <div class="section_search" v-if="admin">
               <ul class="search_content_mob w-full h-7 flex justify-center items-center p-1">
-                <li class="h-full">
+                <li class="relative h-full">
                   <input
                     type="text"
-                    class="text_search w-10/12 h-full text-sm outline-none"
+                    class="text_search w-10/12 h-full text-sm outline-none z-10"
                     style="text-indent: 10px"
                     name="search"
+                    ref="inputSearch"
                     :placeholder="pickMsg"
                     @input="(e) => handleWordsSearch(e, 'mob')"
                   />
                 </li>
-                <li class="cursor-pointer w-2/12 h-full flex items-center justify-center">
+                <li
+                  class="cursor-pointer w-2/12 h-full flex items-center justify-center z-10"
+                  @click="submitSearch"
+                >
                   <span>&#128269;</span>
                 </li>
               </ul>
-              <div
-                class="list_proposal_mob"
-                v-if="isAList"
-                @mouseleave="(e) => stickVisibleorNot(e, 'remove')"
-              >
-                <ul
-                  id="content_proposal_mob"
-                  class="content_proposal_mob play_visible hidden"
-                  ref="contentProposal"
-                >
+              <div class="list_proposal_mob" v-if="isAList">
+                <ul id="content_proposal_mob" class="content_proposal_mob" ref="contentProposal">
                   <li
                     class="item_proposal_mob"
                     v-for="element in listSample"
-                    @mouseenter="(e) => stickVisibleorNot(e, 'remove')"
+                    @click="forwardsSearch"
                   >
                     {{ element }}
                   </li>
@@ -761,8 +757,6 @@ function handleCustom() {
   const userStore = useUserStore()
   const newState = !userStore.customIsVisible
 
-  console.log('usersLogin :', userStore.usersLogin)
-
   userStore.$patch({ customIsVisible: newState })
 
   console.log('user access:', userStore.access_token)
@@ -770,7 +764,6 @@ function handleCustom() {
 
 function handleMiniCustom() {
   const userStore = useUserStore()
-  console.log('usersLogin :', userStore.usersLogin)
   const newState = !userStore.miniCustomIsVisible
   userStore.$patch({ miniCustomIsVisible: newState })
 }
@@ -947,6 +940,7 @@ function forwardsSearch(e) {
 }
 
 async function submitSearch() {
+  const userStore = useUserStore()
   const postStore = usePostStore()
   let newPosts
   if (pickMsg.value === 'look for ...') {
@@ -968,6 +962,10 @@ async function submitSearch() {
   console.log('newPosts:', newPosts)
 
   postStore.$patch({ allposts: newPosts })
+
+  userStore.$patch({ customIsVisible: false })
+
+  userStore.$patch({ miniCustomIsVisible: false })
 
   inputSearch.value.value = null
 }
@@ -1319,7 +1317,7 @@ async function submitSearch() {
   .content_proposal_mob {
     position: absolute;
     top: 5rem;
-    right: -20rem;
+    right: -19rem;
     width: 11.6rem;
     padding: 0.5rem 0;
     max-height: 198px;
@@ -1329,23 +1327,6 @@ async function submitSearch() {
     align-items: left;
     background-color: #f4f4f4;
     overflow-y: scroll;
-    z-index: 10;
-  }
-
-  .content_proposal_mob.play_visible_vanish {
-    animation: proposal-visibility 5s ease-in-out forwards infinite;
-    position: absolute;
-    top: 5rem;
-    right: -20rem;
-    width: 11.6rem;
-    padding: 0.5rem 0;
-    height: 198px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: left;
-    background-color: #f4f4f4;
-    overscroll: auto;
     z-index: 10;
   }
 
@@ -1444,13 +1425,13 @@ async function submitSearch() {
 
   .content_proposal_mob {
     position: absolute;
-    top: 7.4rem;
-    right: -2.5rem;
+    top: 14rem;
+    right: calc(-68%);
     width: 12rem;
     padding: 0.5rem 0;
     height: 200px;
-    background-color: #f4f4f4;
-    overscroll: auto;
+    background-color: #b4b4b4;
+    overflow-y: scroll;
   }
 }
 
