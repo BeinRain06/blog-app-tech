@@ -17,6 +17,7 @@ app.use(
       "http://localhost:5000",
       "http://localhost:3000",
       "http://localhost:5173",
+      "https://blog-app-server-tech.vercel.app",
     ],
     credentials: true,
   })
@@ -28,7 +29,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const PORT = process.env.PORT;
-const base_url = process.env.API_BASE;
+/* const base_url = process.env.API_BASE; !important*/
+
+const base_url = "https://blog-app-server-tech.vercel.app";
 
 //alias Routes Middleware
 app.use(`/${base_url}/post`, postRouter);
