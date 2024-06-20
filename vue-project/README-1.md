@@ -762,3 +762,52 @@ script setup what worked for me
 > ```
 >
 > ```
+
+### Deployment: Full Stack (MERN, MEVN) App - with Vercel (platform server)
+
+Here we **specify** how to link the vercel **back-end** server app in order to work with vercel **front-end** ui app.
+
+First :
+
+On the folder `server` representing your backend. Preconfig **vercel** to enable his preset configuration.
+
+We might do as follow:
+
+`vercel.json`
+
+> ```js
+> {
+>  "version": 2,
+>  "name": "blog-app-tech",
+>  "builds": [{ "src": "server.js", "use": "@vercel/node" }],
+>  "routes": [{ "src": "/", "dest": "/server.js" }]
+> }
+> ```
+
+Then instead of using local host_url (e.g: `http://localhost:5000`) we need to link our **back-end** to the new **url-backend** generated via vercel **platform**(e.g: `https://blog-app-server-tech.vercel.app`)
+
+One way to achieve that, is to replace the private **PORT** we preset (e.g: `PORT=5000`) with the public PORT **8080** (`PORT=8080`) in our `server.js` file located in server back-end folder
+
+then coming to the **fornt-end** part code , and change **_url_path_** to be **e.g:** : `https://blog-app-server-tech.vercel.app` in every **routes url** of every **\*api.js** files connecting frontend to backend using **fetch API** library or **axios** to send request(register-api.js, login-api.js, ...)
+
+like the sample below:
+
+> ```js
+> export const loginapi = async (access_token) => > {
+>   const access = {
+>     access: access_token
+>   }
+>   const newUserInfo = await fetch(`(https://blog-app-server-tech.vercel.app)/login`, {
+>    method: 'POST',
+>    body: JSON.stringify(access),
+>    headers: {
+>      'Content-Type': 'application/json'
+>    },
+>    credentials: 'include'
+>  })
+>    .then((res) => res.json())
+>    .then((newres) => newres.data)
+>
+>  return newUserInfo
+> }
+> ```

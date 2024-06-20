@@ -223,7 +223,7 @@ export default defineComponent({
   }
   p {
     padding: 0.25rem 0;
-    tex-align: center;
+    text-align: center;
     line-height: 1.3;
     font-size: calc(12px + 0.5vw);
   }
@@ -315,7 +315,7 @@ export default defineComponent({
   .load_wrapper {
     position: absolute;
     top: -0.5rem;
-    widrh: 140px;
+    width: 140px;
     height: 70px;
   }
 

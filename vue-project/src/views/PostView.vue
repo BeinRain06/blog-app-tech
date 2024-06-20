@@ -54,6 +54,7 @@
     </div>
   </main>
 </template>
+
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'

@@ -80,6 +80,7 @@
     </form>
   </div>
 </template>
+
 <script>
 import { ref, defineComponent } from 'vue'
 import { useUserStore } from '../stores/user'
@@ -270,7 +271,7 @@ export default defineComponent({
   .load_wrapper {
     position: absolute;
     bottom: -2rem;
-    widrh: 140px;
+    width: 140px;
     height: 70px;
   }
 

@@ -48,7 +48,7 @@
               <input
                 type="button"
                 id="btn_identity"
-                class="btn_identity cursor-pointer w-full text-center text-gray-200 py-2 bg-blue-800 rounded-xl z-10 tranition-all duration-1000 ease-in-out hover:bg-gray-800 hover: text-gray-50"
+                class="btn_identity cursor-pointer w-full text-center text-gray-200 py-2 bg-blue-800 rounded-xl z-10 transition-all duration-1000 ease-in-out hover:bg-gray-800 hover: text-gray-50"
                 value="login"
                 @click.prevent="handleLogin"
               />
@@ -160,7 +160,7 @@ export default defineComponent({
   p {
     font-size: calc(12px + 0.5vw);
     padding: 0.25rem 0;
-    tex-align: center;
+    text-align: center;
     line-height: 1.3;
   }
 
@@ -235,7 +235,7 @@ export default defineComponent({
   .load_wrapper {
     position: absolute;
     bottom: 2rem;
-    widrh: 140px;
+    width: 140px;
     height: 70px;
   }
 

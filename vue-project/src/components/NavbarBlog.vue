@@ -641,7 +641,6 @@
     <LoginAdminView />
   </div>
 </template>
-light
 
 <script setup>
 import { RouterLink, useRouter } from 'vue-router'
@@ -980,7 +979,7 @@ async function submitSearch() {
     position: relative;
     left: 0.5rem;
     width: 36px;
-    heght: 36px;
+    height: 36px;
     padding-left: 0.5rem;
   }
 
@@ -1344,7 +1343,7 @@ async function submitSearch() {
     position: relative;
     left: 0.5rem;
     width: 40px;
-    heght: 340px;
+    height: 340px;
     padding-left: 0rem;
   }
 

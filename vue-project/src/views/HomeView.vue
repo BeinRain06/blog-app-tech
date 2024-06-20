@@ -301,7 +301,7 @@ async function reloadHomeContent() {
 
   .summary_content {
     perspective: 500px;
-    width: calc(100% -1em);
+    width: calc(100% - 1em);
     height: 100%;
   }
   .summary_content .paragraph_container {
