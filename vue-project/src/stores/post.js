@@ -22,8 +22,6 @@ export const usePostStore = defineStore('post', {
       const posts = await getpostsapi()
       this.allposts = posts
 
-      console.log('postsFetch posts:', posts)
-
       return posts
     }
   }

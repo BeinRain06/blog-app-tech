@@ -163,8 +163,6 @@ export default defineComponent({
         return
       }
 
-      //loginadminapi call
-
       const newUserInfo = await loginadminapi(this.user)
 
       if (newUserInfo === 'null') {
