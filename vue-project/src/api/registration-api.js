@@ -1,4 +1,5 @@
 const base_url = import.meta.env.VITE_API_URL
+const base_url_1 = import.meta.env.VITE_API_URL_ONE
 
 export const registrationapi = async (userInfo) => {
   const user = {
@@ -8,7 +9,7 @@ export const registrationapi = async (userInfo) => {
     secret: userInfo.custom
   }
 
-  const userCreation = await fetch(`${base_url}/register`, {
+  const userCreation = await fetch(`${base_url_1}/register`, {
     method: 'POST',
     body: JSON.stringify(user),
     headers: {

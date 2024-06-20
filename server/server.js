@@ -29,9 +29,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const PORT = process.env.PORT;
-/* const base_url = process.env.API_BASE; !important*/
 
-const base_url = "https://blog-app-server-tech.vercel.app";
+const base_url = process.env.API_BASE;
+!important;
+
+/* const NEW_PORT = "https://blog-app-server-tech.vercel.app"; */
+
+const NEW_PORT = 80;
 
 //alias Routes Middleware
 app.use(`/${base_url}/post`, postRouter);
@@ -52,8 +56,16 @@ app.get("/", (req, res) => {
 //connect server to MONGODB and start it!
 const connectDB = require("./src/config/db");
 
-connectDB().then(() => {
+//listen on local
+/* connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`server running on ${PORT}`);
+  });
+}); !important */
+
+// listen on PORT 80 (add an url)
+connectDB().then(() => {
+  app.listen(NEW_PORT, () => {
+    console.log(`server running on ${NEW_PORT}`);
   });
 });

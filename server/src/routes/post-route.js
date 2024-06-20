@@ -70,12 +70,13 @@ router.post("/", async (req, res) => {
 
     const PORT = process.env.PORT;
 
-    /*const base_url = process.env.API_BASE; !important*/
-
-    const base_url = " https://blog-app-server-tech.vercel.app";
+    const base_url = process.env.API_BASE;
 
     // image_url to store on mongDB as string
-    const image_url = `http://localhost:${PORT}/${base_url}/post/${image_path}`;
+
+    /*  const image_url = `http://localhost:${PORT}/${base_url}/post/${image_path}`; !important */
+
+    const image_url = `https://blog-app-server-tech.vercel.app/${base_url}/post/${image_path}`;
 
     let prevCookie;
     let refreshDataUser;
@@ -143,13 +144,13 @@ router.post("/edit/:postId", async (req, res) => {
 
     const PORT = process.env.PORT;
 
-    /* const base_url = process.env.API_BASE;   !important */
-
-    const base_url = " https://blog-app-server-tech.vercel.app";
+    const base_url = process.env.API_BASE;
 
     const image_path = newPost.image;
 
-    const image_url = `http://localhost:${PORT}/${base_url}/post/${image_path}`;
+    /*  const image_url = `http://localhost:${PORT}/${base_url}/post/${image_path}`; ! important*/
+
+    const image_url = `https://blog-app-server-tech.vercel.app/${base_url}/post/${image_path}`;
 
     let updationPost;
 
