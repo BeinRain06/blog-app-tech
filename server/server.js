@@ -43,7 +43,6 @@ app.get("/", (req, res) => {
     name: "Leave",
   };
 
-  console.log(base_url);
   res.status(200).json({ data: post });
 });
 

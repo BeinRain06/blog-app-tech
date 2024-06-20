@@ -26,10 +26,8 @@ function JWTSign(payload, type, label) {
   if (type === "common") {
     return new Promise((resolve, reject) => {
       try {
-        /* const secret = process.env.common_secret; */
         const secret = fs.readFileSync(jwtPrivateFakeKey);
         const token = jwt.sign({ userEmail: payload.email }, secret, options);
-        console.log("token token 1:", token);
         resolve(token);
       } catch (err) {
         reject(err);
@@ -40,7 +38,6 @@ function JWTSign(payload, type, label) {
       try {
         const secret = fs.readFileSync(jwtPrivateKey);
         const token = jwt.sign({ userEmail: payload.email }, secret, options);
-        console.log("token token 2:", token);
         resolve(token);
       } catch (err) {
         reject(err);
@@ -70,13 +67,9 @@ function JWTVerify(token, label) {
       ? { algorithm: "RS256", expiresIn: "6h" }
       : { algorithm: "RS256", expiresIn: "15m" };
 
-  console.log("jwtPublicKey:", typeof jwtPublicKey);
-
   return new Promise((resolve, reject) => {
     try {
       const cert = fs.readFileSync(jwtPublicKey);
-
-      console.log("secret right:", cert);
 
       const result = jwt.verify(token, cert, options);
 

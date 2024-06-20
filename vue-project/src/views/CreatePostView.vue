@@ -115,8 +115,6 @@ async function createPost() {
 
   //get info post
 
-  console.log('inputFile:', inputFile)
-
   const myInputFile = inputFile.value
 
   //send info post
@@ -129,11 +127,7 @@ async function createPost() {
     content: newContent.value
   }
 
-  console.log('postElt:', postElt)
-
   const postInfos = await createpostapi(postElt, thisUserId.value)
-
-  console.log('postInfos:', postInfos)
 
   //upadate lastPost {title, date} and countArticles --post Store
   const lastUpdate = {
@@ -141,8 +135,6 @@ async function createPost() {
     author: postInfos.author,
     date: postInfos.date
   }
-
-  console.log('lastUpdate:', lastUpdate)
 
   const countPost = postInfos.countPost
 
@@ -161,7 +153,6 @@ async function createPost() {
 
 function grabImage(e) {
   const filename = e.target.files[0]
-  console.log('file:', filename)
 }
 </script>
 

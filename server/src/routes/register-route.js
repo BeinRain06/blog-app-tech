@@ -26,9 +26,6 @@ router.get("/", (req, res) => {
   const newUser = req.body.user;
   const ab = req.cookie;
 
-  console.log(user);
-  console.log(newUser);
-
   res.status(200).json({ success: true, data: user });
 });
 
@@ -83,10 +80,6 @@ router.post("/", async (req, res) => {
     });
 
     user = await user.save();
-
-    console.log("user saved :", user);
-
-    /* console.log("req cookie:", req.cookies); */
 
     //send session_tokies in cookie
     const userId = user.id;

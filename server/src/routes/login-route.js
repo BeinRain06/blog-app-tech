@@ -39,8 +39,6 @@ router.get("/admin/authors-themes", async (req, res) => {
       return acc;
     }, []);
 
-    console.log("postsInfos:", postsInfos);
-
     res.status(200).json({ success: true, data: postsInfos });
   } catch (err) {
     console.log(err);
@@ -51,8 +49,6 @@ router.post("/", requestInitUser, async (req, res) => {
   try {
     const user = req.requestInitUser;
     const newUserInfo = await applyNewToken(user, "standard");
-
-    console.log("new New User:", newUserInfo);
 
     const maxAge = 6 * 60 * 60; // in sec
 
@@ -79,20 +75,12 @@ router.post("/redirect", async (req, res) => {
   try {
     const prevCookie = req.cookies.userInfo;
 
-    console.log("req cookies:", req.cookies);
-
     if (prevCookie !== undefined) {
       const userId = prevCookie.userId;
       const userFetch = await User.findById(userId).select("-password");
 
       const session_token = prevCookie.session_token;
       const access_token = req.body.access;
-
-      /* console.log("access_token:", access_token);
-
-      if (access_token === null) {
-        return res.status(200).json({ success: true, data: "null" });
-      } */
 
       if (session_token) {
         // ==> ==>
@@ -101,8 +89,6 @@ router.post("/redirect", async (req, res) => {
           session_token,
           access_token
         );
-
-        console.log("user new :", newUserInfo);
 
         if (newUserInfo === "null" || newUserInfo === undefined) {
           return res.status(200).json({ success: true, data: "null" });
@@ -123,15 +109,11 @@ router.post("/admin/auth", requestInitUser, async (req, res) => {
   try {
     const user = req.requestInitUser;
 
-    console.log("user req.requestInitUser:", user);
-
     if (!user.admin) {
       return res.status(200).json({ success: false, data: "null" });
     }
 
     const newUserInfo = await applyNewToken(user, "admin");
-
-    console.log("newUserInfo:", newUserInfo);
 
     const maxAge = 6 * 60 * 60; // in sec
 

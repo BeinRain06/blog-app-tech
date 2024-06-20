@@ -15,8 +15,6 @@ export const redirectloginapi = async (access_token) => {
     .then((res) => res.json())
     .then((newres) => newres.data)
 
-  console.log('catch username', newUserInfo)
-
   return newUserInfo
 }
 

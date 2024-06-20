@@ -95,8 +95,6 @@ export default defineComponent({
     async function handleLogin(e) {
       const userStore = useUserStore()
 
-      console.log('e login target:', e.target)
-
       setTimeout(() => {
         userStore.$patch({
           loading: !userStore.loadingState
@@ -117,7 +115,6 @@ export default defineComponent({
 
       //loginapi call
       const newUserInfo = await loginapi(user)
-      console.log('newUserInfo:', newUserInfo)
 
       const exUsersArr = userStore.usersLogin
       userStore.$patch({
@@ -128,17 +125,13 @@ export default defineComponent({
         access_token: newUserInfo.access
       })
 
-      console.log('userStore access_token:', userStore.access_token)
-
       resetUser(user, null, inputPwd)
 
       this.$router.push({ path: '/' })
     }
 
     function showPassword(e) {
-      console.log('this e target:', e.target)
       if (e.target.id === 'toggle_password') {
-        console.log('inputPwd:', inputPwd.value)
         const typeEl = inputPwd.value.getAttribute('type')
         if (typeEl === 'password') {
           inputPwd.value.setAttribute('type', 'text')
@@ -239,7 +232,6 @@ export default defineComponent({
     top: 0.5rem;
   }
 
-  /* loading */
   .load_wrapper {
     position: absolute;
     bottom: 2rem;

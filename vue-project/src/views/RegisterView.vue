@@ -147,13 +147,11 @@ export default defineComponent({
     warningUpStage: () => {
       const warningStore = useWarningStore()
       const stage = warningStore.warningStage
-      console.log(stage)
       return stage
     },
     warningUpMsg: () => {
       const warningStore = useWarningStore()
       const msgWarn = warningStore.warningNews
-      console.log(msgWarn)
       return msgWarn
     },
     loadingStage: () => {
@@ -194,8 +192,6 @@ export default defineComponent({
       userStore.$patch({
         loading: !userStore.loadingState
       })
-
-      console.log('collectedData:', collectedData)
 
       const newUser = collectedData.username
 
@@ -316,7 +312,6 @@ export default defineComponent({
     top: 1.35rem;
   }
 
-  /* loading */
   .load_wrapper {
     position: absolute;
     top: -0.5rem;

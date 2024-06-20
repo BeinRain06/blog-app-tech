@@ -15,8 +15,6 @@ export const createpostapi = async (postElt, thisUserId) => {
       .then((res) => res.json())
       .then((newres) => newres.data)
 
-    console.log('postInfos :', postInfos)
-
     return postInfos
   } catch (err) {
     console.log(err)
@@ -26,8 +24,6 @@ export const createpostapi = async (postElt, thisUserId) => {
 export const primarimageapi = async (myInputFile, thisUserId) => {
   try {
     const file = myInputFile.files[0]
-
-    console.log('our api cover:', file)
 
     //formData instance
     const formData = new FormData()
@@ -41,8 +37,6 @@ export const primarimageapi = async (myInputFile, thisUserId) => {
     })
       .then((res) => res.json())
       .then((newres) => newres.image_path)
-
-    console.log('image_path:', prePostImg)
 
     return prePostImg
   } catch (err) {
@@ -103,8 +97,6 @@ export const editpostapi = async (post) => {
       .then((res) => res.json())
       .then((newres) => newres)
 
-    console.log('updatedPost:', updatedPost)
-
     return updatedPost
   } catch (err) {
     console.log(err)
@@ -125,8 +117,6 @@ export const fetchspecificarticlesapi = async (label, inputValue, authorId) => {
     )
       .then((res) => res.json())
       .then((newres) => newres.data)
-
-    console.log('grabArticles:', grabArticles)
 
     return grabArticles
   } catch (err) {

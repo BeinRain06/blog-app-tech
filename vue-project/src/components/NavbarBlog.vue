@@ -758,8 +758,6 @@ function handleCustom() {
   const newState = !userStore.customIsVisible
 
   userStore.$patch({ customIsVisible: newState })
-
-  console.log('user access:', userStore.access_token)
 }
 
 function handleMiniCustom() {
@@ -771,12 +769,9 @@ function handleMiniCustom() {
 async function logoutSession() {
   const userStore = useUserStore()
   const exArr = userStore.usersLogin
-  console.log('exArr:', exArr)
   const userToLogout = await logoutapi()
-  console.log('userToLogout:', userToLogout)
 
   const newArr = exArr.filter((item) => item !== userToLogout)
-  console.log('newArr:', newArr)
   userStore.$patch({
     usersLogin: newArr,
     currentUsername: null,
@@ -796,8 +791,6 @@ async function redirectLink(e, label) {
     console.log('access_token:', access_token)
 
     const newUserInfo = await redirectloginapi(access_token)
-
-    console.log('newUserInfo:', newUserInfo)
 
     if (newUserInfo !== 'null') {
       userStore.$patch({
@@ -826,7 +819,6 @@ function redirectLoginPage() {
 }
 
 function handleFilterSelection(e) {
-  console.log('er target:', e.target)
   if (e.target.id === 'standard_filter') {
     pickMsg.value = 'enter a search'
     switchFilter(e)
@@ -841,10 +833,8 @@ function handleFilterSelection(e) {
 
 function stickVisibleorNot(e, act) {
   if (act === 'add') {
-    console.log('contentProposal:', contentProposal)
     contentProposal.value.classList.add('play_visible_vanish')
   } else {
-    console.log('contentProposal:', contentProposal)
     contentProposal.value.classList.remove('play_visible_vanish')
   }
 }
@@ -871,7 +861,6 @@ function reachTo(label) {
 }
 
 function switchFilter(e) {
-  console.log(e.target)
   showFilter.value = !showFilter.value
   if (showFilter.value === false) {
     filterBox.value.classList.add('hide_selection')
@@ -883,7 +872,6 @@ function switchFilter(e) {
 function handleWordsSearch(e, screen) {
   const str = e.target.value
 
-  console.log(str)
   let matchingResearch
 
   if (e.target.value.length <= 1) {
@@ -896,8 +884,6 @@ function handleWordsSearch(e, screen) {
 
     listAuthors = Array.from(listAuthors)
 
-    console.log('listAuthors:', listAuthors)
-
     isList.value = true
 
     matchingResearch = listAuthors.reduce((acc, val) => {
@@ -909,8 +895,6 @@ function handleWordsSearch(e, screen) {
       }
       return acc
     }, [])
-
-    console.log('matchingResearch:', matchingResearch)
 
     listSample.value = matchingResearch
   } else if (pickMsg.value === 'look for ...' && e.target.value !== '') {
@@ -944,10 +928,8 @@ async function submitSearch() {
   const postStore = usePostStore()
   let newPosts
   if (pickMsg.value === 'look for ...') {
-    console.log('myInput1', myInput)
     newPosts = await fetchspecificarticlesapi('theme', inputSearch.value.value, null)
   } else if (pickMsg.value === 'search by author') {
-    console.log('myInput2', myInput)
     let allAuthors = JSON.parse(localStorage.getItem('list-authors'))
 
     allAuthors = Array.from(allAuthors)
@@ -955,11 +937,10 @@ async function submitSearch() {
     const thisAuthor = allAuthors.find((author) => author.username === inputSearch.value.value)
     newPosts = await fetchspecificarticlesapi('author', inputSearch.value.value, thisAuthor.id)
   } else {
-    console.log('myInput3', myInput)
     newPosts = await fetchspecificarticlesapi('standard', inputSearch.value.value, null)
   }
 
-  console.log('newPosts:', newPosts)
+  console.log('allposts :', newPosts)
 
   postStore.$patch({ allposts: newPosts })
 
@@ -1164,8 +1145,6 @@ async function submitSearch() {
     padding-left: 0.5rem;
   }
 
-  /*style add admin*/
-
   .nav_desktop_admin {
     display: none;
     justify-content: space-between;
@@ -1175,19 +1154,6 @@ async function submitSearch() {
   .nav_mobile_admin {
     display: flex;
   }
-
-  /*.mini_admin_logo {
-    positon: absolute;
-    top: -2rem;
-    left: -1rem;
-    @apply rounded;
-  }*/
-
-  /*.mini_admin_logo span {
-    @apply text-white text-sm bg-green-600 py-1 px-4 rounded;
-  } */
-
-  /* filter wrapper admin*/
 
   .thin_bar {
     position: relative;
@@ -1303,8 +1269,6 @@ async function submitSearch() {
     align-items: center;
   }
 
-  /* list proposal */
-
   .list_proposal_mob {
     display: flex;
     position: absolute;
@@ -1339,8 +1303,6 @@ async function submitSearch() {
     @apply flex items-center px-1 hover:bg-purple-600 hover:text-gray-100;
   }
 
-  /*dark-light mode*/
-
   .wrapper_logout_mode {
     display: none;
     flex-direction: row;
@@ -1371,8 +1333,6 @@ async function submitSearch() {
   .img_mode {
     border-radius: 50%;
   }
-
-  /*style add admin mobile*/
 }
 
 @media (min-width: 375px) {
@@ -1478,8 +1438,6 @@ async function submitSearch() {
     width: 10rem;
   }
 
-  /* list proposal */
-
   .list_proposal {
     position: absolute;
     top: 2rem;
@@ -1540,8 +1498,6 @@ async function submitSearch() {
   p.user_in {
     left: calc(2%);
   }
-
-  /*style add admin*/
 
   .nav_desktop_admin {
     display: flex;

@@ -1,6 +1,6 @@
 <template>
   <main>
-    <div id="home_page" class="home_page w-full px-0 py-2 xsm:p-4">
+    <div id="home_page" class="home_page relative w-full px-0 py-2 xsm:p-4">
       <div
         v-for="(postItem, i) in allposts"
         key="{{postItem.id}}"
@@ -61,6 +61,18 @@
           </div>
         </div>
       </div>
+      <div v-if="allposts === null" class="w-screen h-60 flex items-center">
+        <div class="empty_content_posts w-full h-full flex flex-col justify-start">
+          <div class="relative top-0 left-2 w-screen h-12 flex items-start bg-gray-50">
+            <p class="btn_previous underline cursor-pointer z-10" @click="reloadHomeContent">
+              <span class="m-2">&larr;</span> back
+            </p>
+          </div>
+          <p class="empty_home_posts w-full h-auto text-center" style="font-size: calc(28px + 1vw)">
+            not found
+          </p>
+        </div>
+      </div>
     </div>
   </main>
 </template>
@@ -86,7 +98,7 @@ const posts = onMounted(async () => {
   const postsFetch = await postStore.updateHomePage()
 
   setTimeout(() => {
-    console.log('time delay')
+    console.log('update home page')
   }, 3400)
 
   return postsFetch
@@ -94,8 +106,6 @@ const posts = onMounted(async () => {
 
 const allposts = computed(() => {
   const postStore = usePostStore()
-
-  console.log('postStore:', postStore)
 
   return postStore.fetchPosts
 })
@@ -110,12 +120,6 @@ async function redirectEditPage(e, i) {
   const postId = postEdit.id
 
   const useridInPost = postEdit.author.id
-
-  console.log('useridInPost:', useridInPost)
-
-  console.log('postEdit :', postEdit)
-
-  console.log('userId', userId)
 
   if (userStore.currentUsername !== null && userId === useridInPost) {
     postStore.$patch({ postInPage: postEdit })
@@ -141,9 +145,25 @@ function reachPostPage(e, i) {
     router.push({ path: '/page' })
   }
 }
+
+async function reloadHomeContent() {
+  const postStore = usePostStore()
+  const postsFetch = await postStore.updateHomePage()
+  setTimeout(() => {
+    console.log('update home page')
+  }, 1500)
+}
 </script>
 
 <style scoped>
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 @media (min-width: 180px) {
   h1 {
     font-size: calc(18px + 1.6vw);

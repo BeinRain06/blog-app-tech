@@ -97,8 +97,6 @@ onMounted(() => {
   const postStore = usePostStore()
   const postToEdit = postStore.postInPage
 
-  console.log('postToEdit:', postToEdit)
-
   postItem.value.id = postToEdit?._id
   postItem.value.title = postToEdit?.title
   postItem.value.image = postToEdit?.image
@@ -125,8 +123,6 @@ watch(editorRef, (editor) => {
 function grabImage(e) {
   const filename = e.target.files[0]
   originalNameImg.value = filename
-
-  console.log('file:', filename)
 }
 
 async function submitEditedPost() {
@@ -141,8 +137,6 @@ async function submitEditedPost() {
 
     const postToEdit = postStore.postInPage
 
-    console.log(postToEdit)
-
     let nameExImg = exUrlImgArr[exUrlImgArr.length - 1]
 
     if (nameExImg !== 'undefined') {
@@ -150,15 +144,11 @@ async function submitEditedPost() {
 
       let newNameExImg = `${arrExImg[0]}`
 
-      console.log('newNameExImg:', newNameExImg)
-
       const removeImage = await deleteimageapi(newNameExImg)
       console.log('removeImage:', removeImage)
     }
 
     const myInputFileEdit = inputFileEdit.value
-
-    console.log('inputFileEdit value:', inputFileEdit.value)
 
     newImageUrl = await primarimageapi(myInputFileEdit, userId)
   } else {
@@ -169,11 +159,7 @@ async function submitEditedPost() {
 
   const sendEdit = await editpostapi(post)
 
-  console.log('sendEdit:', sendEdit)
-
   if (sendEdit.success) {
-    console.log('sendEdit success !')
-
     await postStore.updateHomePage()
 
     postStore.$patch({ postInPage: null })

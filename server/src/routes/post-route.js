@@ -50,7 +50,6 @@ router.use(`/images`, express.static(path.join(__dirname, "../public/images")));
 
 router.post("/image/create", upload.single("cover"), (req, res) => {
   try {
-    console.log("req body img create :", req.body);
     if (req.body.userid !== null || req.body.userid !== undefined) {
       return res.status(200).json({
         success: true,
@@ -75,17 +74,13 @@ router.post("/", async (req, res) => {
     // image_url to store on mongDB as string
     const image_url = `http://localhost:${PORT}/${base_url}/post/${image_path}`;
 
-    console.log("req :", req);
-
     let prevCookie;
     let refreshDataUser;
     let userId;
 
     if (userid !== null || userid !== undefined) {
-      console.log("prev pre cookies:", prevCookie);
       if (req.cookies.userInfo !== undefined) {
         prevCookie = req.cookies.userInfo;
-        console.log("prev post cookies:", prevCookie);
         userId = prevCookie.userId;
       } else {
         refreshDataUser = await User.findById(userid);
@@ -105,8 +100,6 @@ router.post("/", async (req, res) => {
     });
 
     post = await post.save();
-
-    console.log("post saved :", post);
 
     const allUserPost = await Post.find({ author: userId });
 
@@ -131,8 +124,6 @@ router.post("/", async (req, res) => {
       access_token: access_token,
     };
 
-    console.log("infosNewPost send :", infosNewPost);
-
     res.status(200).json({ success: true, data: infosNewPost });
   } catch (err) {
     console.log(err);
@@ -143,13 +134,9 @@ router.post("/edit/:postId", async (req, res) => {
   try {
     const postId = req.params.postId;
 
-    console.log("postId:", postId);
-
     let date = format(new Date(), "dd MMM yyyy ,  hh:mm a");
 
     const newPost = req.body;
-
-    console.log("newPost req body :", newPost);
 
     const PORT = process.env.PORT;
 
@@ -158,8 +145,6 @@ router.post("/edit/:postId", async (req, res) => {
     const image_path = newPost.image;
 
     const image_url = `http://localhost:${PORT}/${base_url}/post/${image_path}`;
-
-    console.log("image_url:", image_url);
 
     let updationPost;
 
@@ -189,8 +174,6 @@ router.post("/edit/:postId", async (req, res) => {
         { new: true }
       );
     }
-
-    console.log("newPost req body :", updationPost);
 
     res.status(200).json({ success: true, data: updationPost });
   } catch (err) {
@@ -232,14 +215,17 @@ router.get("/dedicate/:label", async (req, res) => {
         }
       });
     } else if (label === "author") {
-      console.log(authorId);
       const userPostId = await User.findById(authorId);
-      console.log("userPostId:", userPostId);
+
       posts = posts.filter((post) => post.author.id === authorId);
     } else if (label === "standard") {
       posts = posts.filter((post) => {
         if (post.content.includes(valueOfSearch)) return post;
       });
+    }
+
+    if (posts.length === 0) {
+      posts = null;
     }
 
     res.status(200).json({ success: true, data: posts });
@@ -251,22 +237,6 @@ router.get("/dedicate/:label", async (req, res) => {
 router.get("/all", async (req, res) => {
   try {
     let posts = await Post.find().populate("author", "username");
-
-    /* const postsReady = await Promise.all(
-      posts.map(async (post) => {
-        let username = post.username;
-        if (username === undefined) {
-          const userId = post.author;
-          const user = await User.findById(userId);
-
-          username = user.username;
-          const newPost = { ...post, username };
-          return newPost;
-        }
-      })
-    ); */
-
-    console.log("posts HomeView:", posts);
 
     res.status(200).json({ success: true, data: posts });
   } catch (err) {

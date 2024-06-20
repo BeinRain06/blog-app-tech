@@ -105,13 +105,11 @@ export default defineComponent({
     warningUpStage: () => {
       const warningStore = useWarningStore()
       const stage = warningStore.warningStage
-      console.log(stage)
       return stage
     },
     warningUpMsg: () => {
       const warningStore = useWarningStore()
       const msgWarn = warningStore.warningNews
-      console.log(msgWarn)
       return msgWarn
     },
     loadingStage: () => {
@@ -141,7 +139,6 @@ export default defineComponent({
         label = 'cancel'
       } else if (e.target.id === 'submit_log') {
         label = 'submit'
-        console.log('this-user', this.user)
         this.submithandler(label)
       }
 
@@ -149,7 +146,6 @@ export default defineComponent({
     },
     async submithandler(label) {
       const userStore = useUserStore()
-      console.log('this-user', this.user)
 
       setTimeout(() => {
         userStore.$patch({
@@ -162,8 +158,6 @@ export default defineComponent({
       })
 
       const isStateWarning = checkInputError(this.user, 'loginadmin')
-
-      console.log('isStateWarning:', isStateWarning)
 
       if (isStateWarning) {
         return
@@ -178,8 +172,6 @@ export default defineComponent({
       }
 
       await populateLocalStorage()
-
-      console.log('newUserInfo:', newUserInfo)
 
       const exUsersArr = userStore.usersLogin
 
@@ -277,7 +269,6 @@ export default defineComponent({
     @apply bg-gray-800;
   }
 
-  /* loading */
   .load_wrapper {
     position: absolute;
     bottom: -2rem;

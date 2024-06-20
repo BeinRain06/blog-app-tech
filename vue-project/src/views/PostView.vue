@@ -119,8 +119,6 @@ const postPage = computed(() => {
   return callPost
 })
 
-console.log('postPage:', postPage)
-
 const currentUsername = computed(() => {
   const userStore = useUserStore()
   return userStore.currentUsername

@@ -13,7 +13,5 @@ export const logoutapi = async () => {
     .then((res) => res.json())
     .then((newres) => newres.data)
 
-  console.log('user logout - data resetting', postLogout)
-
   return postLogout
 }
