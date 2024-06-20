@@ -31,11 +31,10 @@ app.use(express.urlencoded({ extended: false }));
 const PORT = process.env.PORT;
 
 const base_url = process.env.API_BASE;
-!important;
 
 /* const NEW_PORT = "https://blog-app-server-tech.vercel.app"; */
 
-const NEW_PORT = 80;
+const NEW_PORT = 8080;
 
 //alias Routes Middleware
 app.use(`/${base_url}/post`, postRouter);
