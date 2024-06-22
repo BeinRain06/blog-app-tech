@@ -4,10 +4,10 @@ const User = require("./src/models/user.js");
 const Post = require("./src/models/post.js");
 const path = require("path");
 const cookie = require("cookie-parser");
-const postRouter = require("./src/routes/post-route");
-const registerRouter = require("./src/routes/register-route");
-const loginRouter = require("./src/routes/login-route");
-const logoutRouter = require("./src/routes/logout-route");
+const postRouter = require("./src/routes/post-route.js");
+const registerRouter = require("./src/routes/register-route.js");
+const loginRouter = require("./src/routes/login-route.js");
+const logoutRouter = require("./src/routes/logout-route.js");
 
 const app = express();
 
