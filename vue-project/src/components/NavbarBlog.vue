@@ -1337,23 +1337,20 @@ async function submitSearch() {
 @media (min-width: 375px) {
   .nav_header {
     --var-font-size: 1.4em;
+    padding: 1rem !important;
   }
 
   .generic_logo {
     position: relative;
     left: 0.5rem;
     width: 40px;
-    height: 340px;
+    height: 40px;
     padding-left: 0rem;
   }
 
   .profile_logo {
     width: 3.6rem;
     height: 3rem;
-  }
-
-  .nav_header {
-    padding: 2rem !important;
   }
 
   .btn-logo {

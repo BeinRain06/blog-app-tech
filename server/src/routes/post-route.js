@@ -1,6 +1,7 @@
 const User = require("../models/user.js");
 const Post = require("../models/post.js");
 const express = require("express");
+const { createProxyMiddleware } = require("http-proxy-middleware");
 const compareAsc = require("date-fns/compareAsc");
 const path = require("path");
 const multer = require("multer");
@@ -10,19 +11,68 @@ const router = express.Router();
 const { format } = require("date-fns");
 const { generateToken } = require("../protect-api/authorization-jwt");
 
-router.use(express.urlencoded({ extended: false }));
+router.use(
+  "/",
+  createProxyMiddleware({
+    target: "https://blog-app-server-tech.vercel.app/blogtech/api/post",
+    changeOrigin: true,
+  })
+);
+
+router.use(
+  "/edit/:postId",
+  createProxyMiddleware({
+    target: "https://blog-app-server-tech.vercel.app/blogtech/api/post",
+    changeOrigin: true,
+  })
+);
+
+router.use(
+  "/image/delete/:nameImg",
+  createProxyMiddleware({
+    target: "https://blog-app-server-tech.vercel.app/blogtech/api/post",
+    changeOrigin: true,
+  })
+);
+
+router.use(
+  "/dedicate/:label",
+  createProxyMiddleware({
+    target: "https://blog-app-server-tech.vercel.app/blogtech/api/post",
+    changeOrigin: true,
+  })
+);
+
+router.use(
+  "/all",
+  createProxyMiddleware({
+    target: "https://blog-app-server-tech.vercel.app/blogtech/api/post",
+    secure: false,
+    changeOrigin: true,
+  })
+);
 
 router.use(
   cors({
     origin: [
+      "https://blog-app-server-tech.vercel.app",
       "http://localhost:5000",
       "http://localhost:3000",
       "http://localhost:5173",
-      "https://blog-app-server-tech.vercel.app",
     ],
     credentials: true,
   })
 );
+
+/* router.use((req, res, next) => {
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    "https://blog-app-server-tech.vercel.app/blogtech/api"
+  );
+  next();
+}); */
+
+router.use(express.urlencoded({ extended: false }));
 
 require("dotenv").config({ path: path.join(__dirname, "..") });
 

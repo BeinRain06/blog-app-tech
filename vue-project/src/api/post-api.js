@@ -66,7 +66,8 @@ export const deleteimageapi = async (nameImg) => {
 export const getpostsapi = async () => {
   try {
     const posts = await fetch(`${base_url_1}/post/all`, {
-      mehod: 'GET',
+      method: 'GET',
+      mode: 'cors',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -109,7 +110,7 @@ export const fetchspecificarticlesapi = async (label, inputValue, authorId) => {
       {
         method: 'GET',
         headers: {
-          'Content-TYpe': 'application/json'
+          'Content-Type': 'application/json'
         },
         credentials: 'include'
       }
