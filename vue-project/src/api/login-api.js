@@ -5,7 +5,7 @@ export const redirectloginapi = async (access_token) => {
   const access = {
     access: access_token
   }
-  const newUserInfo = await fetch(`${base_url_1}/login/redirect`, {
+  const newUserInfo = await fetch(`${base_url}/login/redirect`, {
     method: 'POST',
     body: JSON.stringify(access),
     headers: {
@@ -25,7 +25,7 @@ export const loginapi = async (userInfo) => {
     password: userInfo.password
   }
 
-  const userFetching = await fetch(`${base_url_1}/login`, {
+  const userFetching = await fetch(`${base_url}/login`, {
     method: 'POST',
     body: JSON.stringify(user),
     headers: {
@@ -41,7 +41,7 @@ export const loginapi = async (userInfo) => {
 }
 
 export const loginadminapi = async (userInfo) => {
-  const newUserInfo = await fetch(`${base_url_1}/login/admin/auth`, {
+  const newUserInfo = await fetch(`${base_url}/login/admin/auth`, {
     method: 'POST',
     body: JSON.stringify(userInfo),
     headers: {
@@ -57,7 +57,7 @@ export const loginadminapi = async (userInfo) => {
 }
 
 export const getauthorsandthemesapi = async () => {
-  const authorsAndThemes = await fetch(`${base_url_1}/login/admin/authors-themes`, {
+  const authorsAndThemes = await fetch(`${base_url}/login/admin/authors-themes`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'

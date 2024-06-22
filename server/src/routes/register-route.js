@@ -1,6 +1,5 @@
 const User = require("../models/user");
 const express = require("express");
-const { createProxyMiddleware } = require("http-proxy-middleware");
 const cors = require("cors");
 const path = require("path");
 const bcrypt = require("bcryptjs");
@@ -9,14 +8,6 @@ const { format } = require("date-fns");
 const { generateToken } = require("../protect-api/authorization-jwt");
 
 const router = express.Router();
-
-router.use(
-  "/",
-  createProxyMiddleware({
-    target: "https://blog-app-server-tech.vercel.app/blogtech/api/register",
-    changeOrigin: true,
-  })
-);
 
 router.use(
   cors({

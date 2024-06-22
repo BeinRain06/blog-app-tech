@@ -9,7 +9,7 @@ export const registrationapi = async (userInfo) => {
     secret: userInfo.custom
   }
 
-  const userCreation = await fetch(`${base_url_1}/register`, {
+  const userCreation = await fetch(`${base_url}/register`, {
     method: 'POST',
     body: JSON.stringify(user),
     headers: {

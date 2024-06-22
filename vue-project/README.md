@@ -4,7 +4,7 @@ This tech app is a sample **blog** prototype for techreviews. Informatals is a p
 
 <img with="20px" height="20px" src="./link-solid.svg"/> View live
 
-Try [Link](https://github.com/BeinRain06/blog-app-tech)
+Try [Link](https://blog-app-ui-tech.vercel.app/)
 
 or
 

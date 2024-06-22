@@ -5,7 +5,7 @@ export const createpostapi = async (postElt, thisUserId) => {
   try {
     const newPostElt = { ...postElt, userid: thisUserId }
 
-    const postInfos = await fetch(`${base_url_1}/post`, {
+    const postInfos = await fetch(`${base_url}/post`, {
       method: 'POST',
       body: JSON.stringify(newPostElt),
       headers: {
@@ -32,7 +32,7 @@ export const primarimageapi = async (myInputFile, thisUserId) => {
     formData.append('cover', file)
     formData.append('userid', thisUserId)
 
-    const prePostImg = await fetch(`${base_url_1}/post/image/create`, {
+    const prePostImg = await fetch(`${base_url}/post/image/create`, {
       method: 'POST',
       body: formData
     })
@@ -47,7 +47,7 @@ export const primarimageapi = async (myInputFile, thisUserId) => {
 
 export const deleteimageapi = async (nameImg) => {
   try {
-    const sendImage = await fetch(`${base_url_1}/post/image/delete/${nameImg}`, {
+    const sendImage = await fetch(`${base_url}/post/image/delete/${nameImg}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -65,7 +65,7 @@ export const deleteimageapi = async (nameImg) => {
 
 export const getpostsapi = async () => {
   try {
-    const posts = await fetch(`${base_url_1}/post/all`, {
+    const posts = await fetch(`${base_url}/post/all`, {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -86,7 +86,7 @@ export const editpostapi = async (post) => {
   try {
     const postId = post.id
 
-    const updatedPost = await fetch(`${base_url_1}/post/edit/${postId}`, {
+    const updatedPost = await fetch(`${base_url}/post/edit/${postId}`, {
       method: 'POST',
       body: JSON.stringify(post),
       headers: {
@@ -106,7 +106,7 @@ export const editpostapi = async (post) => {
 export const fetchspecificarticlesapi = async (label, inputValue, authorId) => {
   try {
     const grabArticles = await fetch(
-      `${base_url_1}/post/dedicate/${label}?input=${inputValue}&author=${authorId}`,
+      `${base_url}/post/dedicate/${label}?input=${inputValue}&author=${authorId}`,
       {
         method: 'GET',
         headers: {

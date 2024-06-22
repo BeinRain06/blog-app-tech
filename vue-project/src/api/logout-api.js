@@ -3,7 +3,7 @@ const base_url_1 = import.meta.env.VITE_API_URL_ONE
 
 export const logoutapi = async () => {
   const user = {}
-  const postLogout = await fetch(`${base_url_1}/logout`, {
+  const postLogout = await fetch(`${base_url}/logout`, {
     method: 'POST',
     body: JSON.stringify(user),
     headers: {

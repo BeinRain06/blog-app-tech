@@ -1,5 +1,4 @@
 const express = require("express");
-const { createProxyMiddleware } = require("http-proxy-middleware");
 const path = require("path");
 const User = require("../models/user");
 const Post = require("../models/post");
@@ -19,38 +18,6 @@ const {
   applyNewToken,
   checkAccessToken,
 } = require("../protect-api/renew-token");
-
-router.use(
-  "/",
-  createProxyMiddleware({
-    target: "https://blog-app-server-tech.vercel.app/blogtech/api/login",
-    changeOrigin: true,
-  })
-);
-
-router.use(
-  "/admin/authors-theme",
-  createProxyMiddleware({
-    target: "https://blog-app-server-tech.vercel.app/blogtech/api/login",
-    changeOrigin: true,
-  })
-);
-
-router.use(
-  "/redirect",
-  createProxyMiddleware({
-    target: "https://blog-app-server-tech.vercel.app/blogtech/api/login",
-    changeOrigin: true,
-  })
-);
-
-router.use(
-  "/admin/auth",
-  createProxyMiddleware({
-    target: "https://blog-app-server-tech.vercel.app/blogtech/api/login",
-    changeOrigin: true,
-  })
-);
 
 //subdirectory requiry .env variable( file located in root directory)
 require("dotenv").config({ path: path.join(__dirname, "..") });

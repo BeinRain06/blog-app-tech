@@ -1,7 +1,6 @@
 const User = require("../models/user.js");
 const Post = require("../models/post.js");
 const express = require("express");
-const { createProxyMiddleware } = require("http-proxy-middleware");
 const compareAsc = require("date-fns/compareAsc");
 const path = require("path");
 const multer = require("multer");
@@ -10,67 +9,6 @@ const fs = require("fs").promises;
 const router = express.Router();
 const { format } = require("date-fns");
 const { generateToken } = require("../protect-api/authorization-jwt");
-
-router.use(
-  "/",
-  createProxyMiddleware({
-    target: "https://blog-app-server-tech.vercel.app/blogtech/api/post",
-    changeOrigin: true,
-  })
-);
-
-router.use(
-  "/edit/:postId",
-  createProxyMiddleware({
-    target: "https://blog-app-server-tech.vercel.app/blogtech/api/post",
-    changeOrigin: true,
-  })
-);
-
-router.use(
-  "/image/delete/:nameImg",
-  createProxyMiddleware({
-    target: "https://blog-app-server-tech.vercel.app/blogtech/api/post",
-    changeOrigin: true,
-  })
-);
-
-router.use(
-  "/dedicate/:label",
-  createProxyMiddleware({
-    target: "https://blog-app-server-tech.vercel.app/blogtech/api/post",
-    changeOrigin: true,
-  })
-);
-
-router.use(
-  "/all",
-  createProxyMiddleware({
-    target: "https://blog-app-server-tech.vercel.app/blogtech/api/post",
-    secure: false,
-    changeOrigin: true,
-  })
-);
-
-router.use(
-  cors({
-    origin: [
-      "https://blog-app-server-tech.vercel.app",
-      "http://localhost:5000",
-      "http://localhost:3000",
-      "http://localhost:5173",
-    ],
-    credentials: true,
-  })
-);
-
-/* router.use((req, res, next) => {
-  res.setHeader(
-    "Access-Control-Allow-Origin",
-    "https://blog-app-server-tech.vercel.app/blogtech/api"
-  );
-  next();
-}); */
 
 router.use(express.urlencoded({ extended: false }));
 
@@ -124,9 +62,9 @@ router.post("/", async (req, res) => {
 
     // image_url to store on mongDB as string
 
-    /*  const image_url = `http://localhost:${PORT}/${base_url}/post/${image_path}`; !important */
+    const image_url = `http://localhost:${PORT}/${base_url}/post/${image_path}`;
 
-    const image_url = `https://blog-app-server-tech.vercel.app/${base_url}/post/${image_path}`;
+    const image_url_1 = `https://blog-app-server-tech.vercel.app/${base_url}/post/${image_path}`;
 
     let prevCookie;
     let refreshDataUser;
@@ -148,6 +86,7 @@ router.post("/", async (req, res) => {
       title: title,
       summary: summary,
       image: image_url,
+      image_1: image_url_1,
       content: content,
       author: userId,
       date: date,
@@ -198,9 +137,9 @@ router.post("/edit/:postId", async (req, res) => {
 
     const image_path = newPost.image;
 
-    /*  const image_url = `http://localhost:${PORT}/${base_url}/post/${image_path}`; ! important*/
+    const image_url = `http://localhost:${PORT}/${base_url}/post/${image_path}`;
 
-    const image_url = `https://blog-app-server-tech.vercel.app/${base_url}/post/${image_path}`;
+    const image_url_1 = `https://blog-app-server-tech.vercel.app/${base_url}/post/${image_path}`;
 
     let updationPost;
 
@@ -212,6 +151,7 @@ router.post("/edit/:postId", async (req, res) => {
             title: newPost.title,
             summary: newPost.summary,
             image: image_url,
+            image_1: image_url_1,
             content: newPost.content,
             date: date,
           },

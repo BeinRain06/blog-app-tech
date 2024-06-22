@@ -4,6 +4,36 @@ This summary is about your first note in vue.js developing with Vue 3 in Vite.
 
 ## Concept Crossed
 
+### create a vuejs app with vite
+
+Using **vite** is one of the easiest and fatest way to create running application **vuejs**, or **reactjs**
+
+**About Vite**
+
+- **vite** is one of the popular **build tools** for modern web development
+- it's lightweight and talored for faster development
+- it;s easy to use tools for beginners who just start learning **Vue** or **React**
+- Perfect to build **small** & **medium size** web apps
+
+and follow the **steps**
+
+1. First, install vite using the following terminal command it the **root** directory of your project(e.g: `blog-app-tech`) :
+
+   `$ npm create vue@latest`
+
+and follow the **steps**
+
+- give te project name (e.g `vue-project`)
+- check to **YES** or **NOT** packages we do want to initialize wit installation or not
+- this **command** above will install vite automatically (this command is for the latest vuejs (vue-3) using **vite** tools config)
+
+Please to use **tailwind.css** in your project follow **installation** documentation of **tailwind** using **vuejs**:
+
+<p style="text-decoration:underline; font-size:14px">Link : </p>
+[https://v2.tailwindcss.com/docs/guides/vue-3-vite](https://v2.tailwindcss.com/docs/guides/vue-3-vite)
+
+(`vue-project` represent the **name** of our folder that will hold **vue** instance, this folder will be created automatically by the command - you **don't need to create** it by yourself)
+
 ### Composition API/Options API
 
 We have two ways of implementing `<script` tag in vue.js either with the new syntax "composition API" or the standard syntax "options API" but avoid to use the **both** syntax at **same time** -**composition API** (vue3, setup, script) -**options API** (vue3, setup, script)

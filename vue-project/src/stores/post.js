@@ -20,6 +20,7 @@ export const usePostStore = defineStore('post', {
   actions: {
     async updateHomePage() {
       const posts = await getpostsapi()
+      console.log('memory posts:', posts)
       this.allposts = posts
 
       return posts
