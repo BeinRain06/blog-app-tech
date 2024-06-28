@@ -166,7 +166,7 @@ export default defineComponent({
 
   .about {
     position: relative;
-    height: calc(100vh - 108px);
+    height: calc(120vh);
     display: grid;
     grid-auto-columns: 100%;
     grid-template-rows: 56% 1fr;

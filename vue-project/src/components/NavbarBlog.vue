@@ -1,5 +1,5 @@
 <template>
-  <header class="nav_header bg-gray-800">
+  <header class="nav_header bg-gray-800" :data-admin="admin">
     <div class="w-full flex justify-between">
       <ul class="flex justify-center items-center space-x-0 xsm:space-x-1 text-sm md:text-lg">
         <img alt="generic logo" class="generic_logo" src="@/assets/content-svgrepo-com.svg" />
@@ -750,6 +750,8 @@ function handleRadioState(e) {
     userStore.$patch({ isLogAdminOpen: true })
     userStore.updateStateRadio('false', 'true')
   }
+
+  userStore.$patch({ customIsVisible: false, miniCustomIsVisible: false })
 }
 
 function handleCustom() {
@@ -1005,10 +1007,18 @@ async function submitSearch() {
   }
 
   .btn-logo {
-    @apply text-white font-semibold pb-3 md:py-1;
+    @apply text-white font-semibold pb-3 transition-all duration-1000 ease-in-out md:py-1 hover:text-gray-500;
     font-family: 'Poetsen One', sans-serif;
     font-style: normal;
     font-size: var(--var-font-size);
+  }
+
+  .btn-logo:hover > span {
+    @apply text-red-500;
+  }
+
+  .btn-logo:hover > span + span {
+    @apply text-yellow-600;
   }
 
   .btn-link {
@@ -1335,7 +1345,12 @@ async function submitSearch() {
 }
 
 @media (min-width: 375px) {
-  .nav_header {
+  .nav_header[data-admin='true'] {
+    --var-font-size: 1.4em;
+    padding: 2rem 1rem !important;
+  }
+
+  .nav_header[data-admin='false'] {
     --var-font-size: 1.4em;
     padding: 1rem !important;
   }

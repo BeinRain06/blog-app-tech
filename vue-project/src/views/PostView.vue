@@ -40,13 +40,13 @@
         </p>
         <div class="author_customization">
           <div class="author_logo" ref="authorRef">
-            {{ postPage?.username[0].toLowerCase() }}
+            {{ user.minilogo }}
           </div>
-          <p class="author_current_name">{{ postPage?.username }}</p>
+          <p class="author_current_name">{{ user.username }}</p>
         </div>
       </div>
       <div class="art_post_title">
-        <span class="page_title">{{ postPage.title }}</span>
+        <span class="page_title">{{ postPage?.title }}</span>
       </div>
     </div>
     <div class="page_content_wrap grid place-items-center px-2">
@@ -56,7 +56,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onBeforeMount, computed, onMounted, onUnmounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePostStore } from '@/stores/post.js'
 import { useUserStore } from '@/stores/user.js'
@@ -73,6 +73,11 @@ let timePost = ref(null)
 let datePost = ref(null)
 let numbMinRead = ref(null)
 
+let user = reactive({
+  minilogo: '',
+  username: ''
+})
+
 const router = useRouter()
 
 onMounted(() => {
@@ -80,7 +85,7 @@ onMounted(() => {
 
   const postStore = usePostStore()
 
-  const paragraphContent = postStore.postInPage._doc.content
+  const paragraphContent = postStore.postInPage.content
 
   pageInside.value.innerHTML = paragraphContent
 })
@@ -99,25 +104,32 @@ const authorBg = onMounted(() => {
   authorRef.value.style.backgroundColor = pickedColor
 })
 
-const postPage = computed(() => {
+const postPage = computed(async () => {
   const postStore = usePostStore()
 
-  const callPost = postStore.postInPage
+  const callPost = await postStore.postInPage
 
-  const dateTimeArr = callPost.date.split(',')
+  console.log('callPost:', callPost.username)
 
-  const paragraphContent = callPost.content
+  if (callPost !== null) {
+    user.username = callPost.author.username
+    user.minilogo = callPost.author.username[0]?.toLowerCase()
 
-  const lengthContent = paragraphContent.length
+    const dateTimeArr = callPost.date.split(',')
 
-  const wordsPerMinutes = 220
+    const paragraphContent = callPost.content
 
-  numbMinRead.value = Math.ceil(lengthContent / wordsPerMinutes)
+    const lengthContent = paragraphContent.length
 
-  timePost.value = dateTimeArr[0]
-  datePost.value = dateTimeArr[1]
+    const wordsPerMinutes = 220
 
-  return callPost
+    numbMinRead.value = Math.ceil(lengthContent / wordsPerMinutes)
+
+    timePost.value = dateTimeArr[0]
+    datePost.value = dateTimeArr[1]
+
+    return callPost
+  }
 })
 
 const currentUsername = computed(() => {

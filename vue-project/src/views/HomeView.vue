@@ -22,7 +22,10 @@
               class="card_content_wrap relative w-full flex flex-col justify-center items-center rounded-sm gap-3"
             >
               <div class="wrap_post_title w-full px-2 py-1 sm:p-2">
-                <h1 id="post_title" class="post_title font-bold cursor-pointer z-10">
+                <h1
+                  id="post_title"
+                  class="post_title font-bold cursor-pointer z-20 transition-all duration-400 ease-in-out hover:text-gray-700"
+                >
                   {{ postItem.title }}
                 </h1>
               </div>
@@ -51,7 +54,10 @@
                     <h3 class="summary_title w-full font-medium">Summary</h3>
                   </div>
                   <div class="paragraph_container cursor-pointer">
-                    <p id="inner_summary" class="paragraph_inner_content text-xl z-10">
+                    <p
+                      id="inner_summary"
+                      class="paragraph_inner_content text-xl z-20 hover:text-gray-700"
+                    >
                       {{ postItem.summary }}
                     </p>
                   </div>
@@ -78,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onBeforeMount, computed, onMounted, onUnmounted, onUpdated } from 'vue'
 import { useRouter } from 'vue-router'
 import TheWelcome from '../components/TheWelcome.vue'
 import { arrayImg, dataPostsList } from '../assets/images-blog-post/index.js'
@@ -106,7 +112,11 @@ const posts = onMounted(async () => {
 
 const allposts = computed(() => {
   const postStore = usePostStore()
-
+  if (postStore.fetchPosts === null) {
+    setTimeout(() => {
+      // wait a moment please
+    }, 2000)
+  }
   return postStore.fetchPosts
 })
 
@@ -133,16 +143,21 @@ async function redirectEditPage(e, i) {
   }
 }
 
-function reachPostPage(e, i) {
+async function reachPostPage(e, i) {
   const postStore = usePostStore()
   const postTargeted = postStore.allposts[i]
+  console.log('e target:', e.target)
+  console.log('post targeted:', postTargeted)
 
   const postId = postTargeted.id
 
   if (e.target.id === 'post_title' || e.target.id === 'inner_summary') {
-    postStore.$patch({ postInPage: postTargeted })
+    await postStore.$patch({ postInPage: postTargeted })
 
-    router.push({ path: '/page' })
+    setTimeout(() => {
+      // wait a moment
+      router.push({ path: '/page' })
+    }, 600)
   }
 }
 

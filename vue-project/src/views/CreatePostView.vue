@@ -48,14 +48,14 @@
           </fieldset>
         </form>
       </div>
-      <RouterLink to="/"
-        ><p
+      <div to="/" class="back_home" @click="backHome">
+        <p
           class="absolute top-0 left-2 text-gray-800 rounded"
           style="padding: 2px 10px; border-bottom: 1px solid #333"
         >
           <span class="text-lg mx-1">&larr;</span> back
-        </p></RouterLink
-      >
+        </p>
+      </div>
     </div>
   </main>
 </template>
@@ -154,6 +154,12 @@ async function createPost() {
 function grabImage(e) {
   const filename = e.target.files[0]
 }
+
+function backHome() {
+  const postStore = usePostStore()
+  postStore.$patch({ postInPage: null })
+  router.push({ path: '/' })
+}
 </script>
 
 <style scoped>
@@ -161,7 +167,7 @@ function grabImage(e) {
   .creation_post_wrap {
     position: relative;
     top: 0;
-    min-height: 100vh;
+    min-height: 135vh;
   }
 
   .creation_post_content {

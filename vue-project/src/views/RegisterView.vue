@@ -230,7 +230,7 @@ export default defineComponent({
 
   .register {
     position: relative;
-    height: calc(110vh);
+    height: calc(144vh);
     display: grid;
     grid-auto-columns: 100%;
     grid-template-rows: 56% 1fr;
@@ -341,7 +341,7 @@ export default defineComponent({
 
 @media (min-width: 240px) {
   .register {
-    height: calc(134vh);
+    height: calc(180vh);
   }
 
   .register_wrapper {
@@ -369,10 +369,6 @@ export default defineComponent({
   p {
     width: calc(100% - 5px);
     font-size: calc(15px + 0.3vw);
-  }
-
-  .register {
-    height: calc(140vh);
   }
 
   .register_wrapper {

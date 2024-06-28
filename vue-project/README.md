@@ -4,13 +4,9 @@ This tech app is a sample **blog** prototype for techreviews. Informatals is a p
 
 <img with="20px" height="20px" src="./link-solid.svg"/> View live
 
-Try [Link](https://blog-app-ui-tech.vercel.app/)
-
-or
-
 - Clone the repository
   [ Link repository](https://github.com/BeinRain06/blog-app-tech)
-- **run** the command **npm start** inside the terminal directory to open the project on the browser
+- **run** the terminal command `npm run dev` under both directory : **server** and **vue-project**
 
   `blog-tech-app/`
 
