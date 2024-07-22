@@ -23,5 +23,11 @@ This tech app is a sample **blog** prototype for techreviews. Informatals is a p
 - filer articles by author/theme for admin
   >
 - dark/light mode process
+- <br>
+
+- <img src="./src/assets/Screenshot-1.png" width="385px" margin="1rem 0 1rem">
+    <br>
+    <br>
+- <img src="./src/assets/Screenshot-2.png" width="385px" margin="1rem 0 0.75rem">
 
 [view code](https://github.com/BeinRain06/blog-app-tech)
