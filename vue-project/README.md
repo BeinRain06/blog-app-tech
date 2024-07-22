@@ -1,4 +1,4 @@
-# <img with="20px" height="20px" src="./src/assets//link-solid.svg"/> Quiz App <span></span> <img with="20px" height="20px" src="./src/assets/chalkboard-solid.svg"/>
+# <img with="20px" height="20px" src="./src/assets//link-solid.svg"/> Blog App Tech <span></span> <img with="20px" height="20px" src="./src/assets/chalkboard-solid.svg"/>
 
 This tech app is a sample **blog** prototype for techreviews. Informatals is a powerful tool to enhance growth around community. Hope you will find this project helpfull
 
