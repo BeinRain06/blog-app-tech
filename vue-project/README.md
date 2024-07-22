@@ -1,8 +1,8 @@
-# <img with="20px" height="20px" src="./link-solid.svg"/> Quiz App <span></span> <img with="20px" height="20px" src="./chalkboard-solid.svg"/>
+# <img with="20px" height="20px" src="./src/assets//link-solid.svg"/> Quiz App <span></span> <img with="20px" height="20px" src="./src/assets/chalkboard-solid.svg"/>
 
 This tech app is a sample **blog** prototype for techreviews. Informatals is a powerful tool to enhance growth around community. Hope you will find this project helpfull
 
-<img with="20px" height="20px" src="./link-solid.svg"/> View live
+<img with="20px" height="20px" src="./src/assets/link-solid.svg"/> View live
 
 - Clone the repository
   [ Link repository](https://github.com/BeinRain06/blog-app-tech)
@@ -10,7 +10,7 @@ This tech app is a sample **blog** prototype for techreviews. Informatals is a p
 
   `blog-tech-app/`
 
-## <img with="16px" margin-right="0.15rem" height="16px" src="./link-solid.svg"/> Features <span > </span> <img with="16px"  position="relative" left="2rem" height="16px" src="./patch-check.svg"/>
+## <img with="16px" margin-right="0.15rem" height="16px" src="./src/assets/link-solid.svg"/> Features <span > </span> <img with="16px"  position="relative" left="2rem" height="16px" src="./src/assets/patch-check.svg"/>
 
 - register or login like admin/not
   >
