@@ -64,60 +64,82 @@ This tech app is a sample **blog** prototype for techreviews. Informatals is a p
       <div>
           <div style="margin: 0.5rem 1rem; color:#ad0715;font-size:calc(14px + 0.2vw);">Windows Users, Linux, Mac</div>
           <div style="margin:0.5rem 2rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
+          <div style="width:100%; padding:0.25rem; display:flex;justify-content:flex-start; align-items:center">
+             <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
             outline-offset:-1px">1</div> Enter<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">cd Desktop</div> to shift into the <strong style="margin:0 0.25rem">Desktop</strong> directory of your computer.<div>For Mac <div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">cd ~/Desktop/</div></div>
           </div>
+          </div>
           <div style="margin:1rem 2rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
+          <div style="width:100%; padding:0.25rem; display:flex;justify-content:flex-start; align-items:center">
+            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
             outline-offset:-1px">2</div> TYPE<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">mkdir blog-app-tech</div> to create a folder named <strong style="margin:0 0.25rem">blog-app-tech</strong> under desktop page
           </div> 
           <div style="margin:1rem 2rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
+            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
             outline-offset:-1px">3</div> TYPE<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">cd blog-app-tech</div> to move into <strong style="margin:0 0.25rem">blog-app-tech</strong> folder
+          </div>
           </div> 
           <div style="margin:1rem 2rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
-            outline-offset:-1px">4</div> ENTER<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">git clone https://github.com/BeinRain06/blog-app-tech.git .</div>to clone the repository <strong>directly into the folder</strong> created above. Don't forget the dot <strong style="width:3rem;margin:0 0.5rem; padding:0.25rem;color:#fff; background-color:#333; text-align:center;"> . </strong> at the end of this link.
+          <div style="width:100%; padding:0.25rem; display:flex;justify-content:flex-start; align-items:center"><div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
+            outline-offset:-1px">4</div> ENTER<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">git clone https://github.com/BeinRain06/blog-app-tech.git .</div>to clone the repository <strong>directly into the folder</strong> created above. Don't forget the dot <strong style="width:3rem;margin:0 0.5rem; padding:0.25rem;color:#fff; background-color:#333; text-align:center;"> . </strong> at the end of this link.</div>
           </div>   
           <div style="margin:1rem 2rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
+          <div style="width:100%; padding:0.25rem; display:flex;justify-content:flex-start; align-items:center">
+            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
             outline-offset:-1px">5</div> WAIT<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">process compiling</div> until the end <strong style="margin:0 0.25rem">( Terminal Command )</strong>
           </div>
+          </div>
           <div style="margin:1rem 2rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
+           <div style="width:100%; padding:0.25rem; display:flex;justify-content:flex-start; align-items:center">
+             <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
             outline-offset:-1px">6</div> TYPE<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">cd server</div> to move into <strong style="margin:0 0.25rem">server folder</strong> of the app
           </div> 
           <div style="margin:1rem 2rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
+            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
             outline-offset:-1px">7</div> INSTALL <div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">dependencie's app</div> to enable <strong style="margin:0 0.25rem">local running</strong> of the app
+           </div>
           </div>
           <div style="margin:1rem 3.5rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
-            outline-offset:-1px">7.1</div> ENTER<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">npm install bcryptjs cookie-parser cors date-fns</div> and wait the end<strong style="margin:0 0.25rem">installation</strong>
+            <div style="width:100%; padding:0.25rem; display:flex;justify-content:flex-start; align-items:center">
+             <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
+            outline-offset:-1px">7.1</div> ENTER<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">npm install bcryptjs cookie-parser cors date-fns</div> and wait the end<strong style="margin:0 0.25rem"> installation</strong>
+            </div>
           </div> 
           <div style="margin:1rem 3.5rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
-            outline-offset:-1px">7.2</div> ENTER<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">npm install dotenv express express-jwt </div> and wait the end<strong style="margin:0 0.25rem">installation</strong>
+            <div style="width:100%; padding:0.25rem; display:flex;justify-content:flex-start; align-items:center">
+              <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
+            outline-offset:-1px">7.2</div> ENTER<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">npm install dotenv express express-jwt </div> and wait the end<strong style="margin:0 0.25rem"> installation</strong>
+            </div>
           </div>
           <div style="margin:1rem 3.5rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
-            outline-offset:-1px">7.3</div> ENTER<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">npm install jsonwebtoken mongoose multer nodemon</div> and wait the end<strong style="margin:0 0.25rem">installation</strong>
+            <div style="width:100%; padding:0.25rem; display:flex;justify-content:flex-start; align-items:center">
+              <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
+            outline-offset:-1px">7.3</div> ENTER<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">npm install jsonwebtoken mongoose multer nodemon</div> and wait the end<strong style="margin:0 0.25rem"> installation</strong>
+            </div>
           </div>
           <div style="margin:1rem 2rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
+            <div style="width:100%; padding:0.25rem; display:flex;justify-content:flex-start; align-items:center">
+              <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
             outline-offset:-1px">8</div> TYPE sucessively in your <strong>Second Terminal</strong> open<br><br><div style=" padding:0.25rem 0.5rem;margin:0rem 1rem;color:#fff;background-color:#333;">cd Desktop</div><br><div style=" padding:0.25rem 0.5rem;margin:0rem 1rem;color:#fff;background-color:#333;">cd blog-app-tech</div><br><div style=" padding:0.25rem 0.5rem;margin:0rem 1rem;color:#fff;background-color:#333;">cd vue-project</div><br> <div style="margin:0 1.15rem">to move into <strong style="margin:0 0.25rem">client app</strong> folder</div>
+            </div>
           </div>
           <div style="margin:1rem 2rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
-            outline-offset:-1px">9</div> TYPE both<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">npm run dev</div> in the<strong style="margin:0 0.25rem">First Terminal</strong>and  <strong style="margin:0 0.25rem">Second Terminal</strong>  Open
+            <div style="width:100%; padding:0.25rem; display:flex;justify-content:flex-start; align-items:center">
+              <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
+              outline-offset:-1px">9</div> TYPE both<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">npm run dev</div> in the<strong style="margin:0 0.25rem"> First Terminal</strong> and  <strong style="margin:0 0.25rem"> Second Terminal</strong>  Open
+            </div>
           </div>  
           <div style="margin:1rem 2rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
-            outline-offset:-1px">10</div> GO to your browser . Ensures you have internet connection. Type<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">http://localhost:5173</div> and  the<strong style="margin:0 0.25rem">finally</strong>open the app on the<strong style="margin:0 0.25rem">Browser</strong>
+            <div style="width:100%; padding:0.25rem; display:flex;justify-content:flex-start; align-items:center">
+              <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
+            outline-offset:-1px">10</div> GO to your browser . Ensures you have internet connection. Type<div style="display:inline-block; padding:0.25rem 0.5rem;margin:0rem 0.5rem;color:#fff;background-color:#333;">http://localhost:5173</div> and  the<strong style="margin:0 0.25rem">finally</strong> open the app on the <strong style="margin:0 0.25rem">Browser</strong>
+            </div>   
           </div>
           <div style="margin:1rem 2rem">
-            <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #fff;
-            outline-offset:-1px">11</div> <div style="display:inline-block; padding:0.25rem 0.5rem;margin:1.5rem 0.5rem;color:#fff;background-color:#333;font-size:calc(14px + 0.1vw)">Thanks You !</div> 
+             <div style="width:100%; padding:0.25rem; display:flex;justify-content:flex-start; align-items:center">
+               <div style="display:inline-block;padding:0.1rem 0.5rem;margin-right: 0.5rem;color:#fff; background-color: #333;font-size:calc(10px + 0.1vw);outline:2px solid #3b3838;
+            outline-offset:-1px">11</div> <div style="display:inline-block; padding:0.25rem 0.5rem;margin:1.5rem 0.5rem;color:#fff;background-color:#333;font-size:calc(15px + 0.1vw)">Thanks You !</div>
+             </div> 
           </div>        
      </div>
    </div>
