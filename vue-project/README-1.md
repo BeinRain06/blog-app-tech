@@ -24,7 +24,7 @@ and follow the **steps**
 and follow the **steps**
 
 - give te project name (e.g `vue-project`)
-- check to **YES** or **NOT** packages we do want to initialize wit installation or not
+- check to **YES** or **NOT** packages we do want to initialize with installation or not
 - this **command** above will install vite automatically (this command is for the latest vuejs (vue-3) using **vite** tools config)
 
 Please to use **tailwind.css** in your project follow **installation** documentation of **tailwind** using **vuejs**:
@@ -205,7 +205,7 @@ We have two ways of implementing `<script` tag in vue.js either with the new syn
            const isVisible= ref(true);
            const message= ref("toggle me"),
            const props = defineProps({"story", "advice"}) ,
-           const emits = defineEmitss(["mouseon", "changeevent"]) ,
+           const emits = defineEmits(["mouseon", "changeevent"]) ,
 
            computed: // while editing {},
            mounted() // lifecycle Hooks methods {
