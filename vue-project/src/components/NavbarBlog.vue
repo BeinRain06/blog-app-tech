@@ -138,8 +138,8 @@
                   <ul id="content_proposal_normal" class="content_proposal">
                     <li
                       class="item_proposal relative cursor-pointer transition-all duration-1000 ease-in-out my-4"
+                      :key="index"
                       v-for="(element, index) in listSample"
-                      key="index"
                       @click="forwardsSearch"
                     >
                       {{ element }}
@@ -486,7 +486,8 @@
                 <ul id="content_proposal_mob" class="content_proposal_mob" ref="contentProposal">
                   <li
                     class="item_proposal_mob"
-                    v-for="element in listSample"
+                    :key="index"
+                    v-for="(element, index) in listSample"
                     @click="forwardsSearch"
                   >
                     {{ element }}
@@ -644,8 +645,7 @@
 
 <script setup>
 import { RouterLink, useRouter } from 'vue-router'
-import { ref, onMounted, computed } from 'vue'
-import { defineComponent } from 'vue'
+import { ref, computed } from 'vue'
 import { useUserStore } from '@/stores/user.js'
 import { usePostStore } from '@/stores/post.js'
 import LoginAdminView from './LoginAdminView.vue'
@@ -665,18 +665,18 @@ let isList = ref(false)
 
 let inputSearch = ref(null)
 
-const myInput = computed({
+/* const myInput = computed({
   get() {
     return inputSearch.value
   },
   set(newValue) {
     inputSearch.value = newValue
   }
-})
+}) */
 
 const contentProposal = ref(null)
 const filterBox = ref(null)
-const filterBoxOne = ref(null)
+/* const filterBoxOne = ref(null) */
 
 const currentUserIn = computed(() => {
   const userStore = useUserStore()
@@ -708,7 +708,7 @@ const minicustom = computed(() => {
   return userStore.minor
 })
 
-const stateCheckedAll = computed(() => {
+/* const stateCheckedAll = computed(() => {
   const userStore = useUserStore()
   return userStore.isCheckedAll
 })
@@ -716,7 +716,7 @@ const stateCheckedAll = computed(() => {
 const stateCheckedSingle = computed(() => {
   const userStore = useUserStore()
   return userStore.isCheckedSingle
-})
+}) */
 
 const isAdminOpen = computed(() => {
   const userStore = useUserStore()
@@ -728,14 +728,14 @@ const admin = computed(() => {
   return userStore.isAdmin
 })
 
-const notadmin = computed(() => {
+/* const notadmin = computed(() => {
   const userStore = useUserStore()
   if (userStore.isAdmin === true) {
     return false
   } else {
     return true
   }
-})
+}) */
 
 const isAList = computed(() => isList.value)
 
@@ -832,13 +832,13 @@ function handleFilterSelection(e) {
   }
 }
 
-function stickVisibleorNot(e, act) {
+/* function stickVisibleorNot(e, act) {
   if (act === 'add') {
     contentProposal.value.classList.add('play_visible_vanish')
   } else {
     contentProposal.value.classList.remove('play_visible_vanish')
   }
-}
+} */
 
 function switchDarkLight() {
   dark.value = !dark.value
@@ -862,6 +862,8 @@ function reachTo(label) {
 }
 
 function switchFilter(e) {
+  console.log(e)
+
   showFilter.value = !showFilter.value
   if (showFilter.value === false) {
     filterBox.value.classList.add('hide_selection')
@@ -871,6 +873,8 @@ function switchFilter(e) {
 }
 
 function handleWordsSearch(e, screen) {
+  console.log(screen)
+
   const str = e.target.value
 
   let matchingResearch
@@ -890,7 +894,7 @@ function handleWordsSearch(e, screen) {
     matchingResearch = listAuthors.reduce((acc, val) => {
       const user = val.username.toLowerCase()
       if (user.includes(str)) {
-        const usernameAlready = acc.find((elt) => (elt = val.username))
+        const usernameAlready = acc.find((elt) => elt === val.username)
 
         if (usernameAlready === undefined) acc.push(val.username)
       }
