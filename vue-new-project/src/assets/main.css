@@ -1,0 +1,45 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Poetsen+One&family=Reddit+Sans:ital,wght@0,200..900;1,200..900&display=swap'); */
+
+@import url('https://fonts.googleapis.com/css2?family=Poetsen+One&family=Reddit+Sans:ital,wght@0,200..900;1,200..900&family=Ubuntu+Sans:ital,wght@0,100..800;1,100..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /*tailwind color pick for my project*/
+  --background-primary: bg-black, --background-secondary: bg-gray-800,
+    --background-third: bg-gray-300, --background-fourth: bg-green-500, --text-color-one: text-white,
+    --text-color-two: text-gray-300;
+}
+
+#app {
+  width: 100vw;
+  margin: 0;
+  font-weight: normal;
+  overflow-x: hidden;
+}
+
+/* <uniquifier>: Use a unique and descriptive class name */
+/* <weight>: Use a value from 100 to 800 */
+
+/* .ubuntu-sans-<uniquifier> {
+  font-family: "Ubuntu Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+} */
+
+/* .reddit-sans-<uniquifier> {
+  font-family: "Reddit Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: <weight>;
+  font-style: normal;
+} */
+
+/* font-family: 'Reddit Sans', sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal; */

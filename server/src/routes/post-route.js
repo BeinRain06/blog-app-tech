@@ -10,6 +10,8 @@ const router = express.Router();
 const { format } = require("date-fns");
 const { generateToken } = require("../protect-api/authorization-jwt");
 
+/* router.use(cors()); */
+
 router.use(express.urlencoded({ extended: false }));
 
 require("dotenv").config({ path: path.join(__dirname, "..") });

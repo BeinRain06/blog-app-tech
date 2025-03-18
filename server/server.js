@@ -32,7 +32,7 @@ const PORT = process.env.PORT;
 
 const base_url = process.env.API_BASE;
 
-//alias Routes Middleware
+// alias Routes Middleware
 app.use(`/${base_url}/post`, postRouter);
 app.use(`/${base_url}/register`, registerRouter);
 app.use(`/${base_url}/login`, loginRouter);
