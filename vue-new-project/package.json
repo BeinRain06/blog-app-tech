@@ -19,6 +19,7 @@
     "vue-scrollto": "^2.20.0"
   },
   "devDependencies": {
+    "@iconify-json/ic": "^1.2.2",
     "@vitejs/plugin-vue": "^5.2.1",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.22.0",

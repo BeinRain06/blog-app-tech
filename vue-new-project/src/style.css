@@ -1,5 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Poetsen+One&family=Reddit+Sans:ital,wght@0,200..900;1,200..900&family=Ubuntu+Sans:ital,wght@0,100..800;1,100..800&display=swap");
 
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap");
+
 @import "tailwindcss";
 
 :root {
@@ -22,29 +24,46 @@
   overflow-x: hidden;
 }
 
+body {
+  width: 100vw;
+  margin: 0;
+  background-color: var(--bg-gen);
+  font-family: "Manrope", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
 /* <uniquifier>: Use a unique and descriptive class name */
 /* <weight>: Use a value from 100 to 800 */
 
-/* .ubuntu-sans-<uniquifier> {
-  font-family: "Ubuntu Sans", sans-serif;
+.manrope-400 {
+  font-family: "Manrope", sans-serif;
   font-optical-sizing: auto;
-  font-weight: <weight>;
+  font-weight: 400;
   font-style: normal;
-  font-variation-settings:
-    "wdth" 100;
-} */
+}
 
-/* .reddit-sans-<uniquifier> {
-  font-family: "Reddit Sans", sans-serif;
+.manrope-700 {
+  font-family: "Manrope", sans-serif;
   font-optical-sizing: auto;
-  font-weight: <weight>;
+  font-weight: 700;
   font-style: normal;
-} */
+}
 
-/* font-family: 'Reddit Sans', sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 300;
-    font-style: normal; */
+.mulish-500 {
+  font-family: "Mulish", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.mulish-600 {
+  font-family: "Mulish", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+}
 
 /* ex code below */
 
