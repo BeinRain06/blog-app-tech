@@ -1,18 +1,17 @@
 <template>
-  <div class="register w-full">
-    <div class="upper_wrapper w-full"></div>
-    <div class="lower_wrapper w-full h-full bg-gray-300"></div>
-    max-w-lg
+  <div class="register w-full h-full">
+    <!-- <div class="upper_wrapper absolute w-full h-1/2"></div>
+    <div class="lower_wrapper absolute w-full h-1/2"></div> -->
     <div class="register_wrapper">
       <form action="" class="register_form h-full">
         <fieldset class="fieldset_area h-full">
           <legend class="register_title">Register</legend>
           <div class="form_content">
             <div class="field_msg w-full flex flex-col justify-start pl-2">
-              <p class="text-blue-800">
+              <p style="color: var(--brand-text)">
                 Board Featurings Tech Articles, Culture and New Discovery
               </p>
-              <p class="text-green-500">
+              <p style="color: var(--text-body-1)">
                 Meets New Expectations on Daily Basis ¬!
               </p>
             </div>
@@ -64,7 +63,7 @@
                 v-model="user.confirm_password"
               />
             </div>
-            <div class="form_custom">
+            <!--  <div class="form_custom">
               <ul
                 class="label_custom w-full flex justify-center items-center py-2 gap-2"
               >
@@ -90,7 +89,7 @@
                 :disabled="!checked"
                 @input="changeType"
               />
-            </div>
+            </div> -->
             <div class="form_submit relative">
               <input
                 type="button"
@@ -231,6 +230,14 @@ export default defineComponent({
 @import "tailwindcss";
 
 @media (min-width: 180px) {
+  label {
+    color: var(--accent-color-3);
+  }
+
+  input {
+    color: var(--text-link);
+  }
+
   .lower_wrapper {
     z-index: -2;
   }
@@ -243,32 +250,37 @@ export default defineComponent({
 
   .register {
     position: relative;
-    height: calc(144vh);
     display: grid;
+    place-items: center;
     grid-auto-columns: 100%;
-    grid-template-rows: 56% 1fr;
+    grid-template-rows: 100%;
+    background-color: var(--bg-gen);
+    overflow-y: hidden;
   }
 
   .register_wrapper {
-    @apply w-11/12 max-w-lg  border-2 border-solid border-blue-200 rounded-xl;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    height: 38rem;
+    @apply w-11/12 max-w-lg  border-1 border-solid rounded-xl;
+    position: relative;
+    height: max-content;
     padding: 0 1rem;
-    transform: translate(-50%, -50%);
-    box-shadow: 0px 0px 4px hsl(240, 2%, 62%);
+    border-color: var(--text-body-1);
+    display: grid;
+    place-items: center;
+    /* box-shadow: 0px 0px 4px hsl(240, 2%, 62%); */
   }
 
   .register_title {
     position: relative;
     top: -2rem;
-    left: -0.25rem;
-    width: 8rem;
-    padding: 0.5rem;
-    background-color: #fff;
-    font-size: calc(27px + 0.3vw);
-
+    left: 0;
+    width: 9rem;
+    padding: 0.25em;
+    color: var(--accent-color-3);
+    background-color: var(--brand-text);
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    font-size: calc(26px + 0.15vw);
     font-family: "Ubuntu Sans", sans-serif;
     font-optical-sizing: auto;
     font-weight: 440;
@@ -285,9 +297,11 @@ export default defineComponent({
     top: -1.4rem;
     width: 100%;
     height: 100%;
+    color: var(--text-body);
     display: grid;
     grid-auto-columns: 100%;
-    grid-auto-rows: 15% 15% 15% 15% 26% 14% auto;
+    gap: 1rem;
+    grid-auto-rows: 25% 15% 15% 15% 15% auto;
   }
 
   .form_control,
@@ -296,16 +310,21 @@ export default defineComponent({
   }
 
   .input_content {
-    @apply border border-solid border-gray-300;
     width: 100%;
     height: 2.1rem;
     text-indent: 10px;
     transform: skewX(-2deg);
+    border: 1px solid transparent;
+    box-shadow: 0px 1px 5px var(--text-link);
     transition: all 600ms ease-in-out;
   }
 
-  .input_content:focus {
+  input[type="email"]:focus,
+  input[type="text"]:focus,
+  input[type="password"]:focus {
     transform: skewX(0deg);
+    box-shadow: 0px 1px 3px var(--accent-color-2);
+    outline: none;
   }
 
   input[type="checkbox"] {
@@ -320,9 +339,11 @@ export default defineComponent({
   }
 
   input[type="button"] {
-    @apply w-full h-auto text-white bg-gray-800 p-2 rounded-lg text-center;
+    @apply w-full text-white bg-gray-800 p-2 rounded-lg text-center;
     position: relative;
     top: 1.35rem;
+    height: 3.6rem;
+    color: var(--title);
   }
 
   .load_wrapper {
@@ -353,10 +374,6 @@ export default defineComponent({
 }
 
 @media (min-width: 240px) {
-  .register {
-    height: calc(180vh);
-  }
-
   .register_wrapper {
     height: 48rem;
   }
@@ -365,16 +382,16 @@ export default defineComponent({
     display: block;
   }
 
-  .form_content {
+  /* .form_content {
     grid-auto-rows: 14% 14% 14% 14% 14% 16% auto;
+  } */
+
+  .form_content {
+    grid-auto-rows: 15% 12% 12% 12% 12% auto;
   }
 
   .input_content {
     height: 2.8rem;
-  }
-
-  input[type="button"] {
-    top: 2.25rem;
   }
 }
 
@@ -384,14 +401,21 @@ export default defineComponent({
     font-size: calc(15px + 0.3vw);
   }
 
+  .register {
+    position: relative;
+    padding: 1rem 0;
+    display: grid;
+    place-items: center;
+  }
+
   .register_wrapper {
-    @apply w-8/12 max-w-lg  border-2 border-solid border-blue-200 rounded-xl;
-    height: 50rem;
-    padding: 0 1rem;
+    @apply w-8/12 max-w-lg  border-1 border-solid rounded-xl;
+    height: 40rem;
+    /* padding: 0 1rem; */
   }
 
   .register_title {
-    font-size: calc(30px + 0.3vw);
+    font-size: calc(24px + 0.15vw);
   }
 }
 </style>

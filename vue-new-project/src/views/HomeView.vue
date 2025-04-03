@@ -1,3 +1,100 @@
+<script setup>
+import {
+  ref,
+  onBeforeMount,
+  computed,
+  onMounted,
+  onUnmounted,
+  onUpdated,
+} from "vue";
+import { useRouter } from "vue-router";
+/* import TheWelcome from '../components/TheWelcome.vue' */
+import { arrayImg, dataPostsList } from "../assets/images-blog-post/index.js";
+import { useUserStore } from "@/stores/user.js";
+import { usePostStore } from "@/stores/post.js";
+
+const postRef = ref(null);
+
+const router = useRouter();
+
+const postStore = usePostStore();
+
+const userStore = useUserStore();
+
+const posts = onMounted(async () => {
+  const postStore = usePostStore();
+  const postsFetch = await postStore.updateHomePage();
+
+  setTimeout(() => {
+    console.log("update home page");
+  }, 3400);
+
+  return postsFetch;
+});
+
+const allposts = computed(() => {
+  const postStore = usePostStore();
+  if (postStore.fetchPosts === null) {
+    setTimeout(() => {
+      // wait a moment please
+    }, 2000);
+  }
+  console.log("postStore fecth :", postStore.fetchPosts);
+  return postStore.fetchPosts;
+});
+
+async function redirectEditPage(e, i) {
+  const postStore = usePostStore();
+  const userStore = useUserStore();
+  const userId = userStore.currentUserId;
+
+  const postEdit = postStore.allposts[i];
+
+  const postId = postEdit.id;
+
+  const useridInPost = postEdit.author.id;
+
+  if (userStore.currentUsername !== null && userId === useridInPost) {
+    postStore.$patch({ postInPage: postEdit });
+
+    setTimeout(() => {
+      router.push({ path: "/edit" });
+    }, 1500);
+  } else {
+    alert("can't edit this post, not login or not the author");
+    return;
+  }
+}
+
+async function reachPostPage(e, i) {
+  const postStore = usePostStore();
+  const postTargeted = postStore.allposts[i];
+
+  const postId = postTargeted.id;
+
+  const postSaved = JSON.stringify(postTargeted);
+
+  sessionStorage.setItem("postPage", postSaved);
+
+  if (e.target.id === "post_title" || e.target.id === "inner_summary") {
+    await postStore.$patch({ postInPage: postTargeted });
+
+    setTimeout(() => {
+      // wait a moment
+      router.push({ path: `/page/${postId}` });
+    }, 600);
+  }
+}
+
+async function reloadHomeContent() {
+  const postStore = usePostStore();
+  const postsFetch = await postStore.updateHomePage();
+  setTimeout(() => {
+    console.log("update home page");
+  }, 1500);
+}
+</script>
+
 <template>
   <main>
     <div id="home_page" class="home_page relative w-full px-0 py-2 xsm:p-8">
@@ -95,100 +192,6 @@
     </div>
   </main>
 </template>
-
-<script setup>
-import {
-  ref,
-  onBeforeMount,
-  computed,
-  onMounted,
-  onUnmounted,
-  onUpdated,
-} from "vue";
-import { useRouter } from "vue-router";
-/* import TheWelcome from '../components/TheWelcome.vue' */
-import { arrayImg, dataPostsList } from "../assets/images-blog-post/index.js";
-import { useUserStore } from "@/stores/user.js";
-import { usePostStore } from "@/stores/post.js";
-
-const postRef = ref(null);
-
-const router = useRouter();
-
-const postStore = usePostStore();
-
-const userStore = useUserStore();
-
-const posts = onMounted(async () => {
-  const postStore = usePostStore();
-  const postsFetch = await postStore.updateHomePage();
-
-  setTimeout(() => {
-    console.log("update home page");
-  }, 3400);
-
-  return postsFetch;
-});
-
-const allposts = computed(() => {
-  const postStore = usePostStore();
-  if (postStore.fetchPosts === null) {
-    setTimeout(() => {
-      // wait a moment please
-    }, 2000);
-  }
-  return postStore.fetchPosts;
-});
-
-async function redirectEditPage(e, i) {
-  const postStore = usePostStore();
-  const userStore = useUserStore();
-  const userId = userStore.currentUserId;
-
-  const postEdit = postStore.allposts[i];
-
-  const postId = postEdit.id;
-
-  const useridInPost = postEdit.author.id;
-
-  if (userStore.currentUsername !== null && userId === useridInPost) {
-    postStore.$patch({ postInPage: postEdit });
-
-    setTimeout(() => {
-      router.push({ path: "/edit" });
-    }, 1500);
-  } else {
-    alert("can't edit this post, not login or not the author");
-    return;
-  }
-}
-
-async function reachPostPage(e, i) {
-  const postStore = usePostStore();
-  const postTargeted = postStore.allposts[i];
-  console.log("e target:", e.target);
-  console.log("post targeted:", postTargeted);
-
-  const postId = postTargeted.id;
-
-  if (e.target.id === "post_title" || e.target.id === "inner_summary") {
-    await postStore.$patch({ postInPage: postTargeted });
-
-    setTimeout(() => {
-      // wait a moment
-      router.push({ path: "/page" });
-    }, 600);
-  }
-}
-
-async function reloadHomeContent() {
-  const postStore = usePostStore();
-  const postsFetch = await postStore.updateHomePage();
-  setTimeout(() => {
-    console.log("update home page");
-  }, 1500);
-}
-</script>
 
 <style scoped>
 @import "tailwindcss";

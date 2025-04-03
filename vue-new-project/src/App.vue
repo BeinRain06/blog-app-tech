@@ -1,43 +1,32 @@
 <template>
-  <div class="gen_container" data-mode="dark">
+  <div class="gen_container w-full" data-mode="dark">
     <NavbarNewBlog v-if="isNavbar" v-model="closeProfile" />
-
-    <div class="group_main relative z-10 w-full" @mousedown="handleResetVar">
-      <RouterView />
-    </div>
-    >
+    <RouterView @mousedown="handleResetVar" />
   </div>
 </template>
 
 <script setup>
 import { RouterLink, RouterView, useRouter } from "vue-router";
-import { ref, computed } from "vue";
+import { ref, onMounted, useTemplateRef } from "vue";
 import NavbarNewBlog from "./components/NavbarNewBlog.vue";
 import { usePostStore } from "@/stores/post.js";
 
 const router = useRouter();
 
 const closeProfile = ref(false);
+const isNavbar = ref(false);
+const mainRef = useTemplateRef("main-ref");
 
-const isNavbar = computed(() => {
-  const postStore = usePostStore();
-
+onMounted(() => {
   router.beforeEach(async (to, from) => {
-    if (to.name === "home") {
-      setTimeout(() => {
-        // console.log("wait a moment")
-        postStore.$patch({ postInPage: null });
-      }, 1000);
+    console.log("to", to);
+
+    if (to.name === "home" || to.name === "login" || to.name === "register") {
+      isNavbar.value = await true;
+    } else {
+      isNavbar.value = await false;
     }
   });
-
-  const postPage = postStore.postInPage;
-
-  if (postPage === null) {
-    return true;
-  } else {
-    return false;
-  }
 });
 
 const handleResetVar = () => {
@@ -59,6 +48,7 @@ const handleResetVar = () => {
   --accent-color-2: #905149; /* bg btn cta */
   --accent-color-3: #2e2c32; /* title aside bar */
   --brand-text: #4d4474;
+  --brand-text-1: #5f5397;
 }
 
 .gen_container[data-mode="dark"] {
@@ -72,6 +62,13 @@ const handleResetVar = () => {
   --accent-color-11: hsl(92, 71%, 38%); /*soothing*/
   --accent-color-2: #83423a; /* bg btn cta */
   --accent-color-3: #e2e0e6; /* title aside bar */
-  --brand-text: hsl(250, 24%, 46%);
+  --brand-text: #635991;
+  --brand-text-1: #5f5397;
 }
+
+/* * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+} */
 </style>
