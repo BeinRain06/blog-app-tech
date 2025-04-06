@@ -64,6 +64,7 @@ const handleResetVar = () => {
   --accent-color-3: #e2e0e6; /* title aside bar */
   --brand-text: #635991;
   --brand-text-1: #5f5397;
+  --card-box: #201e27;
 }
 
 /* * {
