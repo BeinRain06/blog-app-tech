@@ -104,18 +104,20 @@ export default defineComponent({
 <template>
   <div
     id="register_page"
-    class="register_page grid place-items-center relative w-full h-full"
+    class="register_page grid place-items-center relative w-full h-full px-4 md:px-0"
   >
     <div
-      class="register_container grid place-items-center max-w-full h-full md:max-w-xl lg:h-11/12"
+      class="register_container grid place-items-center max-w-full h-max md:max-w-xl lg:h-11/12"
     >
       <form
         action=""
         class="register_form w-full h-full flex items-center justify-center"
       >
-        <fieldset class="fieldset_area flex flex-col w-full gap-4 p-4">
+        <fieldset
+          class="fieldset_area flex flex-col w-full gap-4 pt-4 pb-8 px-8"
+        >
           <legend
-            class="legend_area"
+            class="legend_area pt-2"
             style="
               width: min-content;
 
@@ -126,10 +128,10 @@ export default defineComponent({
           </legend>
           <div class="fieldset_content">
             <div class="field_msg w-full flex flex-col justify-start">
-              <p style="color: #5f5397">
+              <p class="expectation_1">
                 Board Featurings Tech Articles, Culture and New Discovery
               </p>
-              <p style="color: var(--text-body-1)">
+              <p class="expectation_2">
                 Meets New Expectations on Daily Basis ¬!
               </p>
             </div>
@@ -168,7 +170,13 @@ export default defineComponent({
             />
           </div>
           <div class="submit_form my-4">
-            <button type="submit" class="submit_button">Register</button>
+            <button
+              type="submit"
+              class="submit_button"
+              @click.prevent="handleRegistration"
+            >
+              Register
+            </button>
 
             <div
               id="warning_msg"
@@ -196,9 +204,19 @@ export default defineComponent({
 <style scoped>
 @import "tailwindcss";
 
-.register_page {
-  height: calc(100vh - 64px);
-  background-color: var(--bg-gen);
+p {
+  font-size: calc(13px + 0.25vw);
+  line-height: 26px;
+}
+
+p.expectation_1 {
+  color: #5f5397;
+}
+
+p.expectation_2 {
+  font-size: calc(13px + 0.15vw);
+  color: var(--text-body-1);
+  text-align: right;
 }
 
 label {
@@ -219,11 +237,11 @@ input[type="password"]:focus {
   outline: none;
 }
 
-button[type="submit"] {
-  @apply w-full bg-gray-800 rounded-lg text-center;
+button.submit_button[type="submit"] {
+  @apply w-full bg-gray-800 rounded-lg text-center cursor-pointer;
   position: relative;
   top: 0;
-  font-size: calc(16px + 0.3vw);
+  font-size: calc(15px + 0.35vw);
   padding: 0.5em 0;
   color: var(--title);
 }
@@ -241,24 +259,25 @@ button[type="submit"] {
 }
 
 @media (min-width: 180px) {
-  .input_field {
-    width: 100%;
-    height: 1.9rem;
-    color: var(--text-body);
-    text-indent: 10px;
-    transform: skewX(-2deg);
-    border: 1px solid transparent;
-    box-shadow: 0px 1px 5px var(--title);
-    transition: all 600ms ease-in-out;
+  .register_page {
+    min-height: calc(100vh - 64px);
+    background-color: var(--bg-gen);
   }
 
   .register_container {
     border-radius: 3px;
-    border: 1px solid var(--text-body-1);
-    background-color: var(--);
+    border: 1px solid var(--accent-color-1);
   }
-}
 
-@media (min-width: 1045px) {
+  .input_field {
+    width: 100%;
+    height: 1.8rem;
+    color: var(--text-body);
+    text-indent: 10px;
+    transform: skewX(-2deg);
+    border: 1px solid transparent;
+    box-shadow: 1px 1px 2px var(--accent-color-1);
+    transition: all 600ms ease-in-out;
+  }
 }
 </style>
