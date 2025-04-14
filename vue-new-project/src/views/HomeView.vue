@@ -12,41 +12,55 @@ import { useRouter } from "vue-router";
 import { arrayImg, dataPostsList } from "../assets/images-blog-post/index.js";
 import { useUserStore } from "@/stores/user.js";
 import { usePostStore } from "@/stores/post.js";
+import { shortNameUser } from "../reusable/collaborate-function.js";
 
 const postRef = ref(null);
+
+const allposts = ref();
 
 const authorShortName = ref([]);
 
 const router = useRouter();
 
-const postStore = usePostStore();
-
-const userStore = useUserStore();
-
-const posts = onMounted(async () => {
-  const postStore = usePostStore();
-  const postsFetch = await postStore.updateHomePage();
-
+onMounted(async () => {
   setTimeout(() => {
-    console.log("update home page");
-  }, 3400);
+    console.log("updating...");
+  }, 4000);
 
-  return postsFetch;
+  const postStore = await usePostStore();
+
+  const postsFetch = await postStore.updateHomePage();
+  console.log("postsFetch :", postsFetch);
+
+  if (postsFetch) {
+    postsFetch.map((post) => {
+      const authorName = post.author?.username;
+
+      /* const authorArrName = authorName.split(" ");
+       const shortname =
+        authorArrName[0][0].toUpperCase() + authorArrName[0].slice(1); */
+
+      console.log("authorname:", authorName);
+      const shortname = shortNameUser(authorName);
+
+      authorShortName.value.push(shortname);
+    });
+  }
+
+  allposts.value = postsFetch;
 });
 
-const allposts = computed(() => {
-  const postStore = usePostStore();
+/* const allposts = computed(async () => {
+  const postStore = await usePostStore();
   if (postStore.fetchPosts === null) {
-    setTimeout(() => {
-      // wait a moment please
-    }, 3000);
+    setTimeout(() => {}, 5000);
   }
 
   const postFetch = postStore.fetchPosts;
 
   if (postFetch) {
     postFetch.map((post) => {
-      const authorName = post.author.username;
+      const authorName = post.author?.username;
       const authorArrName = authorName.split(" ");
       const shortname =
         authorArrName[0][0].toUpperCase() + authorArrName[0].slice(1);
@@ -56,7 +70,7 @@ const allposts = computed(() => {
   }
 
   return postStore.fetchPosts;
-});
+}); */
 
 async function redirectEditPage(e, i) {
   const postStore = usePostStore();

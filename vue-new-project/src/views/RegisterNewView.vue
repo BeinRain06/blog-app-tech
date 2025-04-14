@@ -1,17 +1,18 @@
 <script>
-import { ref, defineComponent } from "vue";
+import { ref, defineComponent, nextTick } from "vue";
 import { registrationapi } from "../api/registration-api.js";
 import { useWarningStore } from "@/stores/warning.js";
 import { useUserStore } from "@/stores/user.js";
+
 import {
   populateLocalStorage,
   checkInputError,
-  resetUser,
+  resetUserInput,
+  updateSessionStorage,
 } from "@/reusable/collaborate-function.js";
 
 export default defineComponent({
   setup() {
-    const checked = ref(false);
     const user = ref({
       email: "",
       username: "",
@@ -19,36 +20,30 @@ export default defineComponent({
       confirm_password: "",
       custom: "",
     });
-    let msg = ref("toggle me");
 
     return {
-      checked,
       user,
-      msg,
     };
   },
 
   computed: {
-    warningUpStage: () => {
+    warningState: () => {
       const warningStore = useWarningStore();
       const stage = warningStore.warningStage;
       return stage;
     },
-    warningUpMsg: () => {
+    warningError: () => {
       const warningStore = useWarningStore();
       const msgWarn = warningStore.warningNews;
       return msgWarn;
     },
-    loadingStage: () => {
+    loading: () => {
       const userStore = useUserStore();
-      return userStore.loadingState;
+      return userStore.loading;
     },
   },
 
   methods: {
-    changeMsg() {
-      this.msg = "you got i-t!";
-    },
     changeType(e) {
       setTimeout(() => {
         e.target.setAttribute("type", "password");
@@ -57,17 +52,18 @@ export default defineComponent({
     async handleRegistration() {
       const userStore = useUserStore();
 
+      console.log("userStore :", userStore);
       setTimeout(() => {
         userStore.$patch({
-          loading: !userStore.loadingState,
+          loading: true,
         });
-      }, 5400);
+      }, 4000);
 
       checkInputError(this.user, "register");
 
-      const collectedData = await registrationapi(this.user);
+      const newUserInfo = await registrationapi(this.user);
 
-      if (collectedData === null) {
+      if (newUserInfo === null) {
         const warningStore = useWarningStore();
 
         warningStore.warningUpdate("this user already exist!", this.user);
@@ -75,25 +71,20 @@ export default defineComponent({
       }
 
       userStore.$patch({
-        loading: !userStore.loadingState,
+        loading: false,
       });
 
-      const newUser = collectedData.username;
-
-      userStore.usersLists(newUser);
+      await updateSessionStorage(newUserInfo);
 
       userStore.$patch({
-        currentUsername: newUser,
-        currentUserId: collectedData.userId,
-        access_token: collectedData.access,
-        isAdmin: collectedData.admin,
+        navbarState: sessionStorage.getItem("navbar-state"),
       });
 
-      if (collectedData.admin) {
-        await populateLocalStorage();
-      }
+      userStore.updateUserStore(newUserInfo);
 
-      resetUser(this.user, this.checked, null);
+      resetUserInput(this.user, null);
+
+      await nextTick();
 
       this.$router.push({ path: "/" });
     },
@@ -112,6 +103,7 @@ export default defineComponent({
       <form
         action=""
         class="register_form w-full h-full flex items-center justify-center"
+        autocomplete="off"
       >
         <fieldset
           class="fieldset_area flex flex-col w-full gap-4 pt-4 pb-8 px-8"
@@ -143,11 +135,21 @@ export default defineComponent({
               id="username"
               name="username"
               class="input_field"
+              placeholder="username"
+              autocomplete="off"
+              v-model="user.username"
             />
           </div>
           <div class="input_area">
             <label for="email" class="label_area">Email</label>
-            <input type="email" id="email" name="email" class="input_field" />
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="input_field"
+              placeholder="address_Email"
+              v-model="user.email"
+            />
           </div>
           <div class="input_area">
             <label for="password" class="label_area">Password</label>
@@ -156,6 +158,8 @@ export default defineComponent({
               id="password"
               name="password"
               class="input_field"
+              placeholder="Password"
+              v-model="user.password"
             />
           </div>
           <div class="input_area">
@@ -167,6 +171,8 @@ export default defineComponent({
               id="confirm_password"
               name="confirm_password"
               class="input_field"
+              placeholder="Confirm Password"
+              v-model="user.confirm_password"
             />
           </div>
           <div class="submit_form my-4">
@@ -181,12 +187,12 @@ export default defineComponent({
             <div
               id="warning_msg"
               class="warning_msg absolute top-2 w-full h-8 text-red-600 text-center bg-yellow-100"
-              v-if="warningUpStage"
+              v-if="warningState"
             >
-              <p>{{ warningUpMsg }}</p>
+              <p>{{ warningError }}</p>
             </div>
 
-            <div v-if="loadingStage" class="load_wrapper">
+            <div v-if="loading" class="load_wrapper">
               <ul
                 class="loading_content flex justify-center gap-2 justify-center items-center py-2"
               >
@@ -232,6 +238,7 @@ label {
 input[type="email"]:focus,
 input[type="text"]:focus,
 input[type="password"]:focus {
+  height: auto;
   transform: skewX(0deg);
   box-shadow: 0px 1px 3px var(--accent-color-2);
   outline: none;

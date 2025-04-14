@@ -1,82 +1,119 @@
 <script>
-import { ref, defineComponent } from "vue";
-import { useRouter } from "vue-router";
+import { ref, defineComponent, nextTick } from "vue";
 import { useUserStore } from "@/stores/user.js";
 import { useWarningStore } from "@/stores/warning.js";
-import { loginapi } from "../api/login-api.js";
-import { checkInputError, resetUser } from "@/reusable/collaborate-function.js";
+import { loginapi, loginUpdateTokensFirst } from "../api/login-api.js";
+import {
+  populateLocalStorage,
+  checkInputError,
+  resetUserInput,
+  updateSessionStorage,
+} from "@/reusable/collaborate-function.js";
 
 export default defineComponent({
   setup() {
-    const userStore = ref(useUserStore());
-    const warningStore = ref(useWarningStore());
-    const inputEml = ref(null);
     const inputPwd = ref(null);
-    const email = ref("");
-    const password = ref("");
+    const user = ref({
+      email: "",
+      password: "",
+    });
 
-    async function handleLogin(e) {
+    return {
+      user,
+      inputPwd,
+    };
+  },
+
+  computed: {
+    warningError: function () {
+      const warningStore = useWarningStore();
+      return warningStore.warningNews;
+    },
+    warningState: function () {
+      const warningStore = useWarningStore();
+      return warningStore.warningStage;
+    },
+    loading: function () {
+      const userStore = useUserStore();
+      return userStore.loading;
+    },
+  },
+
+  methods: {
+    showPassword(e) {
+      if (e.target.id === "toggle_password") {
+        const typeEl = this.inputPwd.getAttribute("type");
+        if (typeEl === "password") {
+          this.inputPwd.setAttribute("type", "text");
+        } else if (typeEl === "text") {
+          this.inputPwd.setAttribute("type", "password");
+        }
+      }
+    },
+
+    async handleLogin() {
       const userStore = useUserStore();
 
       setTimeout(() => {
         userStore.$patch({
-          loading: !userStore.loadingState,
+          loading: true,
         });
       }, 4000);
 
-      userStore.$patch({
-        loading: !userStore.loadingState,
-      });
-
-      const user = {
-        email: inputEml.value.value,
-        password: inputPwd.value.value,
-      };
-
-      const isStateWarning = checkInputError(user, "login");
+      const isStateWarning = checkInputError(this.user, "login");
 
       if (isStateWarning) {
         return;
       }
+      const userInfoProceed = await loginapi(this.user);
 
-      //loginapi call
-      const newUserInfo = await loginapi(user);
+      console.log("login-view userInfoProceed :", userInfoProceed);
 
-      const exUsersArr = userStore.usersLogin;
+      if (!userInfoProceed.success) {
+        // do warning show
+
+        this.toggleWarning(userInfoProceed.error);
+        return;
+      }
+
+      //loginapi call surely done
+      let newUserInfo;
+      if (userInfoProceed.message === "update all tokens before sending data") {
+        newUserInfo = await loginUpdateTokensFirst(userInfoProceed);
+      } else if (userInfoProceed.message === "send data to client side") {
+        newUserInfo = userInfoProceed;
+      }
+
+      if (newUserInfo.admin) {
+        populateLocalStorage();
+      }
+
+      updateSessionStorage(newUserInfo);
+
       userStore.$patch({
-        currentUsername: newUserInfo.username,
-        currentUserId: newUserInfo.id,
-        usersLogin: [...exUsersArr, newUserInfo.username],
-        isAdmin: false,
-        access_token: newUserInfo.access,
+        loading: false,
       });
 
-      resetUser(user, null, inputPwd);
+      await nextTick();
+
+      userStore.$patch({
+        navbarState: sessionStorage.getItem("navbar-state"),
+      });
+
+      userStore.updateUserStore(newUserInfo);
+
+      resetUserInput(this.user, this.inputPwd);
+
+      await nextTick();
 
       this.$router.push({ path: "/" });
-    }
+    },
 
-    function showPassword(e) {
-      if (e.target.id === "toggle_password") {
-        const typeEl = inputPwd.value.getAttribute("type");
-        if (typeEl === "password") {
-          inputPwd.value.setAttribute("type", "text");
-        } else if (typeEl === "text") {
-          inputPwd.value.setAttribute("type", "password");
-        }
-      }
-    }
+    toggleWarning(errMsg) {
+      const userWarningStore = useWarningStore();
 
-    return {
-      email,
-      password,
-      userStore,
-      warningStore,
-      inputPwd,
-      inputEml,
-      handleLogin,
-      showPassword,
-    };
+      userWarningStore.warningUpdate(errMsg, this.user);
+    },
   },
 });
 </script>
@@ -125,7 +162,7 @@ export default defineComponent({
                 ref="inputEml"
                 placeholder="address_Email"
                 focus="true"
-                v-model="email"
+                v-model="user.email"
               />
             </div>
             <div class="input_area" @click="showPassword">
@@ -138,7 +175,7 @@ export default defineComponent({
                 min-length="8"
                 ref="inputPwd"
                 placeholder="Password"
-                v-model="password"
+                v-model="user.password"
               />
               <div
                 class="pwd_wrap_toggle w-full flex justify-end text-base text-gray-700 font-bold"
@@ -161,12 +198,12 @@ export default defineComponent({
               <div
                 id="warning_msg"
                 class="warning_msg absolute bottom-12 w-full h-8 text-red-600 text-center bg-yellow-100"
-                v-if="warningStore.warningNews"
+                v-if="warningState"
               >
-                <p>{{ warningStore.warningNews }}</p>
+                <p>{{ warningError }}</p>
               </div>
 
-              <div v-if="userStore.loadingState" class="load_wrapper">
+              <div v-if="loading" class="load_wrapper">
                 <ul
                   class="loading_content flex justify-center gap-2 justify-center items-center py-2"
                 >

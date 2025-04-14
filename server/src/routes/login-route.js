@@ -3,26 +3,36 @@ const path = require("path");
 const User = require("../models/user");
 const Post = require("../models/post");
 const router = express.Router();
+const cookie = require("cookie-parser");
+const cors = require("cors");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const requestInitUser = require("../protect-api/authenticate-pwd-user");
 const {
-  verifyFakeToken,
-  verifyToken,
-  errorToken,
-} = require("../protect-api/authorization-jwt");
+  requestInitUser,
+  requestLoginByEmail,
+} = require("../protect-api/authenticate-helper-user");
+
+const { generateToken } = require("../protect-api/authorization-jwt");
 
 const { checkPrevToken } = require("../protect-api/check-token");
-
-const {
-  applyNewToken,
-  checkAccessToken,
-} = require("../protect-api/renew-token");
 
 //subdirectory requiry .env variable( file located in root directory)
 require("dotenv").config({ path: path.join(__dirname, "..") });
 
+router.use(cookie());
+
 router.use(express.urlencoded({ extended: false }));
+
+router.use(
+  cors({
+    origin: [
+      "https://blog-app-server-tech.vercel.app",
+      "http://localhost:5000",
+      "http://localhost:3000",
+      "http://localhost:5173",
+    ],
+    credentials: true,
+  })
+);
 
 router.get("/admin/authors-themes", async (req, res) => {
   try {
@@ -45,90 +55,175 @@ router.get("/admin/authors-themes", async (req, res) => {
   }
 });
 
-router.post("/", requestInitUser, async (req, res) => {
+router.post("/", requestInitUser, requestLoginByEmail, async (req, res) => {
   try {
-    const user = req.requestInitUser;
-    const newUserInfo = await applyNewToken(user, "standard");
+    const userProceed = req.requestLoginByEmail;
+
+    console.log("login-route --userProceed-- :", userProceed);
+
+    // first case
+    if (
+      userProceed.message === "error" &&
+      userProceed.error === "user not found"
+    ) {
+      return res.status(404).json({ success: false, data: null });
+    }
+
+    if (
+      userProceed.message === "error" &&
+      userProceed.error === "wrong password"
+    ) {
+      return res.status(301).json({ success: false, data: null });
+    }
+
+    // second case - update all token
+    if (userProceed.message === "update all tokens before sending data") {
+      return res.status(200).json({ success: true, data: userProceed });
+    }
+
+    // third case - send to client-side
 
     const maxAge = 6 * 60 * 60; // in sec
 
-    res.cookie(
-      "userInfo",
-      {
-        userId: newUserInfo.id,
-        userName: newUserInfo.username,
-        session_token: newUserInfo.session,
-      },
-      {
-        httpOnly: true,
-        maxAge: maxAge * 1000,
-      }
-    );
+    const userInCookie = {
+      userId: userProceed.userId,
+      userName: userProceed.userName,
+      userEmail: userProceed.userEmail,
+      access_token: userProceed.access_token,
+      admin: userProceed.admin,
+    };
 
-    res.status(200).json({ success: true, data: newUserInfo });
+    res.cookie("userInfo", JSON.stringify(userInCookie), {
+      httpOnly: true,
+      maxAge: maxAge * 1000,
+    });
+
+    res.status(200).json({ success: true, data: userProceed });
   } catch (err) {
     console.log(err);
   }
 });
 
-router.post("/redirect", async (req, res) => {
+router.put("/tokens/update/:userId", async (req, res) => {
+  const userPrimarInfo = req.body;
+
+  const userCatch = {
+    userId: userPrimarInfo.userId,
+    userName: userPrimarInfo.userName,
+    userEmail: userPrimarInfo.userEmail,
+    admin: userPrimarInfo.admin,
+    access_token: userPrimarInfo.access_token,
+  };
+
+  console.log("update-token --userCatch :", userCatch);
+
+  const { access_token, ...newUserCatch } = userCatch;
+
+  const stringAdmin = userPrimarInfo.admin ? "admin" : "common";
+
+  const new_access_token = await generateToken(
+    newUserCatch,
+    stringAdmin,
+    "access"
+  );
+
+  const new_refresh_token = await generateToken(
+    newUserCatch,
+    stringAdmin,
+    "refresh"
+  );
+
+  // encrypt refresh_toen
+  const newRefreshTokenHash = bcrypt.hashSync(`${new_refresh_token}`, 10); //10 autogen salt & hash
+
   try {
-    const prevCookie = req.cookies.userInfo;
-
-    if (prevCookie !== undefined) {
-      const userId = prevCookie.userId;
-      const userFetch = await User.findById(userId).select("-password");
-
-      const session_token = prevCookie.session_token;
-      const access_token = req.body.access;
-
-      if (session_token) {
-        // ==> ==>
-        const newUserInfo = await checkPrevToken(
-          userFetch,
-          session_token,
-          access_token
-        );
-
-        if (newUserInfo === "null" || newUserInfo === undefined) {
-          return res.status(200).json({ success: true, data: "null" });
-        }
-
-        return res.status(200).json({ success: true, data: newUserInfo });
-      }
-    } else {
-      //prevCookie === undefined
-      return res.status(200).json({ success: true, data: "null" });
-    }
-  } catch (err) {
-    console.log(err);
-  }
-});
-
-router.post("/admin/auth", requestInitUser, async (req, res) => {
-  try {
-    const user = req.requestInitUser;
-
-    if (!user.admin) {
-      return res.status(200).json({ success: false, data: "null" });
-    }
-
-    const newUserInfo = await applyNewToken(user, "admin");
+    await User.findByIdAndUpdate(
+      req.params.userId,
+      { $set: { refresh_token: newRefreshTokenHash } },
+      { new: true }
+    );
 
     const maxAge = 6 * 60 * 60; // in sec
 
-    res.cookie(
-      "userInfo",
-      {
-        userId: newUserInfo.id,
-        userName: newUserInfo.username,
-        session_token: newUserInfo.session,
-      },
-      {
-        httpOnly: true,
-        maxAge: maxAge * 1000,
-      }
+    userCatch.access_token = new_access_token;
+
+    const userInCookies = userCatch;
+
+    res.cookie("userInfo", JSON.stringify(userInCookies), {
+      httpOnly: true,
+      maxAge: maxAge * 1000,
+    });
+
+    res.status(200).json({ success: true, data: newUserCatch });
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+router.put("/admin/auth", async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const userName = req.body.userName;
+    const secret = req.body.secret;
+
+    if (process.env.admin_secret !== secret) {
+      return res.status(400).json({
+        success: false,
+        data: {
+          error: "not authorized",
+        },
+      });
+    }
+
+    const userInfo = JSON.parse(req.cookies.userInfo);
+
+    console.log("login-route --cookiesFetch-- :", userInfo);
+
+    const { access_token, ...userCatch } = userInfo;
+
+    const new_access_token = await generateToken(userCatch, "admin", "access");
+
+    const new_refresh_token = await generateToken(
+      userCatch,
+      "admin",
+      "refresh"
     );
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          admin: true,
+          refresh_token: new_refresh_token,
+        },
+      },
+      { new: true }
+    );
+
+    const maxAge = 6 * 60 * 60; // in sec
+
+    const userInCookies = {
+      ...userInfo,
+      access_token: new_access_token,
+      admin: user.admin,
+    };
+
+    console.log("PUT-ADMIN-AUTH --userInCookies-- :", userInCookies);
+
+    res.cookie("userInfo", JSON.stringify(userInCookies), {
+      httpOnly: true,
+      maxAge: maxAge * 1000,
+    });
+
+    const newUserInfo = {
+      userId: user.id,
+      userName: user.username,
+      userEmail: user.email,
+      admin: user.admin,
+      access_token: new_access_token,
+    };
+
+    console.log("PUT-ADMIN-AUTH --newUserInfo-- :", newUserInfo);
 
     res.status(200).json({ success: true, data: newUserInfo });
   } catch (err) {

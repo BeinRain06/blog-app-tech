@@ -1,14 +1,82 @@
 <script setup>
-import { ref, computed, useTemplateRef, watch } from "vue";
+import { ref, reactive, computed, useTemplateRef, watch, nextTick } from "vue";
 import { useRouter } from "vue-router";
+import { storeToRefs } from "pinia"; // really useful to get pinia reactive state almost instantly
 import { useUserStore } from "../stores/user";
+import { useWarningStore } from "../stores/warning";
+import { loginadminapi } from "../api/login-api";
+import { logoutapi } from "../api/logout-api";
+import {
+  shortNameUser,
+  updateSessionStorage,
+} from "../reusable/collaborate-function";
+
+const userStore = useUserStore();
+const { navbarState } = storeToRefs(userStore);
 
 const closeBoxProfile = defineModel();
+
 const router = useRouter();
+
+const userSecret = reactive({
+  mob: "",
+  desk: "",
+});
+
+const navLogoutRef = useTemplateRef("nav-logout");
+const navLoginRef = useTemplateRef("nav-login");
+const navLoginAdminRef = useTemplateRef("nav-login-admin");
+
+watch(navbarState, async () => {
+  console.log("navbarState in watch", navbarState);
+
+  switch (navbarState.value) {
+    case "logout":
+      navLogoutRef.value?.classList.remove("hidden");
+      navLoginRef.value?.classList.add("hidden");
+      navLoginAdminRef.value?.classList.add("hidden");
+      break;
+    case "standard":
+      navLoginRef.value?.classList.remove("hidden");
+      navLogoutRef.value?.classList.add("hidden");
+      navLoginAdminRef.value?.classList.add("hidden");
+      break;
+    case "admin":
+      navLoginAdminRef.value?.classList.remove("hidden");
+      navLogoutRef.value?.classList.add("hidden");
+      navLoginRef.value?.classList.add("hidden");
+
+      break;
+    default:
+      throw new Error("Error Commutating NavState");
+  }
+});
+
+const shortName = computed(() => {
+  const userStore = useUserStore();
+
+  const { currentUsername } = storeToRefs(userStore);
+  const shortNameCase = currentUsername.value;
+
+  let usernameFetch = sessionStorage.getItem("username");
+
+  let shortCalled = !usernameFetch
+    ? shortNameUser(shortNameCase)
+    : shortNameUser(usernameFetch);
+
+  console.log("shortCalled :", shortCalled);
+
+  return shortCalled;
+});
 
 const modeScene = computed(() => {
   const userStore = useUserStore();
   return userStore.lightMode;
+});
+
+const warningMsg = computed(() => {
+  const warningStore = useWarningStore();
+  return warningStore.warningNews;
 });
 
 const topicRefZero = useTemplateRef("topic-ref-0");
@@ -19,6 +87,9 @@ const profileRefZero = useTemplateRef("profile-ref-0");
 
 const sourceMobRef = useTemplateRef("source-mob-ref");
 const topicMobRef = useTemplateRef("topic-mob-ref");
+
+const adminShowDesk = useTemplateRef("admin-toggle-desk");
+const adminShowMob = useTemplateRef("admin-toggle-mob");
 
 watch(closeBoxProfile, async () => {
   if (closeBoxProfile.value === true) {
@@ -69,6 +140,9 @@ const handleMobModalContainer = (e) => {
 };
 
 const handleModalProfile = (e) => {
+  e.preventDefault();
+  console.log("--handle modal profile-- e.currentTarget :", e.currentTarget);
+
   switchPosAngleArrow(e);
 
   if (topicRefZero) {
@@ -100,12 +174,82 @@ const switchPosAngleArrow = (e) => {
   }
 };
 
-const handleSecretAdmin = (e) => {
-  e.currentTarget.classList.toggle("secret_entry");
+const togglerBoxAdmin = (type) => {
+  if (type === "toggle") {
+    adminShowDesk.value?.classList.toggle("secret_entry");
+    adminShowMob.value?.classList.toggle("secret_entry");
+  } else if (type === "remove") {
+    adminShowDesk.value?.classList.remove("secret_entry");
+    adminShowMob.value?.classList.remove("secret_entry");
+  }
+};
+
+const handleLoginAdmin = async (media) => {
+  const userStore = useUserStore();
+  const warningStore = useWarningStore();
+
+  const saveMedia = media === "desktop" ? userSecret.desk : userSecret.mob;
+
+  const user = {
+    userId: userStore.currentUserId,
+    userName: userStore.currentUsername,
+    secret: saveMedia,
+  };
+
+  console.log("handleLoginAdmin -- user :", user);
+
+  if (!user.userId) {
+    user.userId = sessionStorage.getItem("userid");
+    user.userName = sessionStorage.getItem("username");
+  }
+
+  const newUserInfo = await loginadminapi(user);
+
+  console.log("navblog --newUserInfo-- :", newUserInfo);
+
+  await updateSessionStorage(newUserInfo);
+
+  userStore.$patch({
+    navbarState: sessionStorage.getItem("navbar-state"),
+  });
+  userStore.updateUserStore(newUserInfo);
+
+  togglerBoxAdmin("remove");
+
+  await nextTick();
+
+  setTimeout(() => {
+    if (profileRefZero)
+      profileRefZero.value?.children[1].setAttribute("data-arrow", "down");
+    if (profileRef)
+      profileRef.value?.children[1].setAttribute("data-arrow", "down");
+  }, 3000);
+};
+
+const handleLogout = async () => {
+  const userStore = useUserStore();
+  const userName = await logoutapi();
+
+  console.log("userName --logout-- :", userName);
+
+  if (userName) {
+    userStore.resetUserData(userName);
+  }
+  router.push({ name: "home" });
+
+  navLogoutRef.value.classList.remove("hidden");
+
+  sessionStorage.setItem("username", "");
+  sessionStorage.setItem("navbar-state", "logout");
 };
 
 const handleModalMenu = (e) => {
   e.currentTarget.classList.toggle("active_menu");
+
+  if (!e.target.classlList.contains("active_menu")) {
+    if (adminShowDesk) adminShowDesk.value.classList.remove("secret_entry");
+    if (adminShowMob) adminShowMob.value.classList.remove("secret_entry");
+  }
 };
 
 const redirectToCredentials = (e, label) => {
@@ -120,6 +264,8 @@ const redirectToCredentials = (e, label) => {
 
 const handleResetNav = (e) => {
   const thisTarget = e.target;
+
+  console.log("thisTarget :", e.target);
 
   if (topicRefZero) {
     profileRef.value.children[1].setAttribute("data-arrow", "down");
@@ -140,8 +286,6 @@ const handleResetNav = (e) => {
       thisTarget.closest("#mode_light_admin.mode_light_container"),
   };
 
-  const isnavLink = thisTarget.closest(".nav_link");
-
   if (sideReview.logo || sideReview.search || sideReview.light) {
     profileRefZero.value?.children[1].setAttribute("data-arrow", "down");
     profileRef.value?.children[1].setAttribute("data-arrow", "down");
@@ -150,19 +294,24 @@ const handleResetNav = (e) => {
     sourceRef.value?.children[1].setAttribute("data-arrow", "down");
   }
 
-  if (
-    isnavLink.getAttribute("id") !== "profile_user_standard" ||
-    isnavLink.getAttribute("id") !== "profile_user"
-  ) {
+  if (!e.target.closest("li#profile_user_standard")) {
     profileRefZero.value?.children[1].setAttribute("data-arrow", "down");
     profileRef.value?.children[1].setAttribute("data-arrow", "down");
+    togglerBoxAdmin("remove");
+  }
+
+  if (e.target.parentElement.getAttribute("id") === "user_admin") {
+    togglerBoxAdmin("remove");
   }
 };
 </script>
 <template>
   <header id="nav_header">
     <!--navbar no-login-->
-    <nav class="nav_container flex items-center z-30 w-full h-16 relative my-0">
+    <nav
+      class="nav_container flex items-center z-30 w-full h-16 relative my-0"
+      ref="nav-logout"
+    >
       <div
         class="nav_space_fit flex items-center justify-between md:justify-center flex-1 h-7 lg:px-12 mx-4 lg:mx-0 gap-x-4"
       >
@@ -514,6 +663,7 @@ const handleResetNav = (e) => {
     <nav
       class="nav_container hidden flex items-center z-30 w-full h-16 relative"
       data-admin="false"
+      ref="nav-login"
       @mousedown="(e) => handleResetNav(e)"
     >
       <div
@@ -615,7 +765,7 @@ const handleResetNav = (e) => {
                     <div class="menu_bar"></div>
                   </div>
                   <!--modal container-->
-                  <div class="modal_container absolute w-screen px-2 pb-1">
+                  <div class="modal_container absolute w-screen px-2 pb-4">
                     <ul
                       class="modal_content flex flex-col w-full space-y-4"
                       style="font-size: 1em; color: var(--text-link)"
@@ -628,7 +778,7 @@ const handleResetNav = (e) => {
                           href="#"
                           class="profile_link"
                           style="color: var(--accent-color-11)"
-                          >MitNews</a
+                          >{{ shortName }}</a
                         >
                         <div
                           id="mode_light_standard"
@@ -896,8 +1046,9 @@ const handleResetNav = (e) => {
                       >
                         <button
                           type="button"
-                          class="btn_admin flex items-center justify-center cursor-pointer z-40"
-                          @click="(e) => handleSecretAdmin(e)"
+                          class="btn_admin relative flex items-center justify-start w-full cursor-pointer z-40"
+                          ref="admin-toggle-mob"
+                          @click="() => togglerBoxAdmin('toggle')"
                           style="
                             width: min-content;
                             height: min-content;
@@ -905,7 +1056,7 @@ const handleResetNav = (e) => {
                             border-bottom: 1px solid var(--brand-text);
                           "
                         >
-                          <div>admin</div>
+                          <div class="z-10">admin</div>
                           <div
                             class="grid place-items-center"
                             style="
@@ -916,6 +1067,10 @@ const handleResetNav = (e) => {
                               border-radius: 50%;
                             "
                           ></div>
+
+                          <div class="absolute w-max right-2">
+                            {{ warningMsg }}
+                          </div>
                         </button>
                         <!--admin box-->
                         <div class="admin_box relative z-50">
@@ -935,6 +1090,7 @@ const handleResetNav = (e) => {
                                   padding: 4px 8px;
                                   color: var(--title);
                                 "
+                                v-model="userSecret.mob"
                               />
                             </div>
                             <div class="submit_secret w-full mt-3 mb-2">
@@ -946,6 +1102,7 @@ const handleResetNav = (e) => {
                                   background-color: var(--accent-color-1);
                                   border-radius: 5px;
                                 "
+                                @click="handleLoginAdmin('mobile')"
                               >
                                 submit
                               </button>
@@ -962,6 +1119,7 @@ const handleResetNav = (e) => {
                             padding: 2px 0;
                             border-bottom: 1px solid var(--text-link);
                           "
+                          @click.prevent="async () => handleLogout()"
                           >logout</a
                         >
                       </li>
@@ -978,230 +1136,235 @@ const handleResetNav = (e) => {
               class="nav-right_panel absolute w-5/6 flex items-center justify-end"
             >
               <li id="profile_user_standard" class="nav_link text-xs">
-                <div class="logo_user_wrap">
+                <div
+                  class="logo_user_wrap w-6 flex items-start justify-center mr-4"
+                  style="
+                    padding: 4px;
+                    background-color: var(--accent-color-1);
+                    color: var(--accent-color-3);
+                  "
+                >
                   <div
-                    class="logo_user flex items-center justify-center font-medium w-7 h-6 mr-4"
-                    ref="profile-ref-0"
-                    style="
-                      padding: 4px;
-                      background-color: var(--accent-color-1);
-                      color: var(--accent-color-3);
-                    "
+                    class="symbol_user w-3 h-5 flex items-center justify-center"
+                    style="white-space: wrap"
                   >
-                    <div
-                      class="symbol_user flex-1 flex items-center justify-center"
-                      style="white-space: wrap"
-                    >
-                      M
-                    </div>
-                    <div
-                      class="arrow_icon relative flex-1 flex justify-center"
-                      data-arrow="down"
-                      @click="(e) => handleModalProfile(e)"
-                      style="bottom: 4px; right: -1px"
-                    >
-                      <i class="arrow_down absolute">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                        >
-                          <!-- Icon from All by undefined - undefined -->
-                          <path
-                            fill="currentColor"
-                            d="m12 15.4l-6-6L7.4 8l4.6 4.6L16.6 8L18 9.4z"
-                          />
-                        </svg>
-                      </i>
-                      <i class="arrow_up absolute">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                        >
-                          <!-- Icon from All by undefined - undefined -->
-                          <path
-                            fill="currentColor"
-                            d="m12 10.8l-4.6 4.6L6 14l6-6l6 6l-1.4 1.4z"
-                          />
-                        </svg>
-                      </i>
-                    </div>
-                    <!--modal container-->
-                    <div class="modal_container absolute w-56 px-2 pb-1">
-                      <ul
-                        class="modal_content flex flex-col space-y-4 w-full"
-                        style="font-size: 1em; color: var(--text-link)"
+                    {{ shortName[0]?.toUpperCase() }}
+                  </div>
+                  <div
+                    class="arrow_icon relative w-3 h-5 flex flex-col items-center justify-end"
+                    data-arrow="down"
+                    style="bottom: 1px; right: -1px"
+                    @click="(e) => handleModalProfile(e)"
+                  >
+                    <i class="arrow_down absolute">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
                       >
-                        <li id="user_name" class="modal_link py-1">
-                          <a
-                            href="#"
-                            class="profile_link"
-                            style="color: var(--accent-color-11)"
-                            >MitNews</a
-                          >
-                        </li>
-                        <li
-                          id="user_arcticle"
-                          class="modal_link flex justify-between w-full py-1"
+                        <!-- Icon from All by undefined - undefined -->
+                        <path
+                          fill="currentColor"
+                          d="m12 15.4l-6-6L7.4 8l4.6 4.6L16.6 8L18 9.4z"
+                        />
+                      </svg>
+                    </i>
+                    <i class="arrow_up absolute">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                      >
+                        <!-- Icon from All by undefined - undefined -->
+                        <path
+                          fill="currentColor"
+                          d="m12 10.8l-4.6 4.6L6 14l6-6l6 6l-1.4 1.4z"
+                        />
+                      </svg>
+                    </i>
+                  </div>
+                  <!--modal container-->
+                  <div class="modal_container absolute w-56 right-24 px-2 pb-1">
+                    <ul
+                      class="modal_content flex flex-col space-y-4 w-full"
+                      style="font-size: 1em; color: var(--text-link)"
+                    >
+                      <li id="user_name" class="modal_link py-1">
+                        <a
+                          href="#"
+                          class="profile_link"
+                          style="color: var(--accent-color-11)"
+                          >{{ shortName }}</a
                         >
-                          <a href="#" class="profile_link">publication</a>
-                          <div
-                            class="article_published"
-                            style="
-                              padding: 2px;
-                              color: var(--text-body);
-                              background-color: var(--accent-color-1);
-                              border-radius: 5px;
-                            "
-                          >
-                            0
-                          </div>
-                        </li>
-                        <li
-                          id="user_last_read"
-                          class="modal_link flex flex-col py-1"
+                      </li>
+                      <li
+                        id="user_arcticle"
+                        class="modal_link flex justify-between w-full py-1"
+                      >
+                        <a href="#" class="profile_link">publication</a>
+                        <div
+                          class="article_published"
+                          style="
+                            padding: 2px;
+                            color: var(--text-body);
+                            background-color: var(--accent-color-1);
+                            border-radius: 5px;
+                          "
                         >
-                          <a href="#" class="profile_link">last read</a>
-                          <div class="article_last_read">
-                            <div class="article_title cursor-pointer">
-                              <a href="#" class="profile_link text-center">
-                                lorem ipsum deum carnet fella bachhi katra pello
-                                madus infallum</a
-                              >
-                            </div>
+                          0
+                        </div>
+                      </li>
+                      <li
+                        id="user_last_read"
+                        class="modal_link flex flex-col py-1"
+                      >
+                        <a href="#" class="profile_link">last read</a>
+                        <div class="article_last_read">
+                          <div class="article_title cursor-pointer">
+                            <a href="#" class="profile_link text-center">
+                              lorem ipsum deum carnet fella bachhi katra pello
+                              madus infallum</a
+                            >
                           </div>
-                        </li>
-                        <li id="user_like" class="modal_link py-1">
-                          <a href="#" class="profile_link">Favourites</a>
-                          <i class="icon_like" style="color: hsl(0, 86%, 44%)">
+                        </div>
+                      </li>
+                      <li id="user_like" class="modal_link py-1">
+                        <a href="#" class="profile_link">Favourites</a>
+                        <i class="icon_like" style="color: hsl(0, 86%, 44%)">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                          >
+                            <!-- Icon from All by undefined - undefined -->
+                            <path
+                              fill="currentColor"
+                              fill-rule="evenodd"
+                              d="M4.536 5.778a5 5 0 0 1 7.07 0q.275.274.708.682q.432-.408.707-.682a5 5 0 0 1 7.125 7.016L13.02 19.92a1 1 0 0 1-1.414 0L4.48 12.795a5 5 0 0 1 .055-7.017z"
+                            />
+                          </svg>
+                        </i>
+                      </li>
+                      <li
+                        id="user_flag"
+                        class="modal_link flex justify-between w-full py-1"
+                      >
+                        <span>flag</span>
+                        <div class="level_contribution">
+                          <i class="icon_flag" data-flag="newbie">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               width="16"
                               height="16"
-                              viewBox="0 0 24 24"
+                              viewBox="0 0 256 256"
                             >
                               <!-- Icon from All by undefined - undefined -->
                               <path
                                 fill="currentColor"
-                                fill-rule="evenodd"
-                                d="M4.536 5.778a5 5 0 0 1 7.07 0q.275.274.708.682q.432-.408.707-.682a5 5 0 0 1 7.125 7.016L13.02 19.92a1 1 0 0 1-1.414 0L4.48 12.795a5 5 0 0 1 .055-7.017z"
+                                d="M232 56v120a8 8 0 0 1-2.76 6c-15.28 13.23-29.89 18-43.82 18c-18.91 0-36.57-8.74-53-16.85C105.87 170 82.79 158.61 56 179.77V224a8 8 0 0 1-16 0V56a8 8 0 0 1 2.77-6c36-31.18 68.31-15.21 96.79-1.12C167 62.46 190.79 74.2 218.76 50A8 8 0 0 1 232 56"
                               />
                             </svg>
                           </i>
-                        </li>
-                        <li
-                          id="user_flag"
-                          class="modal_link flex justify-between w-full py-1"
-                        >
-                          <span>flag</span>
-                          <div class="level_contribution">
-                            <i class="icon_flag" data-flag="newbie">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 256 256"
-                              >
-                                <!-- Icon from All by undefined - undefined -->
-                                <path
-                                  fill="currentColor"
-                                  d="M232 56v120a8 8 0 0 1-2.76 6c-15.28 13.23-29.89 18-43.82 18c-18.91 0-36.57-8.74-53-16.85C105.87 170 82.79 158.61 56 179.77V224a8 8 0 0 1-16 0V56a8 8 0 0 1 2.77-6c36-31.18 68.31-15.21 96.79-1.12C167 62.46 190.79 74.2 218.76 50A8 8 0 0 1 232 56"
-                                />
-                              </svg>
-                            </i>
-                          </div>
-                        </li>
-                        <li
-                          id="user_joined"
-                          class="flex justify-between w-full py-1"
-                        >
-                          <div style="font-size: calc(12px + 0.1vw)">
-                            <a href="#" class="profile_link underline"
-                              >date joined :</a
-                            >
-                          </div>
-                          <div class="underline">20th, July 2024</div>
-                        </li>
-                        <li
-                          id="user_admin"
-                          class="modal_link flex flex-col w-full py-1 space-y-3"
-                        >
-                          <button
-                            type="button"
-                            class="btn_admin flex items-center justify-center text-xs cursor-pointer z-40"
-                            @click="(e) => handleSecretAdmin(e)"
-                            style="
-                              width: min-content;
-                              height: min-content;
-                              padding-bottom: 1px;
-                              border-bottom: 1px solid var(--brand-text);
-                            "
+                        </div>
+                      </li>
+                      <li
+                        id="user_joined"
+                        class="flex justify-between w-full py-1"
+                      >
+                        <div style="font-size: calc(12px + 0.1vw)">
+                          <a href="#" class="profile_link underline"
+                            >date joined :</a
                           >
-                            <div>admin</div>
+                        </div>
+                        <div class="underline">20th, July 2024</div>
+                      </li>
+                      <li
+                        id="user_admin"
+                        class="modal_link flex flex-col w-full py-1 space-y-3"
+                      >
+                        <button
+                          type="button"
+                          class="btn_admin relative flex items-center justify-start text-xs w-full cursor-pointer z-40"
+                          ref="admin-toggle-desk"
+                          @click="() => togglerBoxAdmin('toggle')"
+                          style="
+                            width: min-content;
+                            height: min-content;
+                            padding-bottom: 1px;
+                            border-bottom: 1px solid var(--brand-text);
+                          "
+                        >
+                          <div>admin</div>
+                          <div
+                            class="grid place-items-center"
+                            style="
+                              width: 5px;
+                              height: 5px;
+                              margin: 4px;
+                              background-color: var(--brand-text);
+                              border-radius: 50%;
+                            "
+                          ></div>
+
+                          <div class="absolute w-max right-2">
+                            {{ warningMsg }}
+                          </div>
+                        </button>
+                        <!--admin box-->
+                        <div class="admin_box">
+                          <form
+                            class="flex flex-col items-center justify-start space-y-2 w-full"
+                          >
                             <div
-                              class="grid place-items-center"
-                              style="
-                                width: 5px;
-                                height: 5px;
-                                margin: 4px;
-                                background-color: var(--brand-text);
-                                border-radius: 50%;
-                              "
-                            ></div>
-                          </button>
-                          <!--admin box-->
-                          <div class="admin_box">
-                            <form
-                              class="flex flex-col items-center justify-start space-y-2 w-full"
+                              class="admin_secret_wrap flex flex-col justify-start py-2 w-full"
                             >
-                              <div
-                                class="admin_secret_wrap flex flex-col justify-start py-2 w-full"
+                              <input
+                                type="password"
+                                id="secret"
+                                name=" secret"
+                                placeholder="digit"
+                                style="
+                                  border-radius: 3px;
+                                  padding: 4px 8px;
+                                  color: var(--title);
+                                "
+                                v-model="userSecret.desk"
+                              />
+                            </div>
+                            <div class="submit_secret w-full mt-3 mb-2">
+                              <button
+                                type="button"
+                                class="grid place-items-center w-full h-8"
+                                style="
+                                  color: var(--accenr-color-3);
+                                  background-color: var(--accent-color-1);
+                                  border-radius: 5px;
+                                "
+                                @click="handleLoginAdmin('desktop')"
                               >
-                                <input
-                                  type="password"
-                                  id="secret"
-                                  name=" secret"
-                                  placeholder="digit"
-                                  style="
-                                    border-radius: 3px;
-                                    padding: 4px 8px;
-                                    color: var(--title);
-                                  "
-                                />
-                              </div>
-                              <div class="submit_secret w-full mt-3 mb-2">
-                                <button
-                                  type="button"
-                                  class="grid place-items-center w-full h-8"
-                                  style="
-                                    color: var(--accenr-color-3);
-                                    background-color: var(--accent-color-1);
-                                    border-radius: 5px;
-                                  "
-                                >
-                                  submit
-                                </button>
-                              </div>
-                            </form>
-                          </div>
-                        </li>
-                        <li id="user_logout" class="modal_link py-1">
-                          <a
-                            href="#"
-                            class="profile_link"
-                            style="
-                              height: max-content;
-                              padding: 2px 0;
-                              border-bottom: 1px solid var(--text-link);
-                            "
-                            >logout</a
-                          >
-                        </li>
-                      </ul>
-                    </div>
+                                submit
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </li>
+                      <li id="user_logout" class="modal_link py-1">
+                        <a
+                          href="#"
+                          class="profile_link"
+                          style="
+                            height: max-content;
+                            padding: 2px 0;
+                            border-bottom: 1px solid var(--text-link);
+                          "
+                          @click.prevent="async () => handleLogout()"
+                          >logout</a
+                        >
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </li>
@@ -1387,6 +1550,7 @@ const handleResetNav = (e) => {
     <nav
       class="nav_container hidden flex items-center z-30 w-full h-16 relative"
       data-admin="true"
+      ref="nav-login-admin"
       @mousedown="(e) => handleResetNav(e)"
     >
       <div
@@ -1489,7 +1653,7 @@ const handleResetNav = (e) => {
                       <div class="menu_bar"></div>
                     </div>
 
-                    <div class="modal_container absolute w-screen px-2 pb-1">
+                    <div class="modal_container absolute w-screen px-2 pb-4">
                       <ul
                         class="modal_content flex flex-col w-full space-y-4"
                         style="font-size: 1em; color: var(--text-link)"
@@ -1502,7 +1666,7 @@ const handleResetNav = (e) => {
                             href="#"
                             class="profile_link"
                             style="color: var(--accent-color-11)"
-                            >MitNews</a
+                            >{{ shortName }}</a
                           >
                           <div
                             id="mode_light_standard"
@@ -1812,69 +1976,6 @@ const handleResetNav = (e) => {
                           </div>
                           <div class="underline">20th, July 2024</div>
                         </li>
-                        <li
-                          id="user_admin"
-                          class="menu_link flex flex-col w-full py-1 space-y-3 mb-0"
-                        >
-                          <button
-                            type="button"
-                            class="btn_admin flex items-center justify-center cursor-pointer z-40"
-                            @click="(e) => handleSecretAdmin(e)"
-                            style="
-                              width: min-content;
-                              height: min-content;
-                              padding-bottom: 1px;
-                              border-bottom: 1px solid var(--brand-text);
-                            "
-                          >
-                            <div>admin</div>
-                            <div
-                              class="grid place-items-center"
-                              style="
-                                width: 5px;
-                                height: 5px;
-                                margin: 4px;
-                                background-color: var(--brand-text);
-                                border-radius: 50%;
-                              "
-                            ></div>
-                          </button>
-                          <!--admin box-->
-                          <div class="admin_box relative z-50">
-                            <form
-                              class="flex flex-col items-center justify-start space-y-2 w-full"
-                            >
-                              <div
-                                class="admin_secret_wrap flex flex-col justify-start py-2 w-full"
-                              >
-                                <input
-                                  type="password"
-                                  id="secret"
-                                  name=" secret"
-                                  placeholder="digit"
-                                  style="
-                                    border-radius: 3px;
-                                    padding: 4px 8px;
-                                    color: var(--title);
-                                  "
-                                />
-                              </div>
-                              <div class="submit_secret w-full mt-3 mb-2">
-                                <button
-                                  type="button"
-                                  class="grid place-items-center w-full h-8"
-                                  style="
-                                    color: var(--accenr-color-3);
-                                    background-color: var(--accent-color-1);
-                                    border-radius: 5px;
-                                  "
-                                >
-                                  submit
-                                </button>
-                              </div>
-                            </form>
-                          </div>
-                        </li>
                         <li id="user_logout" class="menu_link mt-4 py-1">
                           <a
                             href="#"
@@ -1884,6 +1985,7 @@ const handleResetNav = (e) => {
                               padding: 2px 0;
                               border-bottom: 1px solid var(--text-link);
                             "
+                            @click.prevent="async () => handleLogout()"
                             >logout</a
                           >
                         </li>
@@ -1901,226 +2003,161 @@ const handleResetNav = (e) => {
               class="nav-right_panel absolute w-5/6 flex items-center justify-end"
             >
               <li id="profile_user" class="nav_link text-xs">
-                <div class="logo_user_wrap">
+                <div
+                  class="logo_user_wrap w-6 flex items-start justify-center mr-4"
+                  style="
+                    padding: 4px;
+                    background-color: var(--accent-color-1);
+                    color: var(--accent-color-3);
+                  "
+                >
                   <div
-                    class="logo_user flex items-center justify-center font-medium w-7 h-6 mr-4"
-                    ref="profile-ref"
-                    style="
-                      padding: 4px;
-                      background-color: var(--accent-color-1);
-                      color: var(--accent-color-3);
-                    "
+                    class="symbol_user w-3 h-5 flex items-center justify-center"
+                    style="white-space: wrap"
                   >
-                    <div
-                      class="symbol_user flex-1 flex items-center justify-center"
-                      style="white-space: wrap"
-                    >
-                      M
-                    </div>
-                    <div
-                      class="arrow_icon relative flex-1 flex justify-center"
-                      data-arrow="down"
-                      @click="(e) => handleModalProfile(e)"
-                      style="bottom: 4px; right: -1px"
-                    >
-                      <i class="arrow_down absolute">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fill="currentColor"
-                            d="m12 15.4l-6-6L7.4 8l4.6 4.6L16.6 8L18 9.4z"
-                          />
-                        </svg>
-                      </i>
-                      <i class="arrow_up absolute">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fill="currentColor"
-                            d="m12 10.8l-4.6 4.6L6 14l6-6l6 6l-1.4 1.4z"
-                          />
-                        </svg>
-                      </i>
-                    </div>
-                    <!--modal container-->
-                    <div class="modal_container absolute w-56 px-2 pb-1">
-                      <ul
-                        class="modal_content flex flex-col w-full space-y-4"
-                        style="font-size: 1em; color: var(--text-link)"
+                    {{ shortName[0]?.toUpperCase() }}
+                  </div>
+                  <div
+                    class="arrow_icon relative w-3 h-5 flex flex-col items-center justify-end"
+                    data-arrow="down"
+                    style="bottom: 1px; right: -1px"
+                    @click="(e) => handleModalProfile(e)"
+                  >
+                    <i class="arrow_down absolute">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
                       >
-                        <li id="user_name" class="modal_link py-1">
-                          <a
-                            href="#"
-                            class="profile_link"
-                            style="color: var(--accent-color-11)"
-                            >MitNews</a
-                          >
-                        </li>
-                        <li
-                          id="user_arcticle"
-                          class="modal_link flex justify-between w-full py-1"
+                        <path
+                          fill="currentColor"
+                          d="m12 15.4l-6-6L7.4 8l4.6 4.6L16.6 8L18 9.4z"
+                        />
+                      </svg>
+                    </i>
+                    <i class="arrow_up absolute">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          fill="currentColor"
+                          d="m12 10.8l-4.6 4.6L6 14l6-6l6 6l-1.4 1.4z"
+                        />
+                      </svg>
+                    </i>
+                  </div>
+                  <!--modal container-->
+                  <div class="modal_container absolute w-56 right-24 px-2 pb-1">
+                    <ul
+                      class="modal_content flex flex-col w-full space-y-4"
+                      style="font-size: 1em; color: var(--text-link)"
+                    >
+                      <li id="user_name" class="modal_link py-1">
+                        <a
+                          href="#"
+                          class="profile_link"
+                          style="color: var(--accent-color-11)"
+                          >{{ shortName }}</a
                         >
-                          <a href="#" class="profile_link">publication</a>
-                          <div
-                            class="article_published"
-                            style="
-                              padding: 2px;
-                              color: var(--text-body);
-                              background-color: var(--accent-color-1);
-                              border-radius: 5px;
-                            "
-                          >
-                            0
-                          </div>
-                        </li>
-                        <li
-                          id="user_last_read"
-                          class="modal_link flex flex-col py-1"
+                      </li>
+                      <li
+                        id="user_arcticle"
+                        class="modal_link flex justify-between w-full py-1"
+                      >
+                        <a href="#" class="profile_link">publication</a>
+                        <div
+                          class="article_published"
+                          style="
+                            padding: 2px;
+                            color: var(--text-body);
+                            background-color: var(--accent-color-1);
+                            border-radius: 5px;
+                          "
                         >
-                          <a href="#" class="profile_link">last read</a>
-                          <div class="article_last_read">
-                            <div class="article_title cursor-pointer">
-                              <a href="#" class="profile_link text-center">
-                                lorem ipsum deum carnet fella bachhi katra pello
-                                madus infallum</a
-                              >
-                            </div>
+                          0
+                        </div>
+                      </li>
+                      <li
+                        id="user_last_read"
+                        class="modal_link flex flex-col py-1"
+                      >
+                        <a href="#" class="profile_link">last read</a>
+                        <div class="article_last_read">
+                          <div class="article_title cursor-pointer">
+                            <a href="#" class="profile_link text-center">
+                              lorem ipsum deum carnet fella bachhi katra pello
+                              madus infallum</a
+                            >
                           </div>
-                        </li>
-                        <li id="user_like" class="modal_link py-1">
-                          <a href="#" class="profile_link">Favourites</a>
-                          <i class="icon_like" style="color: hsl(0, 86%, 44%)">
+                        </div>
+                      </li>
+                      <li id="user_like" class="modal_link py-1">
+                        <a href="#" class="profile_link">Favourites</a>
+                        <i class="icon_like" style="color: hsl(0, 86%, 44%)">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="currentColor"
+                              fill-rule="evenodd"
+                              d="M4.536 5.778a5 5 0 0 1 7.07 0q.275.274.708.682q.432-.408.707-.682a5 5 0 0 1 7.125 7.016L13.02 19.92a1 1 0 0 1-1.414 0L4.48 12.795a5 5 0 0 1 .055-7.017z"
+                            />
+                          </svg>
+                        </i>
+                      </li>
+                      <li
+                        id="user_flag"
+                        class="modal_link flex justify-between w-full py-1"
+                      >
+                        <span>flag</span>
+                        <div class="level_contribution">
+                          <i class="icon_flag" data-flag="newbie">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               width="16"
                               height="16"
-                              viewBox="0 0 24 24"
+                              viewBox="0 0 256 256"
                             >
                               <path
                                 fill="currentColor"
-                                fill-rule="evenodd"
-                                d="M4.536 5.778a5 5 0 0 1 7.07 0q.275.274.708.682q.432-.408.707-.682a5 5 0 0 1 7.125 7.016L13.02 19.92a1 1 0 0 1-1.414 0L4.48 12.795a5 5 0 0 1 .055-7.017z"
+                                d="M232 56v120a8 8 0 0 1-2.76 6c-15.28 13.23-29.89 18-43.82 18c-18.91 0-36.57-8.74-53-16.85C105.87 170 82.79 158.61 56 179.77V224a8 8 0 0 1-16 0V56a8 8 0 0 1 2.77-6c36-31.18 68.31-15.21 96.79-1.12C167 62.46 190.79 74.2 218.76 50A8 8 0 0 1 232 56"
                               />
                             </svg>
                           </i>
-                        </li>
-                        <li
-                          id="user_flag"
-                          class="modal_link flex justify-between w-full py-1"
-                        >
-                          <span>flag</span>
-                          <div class="level_contribution">
-                            <i class="icon_flag" data-flag="newbie">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 256 256"
-                              >
-                                <path
-                                  fill="currentColor"
-                                  d="M232 56v120a8 8 0 0 1-2.76 6c-15.28 13.23-29.89 18-43.82 18c-18.91 0-36.57-8.74-53-16.85C105.87 170 82.79 158.61 56 179.77V224a8 8 0 0 1-16 0V56a8 8 0 0 1 2.77-6c36-31.18 68.31-15.21 96.79-1.12C167 62.46 190.79 74.2 218.76 50A8 8 0 0 1 232 56"
-                                />
-                              </svg>
-                            </i>
-                          </div>
-                        </li>
-                        <li
-                          id="user_joined"
-                          class="flex justify-between w-full py-1"
-                        >
-                          <div style="font-size: calc(12px + 0.1vw)">
-                            <a href="#" class="profile_link underline"
-                              >date joined :</a
-                            >
-                          </div>
-                          <div class="underline">20th, July 2024</div>
-                        </li>
-                        <li
-                          id="user_admin"
-                          class="modal_link flex flex-col w-full py-1 space-y-3 mb-0"
-                        >
-                          <button
-                            type="button"
-                            class="btn_admin flex items-center justify-center text-xs cursor-pointer z-40"
-                            @click="(e) => handleSecretAdmin(e)"
-                            style="
-                              width: min-content;
-                              height: min-content;
-                              padding-bottom: 1px;
-                              border-bottom: 1px solid var(--brand-text);
-                            "
+                        </div>
+                      </li>
+                      <li
+                        id="user_joined"
+                        class="flex justify-between w-full py-1"
+                      >
+                        <div style="font-size: calc(12px + 0.1vw)">
+                          <a href="#" class="profile_link underline"
+                            >date joined :</a
                           >
-                            <div>admin</div>
-                            <div
-                              class="grid place-items-center"
-                              style="
-                                width: 5px;
-                                height: 5px;
-                                margin: 4px;
-                                background-color: var(--brand-text);
-                                border-radius: 50%;
-                              "
-                            ></div>
-                          </button>
-
-                          <div class="admin_box">
-                            <form
-                              class="flex flex-col items-center justify-start space-y-2 w-full"
-                            >
-                              <div
-                                class="admin_secret_wrap flex flex-col justify-start py-2 w-full"
-                              >
-                                <input
-                                  type="password"
-                                  id="secret"
-                                  name=" secret"
-                                  placeholder="digit"
-                                  style="
-                                    border-radius: 3px;
-                                    padding: 4px 8px;
-                                    color: var(--title);
-                                  "
-                                />
-                              </div>
-                              <div class="submit_secret w-full mt-3 mb-2">
-                                <button
-                                  type="button"
-                                  class="grid place-items-center w-full h-8"
-                                  style="
-                                    color: var(--accenr-color-3);
-                                    background-color: var(--accent-color-1);
-                                    border-radius: 5px;
-                                  "
-                                >
-                                  submit
-                                </button>
-                              </div>
-                            </form>
-                          </div>
-                        </li>
-                        <li id="user_logout" class="modal_link py-1">
-                          <a
-                            href="#"
-                            class="profile_link"
-                            style="
-                              height: max-content;
-                              padding: 2px 0;
-                              border-bottom: 1px solid var(--text-link);
-                            "
-                            >logout</a
-                          >
-                        </li>
-                      </ul>
-                    </div>
+                        </div>
+                        <div class="underline">20th, July 2024</div>
+                      </li>
+                      <li id="user_logout" class="modal_link py-1">
+                        <a
+                          href="#"
+                          class="profile_link"
+                          style="
+                            height: max-content;
+                            padding: 2px 0;
+                            border-bottom: 1px solid var(--text-link);
+                          "
+                          @click.prevent="async () => handleLogout()"
+                          >logout</a
+                        >
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </li>

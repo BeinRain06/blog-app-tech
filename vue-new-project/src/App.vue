@@ -7,17 +7,17 @@
 
 <script setup>
 import { RouterLink, RouterView, useRouter } from "vue-router";
-import { ref, onMounted, useTemplateRef } from "vue";
+import { ref, onMounted } from "vue";
+import { useUserStore } from "./stores/user";
+
 import NavbarNewBlog from "./components/NavbarNewBlog.vue";
-import { usePostStore } from "@/stores/post.js";
 
 const router = useRouter();
 
 const closeProfile = ref(false);
 const isNavbar = ref(false);
-const mainRef = useTemplateRef("main-ref");
 
-onMounted(() => {
+onMounted(async () => {
   router.beforeEach(async (to, from) => {
     console.log("to", to);
 
@@ -27,6 +27,20 @@ onMounted(() => {
       isNavbar.value = await false;
     }
   });
+
+  async function mountNavBar() {
+    const checkPrevNav = await sessionStorage.getItem("navbar-state");
+    if (checkPrevNav) {
+      let newNavState;
+      setTimeout(async () => {
+        newNavState = checkPrevNav;
+        const userStore = await useUserStore();
+        userStore.$patch({ navbarState: newNavState });
+      }, 4000);
+    }
+  }
+
+  await mountNavBar();
 });
 
 const handleResetVar = () => {

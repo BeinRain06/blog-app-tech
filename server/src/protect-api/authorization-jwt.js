@@ -17,82 +17,59 @@ module.exports.generateToken = async function (payload, type, label) {
 // allowInsecureKeySizes: true;
 function JWTSign(payload, type, label) {
   const options =
-    label === "session"
+    label === "access"
       ? { algorithm: "RS256", expiresIn: "6h" }
-      : { algorithm: "RS256", expiresIn: "15m" };
+      : { algorithm: "RS256", expiresIn: "2m" };
 
-  const userEmail = payload.email;
+  let userEmail = payload.userEmail ? payload.userEmail : payload.email;
 
-  if (type === "common") {
-    return new Promise((resolve, reject) => {
-      try {
-        const secret = fs.readFileSync(jwtPrivateFakeKey);
-        const token = jwt.sign({ userEmail: payload.email }, secret, options);
-        resolve(token);
-      } catch (err) {
-        reject(err);
-      }
-    });
-  } else {
-    return new Promise((resolve, reject) => {
-      try {
-        const secret = fs.readFileSync(jwtPrivateKey);
-        const token = jwt.sign({ userEmail: payload.email }, secret, options);
-        resolve(token);
-      } catch (err) {
-        reject(err);
-      }
-    });
-  }
+  const tokenGen = assignNewToken(userEmail, type, options);
+
+  return tokenGen;
 }
 
-module.exports.getPayloadFromToken = async function (token, label) {
-  const payload = await JWTVerify(token, label);
+module.exports.getPayloadFromToken = async function (token, label, admin) {
+  const payload = await JWTVerify(token, label, admin);
   return payload;
 };
 
-module.exports.verifyToken = async function (token, label) {
-  const result = await JWTVerify(token, label);
+module.exports.verifyToken = async function (token, label, admin) {
+  const result = await JWTVerify(token, label, admin);
   return result;
 };
 
-module.exports.verifyFakeToken = async function (token, label) {
-  const result = await JWTVerifyFake(token, label);
-  return result;
-};
-
-function JWTVerify(token, label) {
+function JWTVerify(token, label, admin) {
   const options =
-    label === "session"
+    label === "access"
       ? { algorithm: "RS256", expiresIn: "6h" }
-      : { algorithm: "RS256", expiresIn: "15m" };
+      : { algorithm: "RS256", expiresIn: "2m" };
+
+  const key_tool = admin ? jwtPublicKey : jwtPublicFakeKey;
+
+  const tokenCheckRes = verifyThisToken(key_tool, token, options);
+
+  return tokenCheckRes;
+}
+
+function assignNewToken(payload, type, options) {
+  const hold_key = type === "admin" ? jwtPrivateKey : jwtPrivateFakeKey;
 
   return new Promise((resolve, reject) => {
     try {
-      const cert = fs.readFileSync(jwtPublicKey);
+      const secret = fs.readFileSync(hold_key);
 
-      const result = jwt.verify(token, cert, options);
-
-      resolve(result);
+      const token = jwt.sign({ userEmail: payload }, secret, options);
+      resolve(token);
     } catch (err) {
-      if (err.name !== "TokenExpiredError") {
-        reject(err);
-      } else {
-        resolve(err);
-      }
+      reject(err);
     }
   });
 }
 
-function JWTVerifyFake(token, label) {
-  const options =
-    label === "session"
-      ? { algorithm: "RS256", expiresIn: "6h" }
-      : { algorithm: "RS256", expiresIn: "15m" };
-
+function verifyThisToken(key_tool, token, options) {
   return new Promise((resolve, reject) => {
     try {
-      const cert = fs.readFileSync(jwtPublicFakeKey);
+      const cert = fs.readFileSync(key_tool);
 
       const result = jwt.verify(token, cert, options);
       resolve(result);
@@ -109,3 +86,17 @@ function JWTVerifyFake(token, label) {
 module.exports.errorToken = function (msgErr) {
   throw new Error(msgErr);
 };
+
+/* function JWTVerifyFake(token, label) {
+  const options =
+    label === "access"
+      ? { algorithm: "RS256", expiresIn: "6h" }
+      : { algorithm: "RS256", expiresIn: "2w" };
+
+  verifyThisToken(jwtPublicFakeKey, token, options);
+}
+
+module.exports.verifyFakeToken = async function (token, label) {
+  const result = await JWTVerifyFake(token, label);
+  return result;
+}; */

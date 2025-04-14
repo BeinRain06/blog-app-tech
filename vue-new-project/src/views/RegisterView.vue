@@ -1,7 +1,5 @@
 <template>
   <div class="register w-full h-full">
-    <!-- <div class="upper_wrapper absolute w-full h-1/2"></div>
-    <div class="lower_wrapper absolute w-full h-1/2"></div> -->
     <div class="register_wrapper">
       <form action="" class="register_form h-full">
         <fieldset class="fieldset_area h-full">
@@ -63,33 +61,8 @@
                 v-model="user.confirm_password"
               />
             </div>
-            <!--  <div class="form_custom">
-              <ul
-                class="label_custom w-full flex justify-center items-center py-2 gap-2"
-              >
-                <label for="checkbox" class="pr-2">
-                  Custom (Optional-retriever password)
-                </label>
-                <input
-                  type="checkbox"
-                  class="z-10"
-                  id="checkbox"
-                  v-model="checked"
-                  @click="changeMsg"
-                />
-              </ul>
-              <input
-                type="text"
-                id="custom"
-                class="input_content"
-                name="custom"
-                min-length="8"
-                placeholder="Custom"
-                v-model="user.custom"
-                :disabled="!checked"
-                @input="changeType"
-              />
-            </div> -->
+
+            <!--submition-->
             <div class="form_submit relative">
               <input
                 type="button"
@@ -128,15 +101,15 @@ import { ref, defineComponent } from "vue";
 import { registrationapi } from "../api/registration-api.js";
 import { useWarningStore } from "@/stores/warning.js";
 import { useUserStore } from "@/stores/user.js";
+
 import {
   populateLocalStorage,
   checkInputError,
-  resetUser,
+  resetUserInput,
 } from "@/reusable/collaborate-function.js";
 
 export default defineComponent({
   setup() {
-    const checked = ref(false);
     const user = ref({
       email: "",
       username: "",
@@ -144,12 +117,9 @@ export default defineComponent({
       confirm_password: "",
       custom: "",
     });
-    let msg = ref("toggle me");
 
     return {
-      checked,
       user,
-      msg,
     };
   },
 
@@ -171,9 +141,6 @@ export default defineComponent({
   },
 
   methods: {
-    changeMsg() {
-      this.msg = "you got i-t!";
-    },
     changeType(e) {
       setTimeout(() => {
         e.target.setAttribute("type", "password");
@@ -190,9 +157,9 @@ export default defineComponent({
 
       checkInputError(this.user, "register");
 
-      const collectedData = await registrationapi(this.user);
+      const newUserInfo = await registrationapi(this.user);
 
-      if (collectedData === null) {
+      if (newUserInfo === null) {
         const warningStore = useWarningStore();
 
         warningStore.warningUpdate("this user already exist!", this.user);
@@ -203,22 +170,13 @@ export default defineComponent({
         loading: !userStore.loadingState,
       });
 
-      const newUser = collectedData.username;
+      userStore.updateUserStore(newUserInfo);
 
-      userStore.usersLists(newUser);
-
-      userStore.$patch({
-        currentUsername: newUser,
-        currentUserId: collectedData.userId,
-        access_token: collectedData.access,
-        isAdmin: collectedData.admin,
-      });
-
-      if (collectedData.admin) {
+      if (newUserInfo.admin) {
         await populateLocalStorage();
       }
 
-      resetUser(this.user, this.checked, null);
+      resetUserInput(this.user, null);
 
       this.$router.push({ path: "/" });
     },
