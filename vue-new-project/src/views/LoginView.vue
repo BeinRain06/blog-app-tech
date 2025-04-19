@@ -54,11 +54,9 @@ export default defineComponent({
     async handleLogin() {
       const userStore = useUserStore();
 
-      setTimeout(() => {
-        userStore.$patch({
-          loading: true,
-        });
-      }, 4000);
+      userStore.$patch({
+        loading: true,
+      });
 
       const isStateWarning = checkInputError(this.user, "login");
 
@@ -67,7 +65,7 @@ export default defineComponent({
       }
       const userInfoProceed = await loginapi(this.user);
 
-      console.log("login-view userInfoProceed :", userInfoProceed);
+      // console.log("login-view userInfoProceed :", userInfoProceed);
 
       if (!userInfoProceed.success) {
         // do warning show
@@ -88,11 +86,25 @@ export default defineComponent({
         populateLocalStorage();
       }
 
-      updateSessionStorage(newUserInfo);
+      let numbersOfPosts = newUserInfo.numberOfPosts;
+
+      if (!numbersOfPosts) {
+        numbersOfPosts = 0;
+      }
+
+      sessionStorage.setItem("numbers-of-post", numbersOfPosts.toString());
 
       userStore.$patch({
-        loading: false,
+        numbersofPosts: sessionStorage.getItem("numbers-of-post"),
       });
+
+      updateSessionStorage(newUserInfo);
+
+      setTimeout(() => {
+        userStore.$patch({
+          loading: false,
+        });
+      }, 3000);
 
       await nextTick();
 
@@ -195,12 +207,21 @@ export default defineComponent({
               >
                 Login
               </button>
+
               <div
-                id="warning_msg"
-                class="warning_msg absolute bottom-12 w-full h-8 text-red-600 text-center bg-yellow-100"
-                v-if="warningState"
+                class="warning_container absolute left-0 top-5 flex items-center justify-center w-full h-8 mx-auto"
               >
-                <p>{{ warningError }}</p>
+                <div
+                  id="warning_msg"
+                  class="warning_msg absolute flex items-center justify-end w-2/5"
+                  v-if="warningState"
+                >
+                  <p
+                    class="absolute right-16 w-max h-8 py-1 px-4 text-red-600 text-center bg-yellow-400"
+                  >
+                    {{ warningError }}
+                  </p>
+                </div>
               </div>
 
               <div v-if="loading" class="load_wrapper">

@@ -1,7 +1,16 @@
 <script setup>
-import { ref, reactive, computed, useTemplateRef, watch, nextTick } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  computed,
+  useTemplateRef,
+  watch,
+  nextTick,
+} from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia"; // really useful to get pinia reactive state almost instantly
+import { format } from "date-fns";
 import { useUserStore } from "../stores/user";
 import { useWarningStore } from "../stores/warning";
 import { loginadminapi } from "../api/login-api";
@@ -23,35 +32,51 @@ const userSecret = reactive({
   desk: "",
 });
 
+const navSelect = ref("logout");
+
 const navLogoutRef = useTemplateRef("nav-logout");
 const navLoginRef = useTemplateRef("nav-login");
 const navLoginAdminRef = useTemplateRef("nav-login-admin");
 
+const today = ref("");
+
+onMounted(async () => {
+  await mountNavBar();
+
+  today.value = format(new Date(), "eee, dd MMM");
+
+  function mountNavBar() {
+    const userStore = useUserStore();
+    const checkPrevNav = sessionStorage.getItem("navbar-state");
+    if (checkPrevNav) {
+      userStore.$patch({ navbarState: checkPrevNav });
+    } else {
+      userStore.$patch({ navbarState: "logout" });
+    }
+  }
+});
+
 watch(navbarState, async () => {
-  console.log("navbarState in watch", navbarState);
+  // console.log("navbarState in watch", navbarState);
 
   switch (navbarState.value) {
     case "logout":
-      navLogoutRef.value?.classList.remove("hidden");
-      navLoginRef.value?.classList.add("hidden");
-      navLoginAdminRef.value?.classList.add("hidden");
+      navSelect.value = "logout";
       break;
     case "standard":
-      navLoginRef.value?.classList.remove("hidden");
-      navLogoutRef.value?.classList.add("hidden");
-      navLoginAdminRef.value?.classList.add("hidden");
+      navSelect.value = "standard";
+
       break;
     case "admin":
-      navLoginAdminRef.value?.classList.remove("hidden");
-      navLogoutRef.value?.classList.add("hidden");
-      navLoginRef.value?.classList.add("hidden");
-
+      navSelect.value = "admin";
       break;
     default:
       throw new Error("Error Commutating NavState");
   }
 });
-
+const navStatus = computed(() => {
+  return navSelect.value;
+});
 const shortName = computed(() => {
   const userStore = useUserStore();
 
@@ -64,9 +89,12 @@ const shortName = computed(() => {
     ? shortNameUser(shortNameCase)
     : shortNameUser(usernameFetch);
 
-  console.log("shortCalled :", shortCalled);
-
   return shortCalled;
+});
+
+const numberOfPosts = computed(() => {
+  const userStore = useUserStore();
+  return userStore.numbersofPosts;
 });
 
 const modeScene = computed(() => {
@@ -141,17 +169,17 @@ const handleMobModalContainer = (e) => {
 
 const handleModalProfile = (e) => {
   e.preventDefault();
-  console.log("--handle modal profile-- e.currentTarget :", e.currentTarget);
+  // console.log("--handle modal profile-- e.currentTarget :", e.currentTarget);
 
   switchPosAngleArrow(e);
 
-  if (topicRefZero) {
+  if (topicRefZero.value) {
     if (topicRefZero.value.children[1].getAttribute("data-arrow") === "up") {
       topicRefZero.value.children[1].setAttribute("data-arrow", "down");
     }
   }
 
-  if (topicRef && sourceRef) {
+  if (topicRef.value && sourceRef.value) {
     if (topicRef.value.children[1].getAttribute("data-arrow") === "up") {
       topicRef.value.children[1].setAttribute("data-arrow", "down");
     }
@@ -196,8 +224,6 @@ const handleLoginAdmin = async (media) => {
     secret: saveMedia,
   };
 
-  console.log("handleLoginAdmin -- user :", user);
-
   if (!user.userId) {
     user.userId = sessionStorage.getItem("userid");
     user.userName = sessionStorage.getItem("username");
@@ -205,7 +231,7 @@ const handleLoginAdmin = async (media) => {
 
   const newUserInfo = await loginadminapi(user);
 
-  console.log("navblog --newUserInfo-- :", newUserInfo);
+  // console.log("navblog --newUserInfo-- :", newUserInfo);
 
   await updateSessionStorage(newUserInfo);
 
@@ -230,17 +256,16 @@ const handleLogout = async () => {
   const userStore = useUserStore();
   const userName = await logoutapi();
 
-  console.log("userName --logout-- :", userName);
-
   if (userName) {
     userStore.resetUserData(userName);
   }
   router.push({ name: "home" });
 
-  navLogoutRef.value.classList.remove("hidden");
+  navLogoutRef.value?.classList.remove("hidden");
 
-  sessionStorage.setItem("username", "");
-  sessionStorage.setItem("navbar-state", "logout");
+  await resetStorage();
+
+  await nextTick();
 };
 
 const handleModalMenu = (e) => {
@@ -249,6 +274,16 @@ const handleModalMenu = (e) => {
   if (!e.target.classlList.contains("active_menu")) {
     if (adminShowDesk) adminShowDesk.value.classList.remove("secret_entry");
     if (adminShowMob) adminShowMob.value.classList.remove("secret_entry");
+  }
+};
+
+const redirectPost = (label) => {
+  const userId = sessionStorage.getItem("userid");
+
+  if (label === "create") {
+    router.push(`/create/${userId}`);
+  } else {
+    router.push(`/edit/${userId}`);
   }
 };
 
@@ -262,13 +297,18 @@ const redirectToCredentials = (e, label) => {
   }
 };
 
+const resetStorage = () => {
+  sessionStorage.setItem("username", "");
+  sessionStorage.setItem("navbar-state", "logout");
+};
+
 const handleResetNav = (e) => {
   const thisTarget = e.target;
 
-  console.log("thisTarget :", e.target);
+  // console.log("thisTarget :", e.target);
 
   if (topicRefZero) {
-    profileRef.value.children[1].setAttribute("data-arrow", "down");
+    profileRef.value?.children[1].setAttribute("data-arrow", "down");
   }
 
   const sideReview = {
@@ -310,10 +350,11 @@ const handleResetNav = (e) => {
     <!--navbar no-login-->
     <nav
       class="nav_container flex items-center z-30 w-full h-16 relative my-0"
-      ref="nav-logout"
+      v-if="navStatus === 'logout'"
     >
       <div
         class="nav_space_fit flex items-center justify-between md:justify-center flex-1 h-7 lg:px-12 mx-4 lg:mx-0 gap-x-4"
+        ref="nav-logout"
       >
         <div
           class="nav_logo_container flex items-center flex-1 text-sm md:text-lg"
@@ -661,13 +702,14 @@ const handleResetNav = (e) => {
 
     <!--navbar no-admin-->
     <nav
-      class="nav_container hidden flex items-center z-30 w-full h-16 relative"
+      class="nav_container flex items-center z-30 w-full h-16 relative"
       data-admin="false"
-      ref="nav-login"
+      v-else-if="navStatus === 'standard'"
       @mousedown="(e) => handleResetNav(e)"
     >
       <div
-        class="nav_space_fit flex items-center justify-between md:justify-center flex-1 h-7 lg:px-12 mx-4 lg:mx-0 gap-x-4"
+        class="nav_space_fit flex items-center justify-between md:justify-center flex-1 h-7 lg:pl-12 lg:pr-8 mx-4 lg:mx-0 gap-x-4"
+        ref="nav-login"
       >
         <div
           id="logo_brand_standard"
@@ -721,6 +763,16 @@ const handleResetNav = (e) => {
           <div
             class="nav_control_mob w-16 h-full flex items-center justify-end md:hidden"
           >
+            <div class="btn_post_container flex items-center mr-4">
+              <button
+                type="button"
+                class="w-max underline cursor-pointer"
+                style="padding-bottom: 1px; background-color: var(--text-link)"
+                @click="redirectPost('create')"
+              >
+                create a post
+              </button>
+            </div>
             <button
               type="button"
               class="search_nav_container flex items-center flex-shrink-0"
@@ -880,14 +932,13 @@ const handleResetNav = (e) => {
                         id="user_last_read"
                         class="menu_link flex w-full h-10 py-1"
                       >
-                        <a href="#" class="profile_link w-1/5">last read :</a>
+                        <a href="#" class="profile_link w-1/5">recent read :</a>
                         <div class="article_last_read w-4/5">
                           <div
                             class="article_title grid place-items-center w-full cursor-pointer"
                           >
                             <a href="#" class="profile_link text-left max-w-sm">
-                              lorem ipsum deum carnet fella bachhi katra pello
-                              madus infallum</a
+                              A guide to time management scheduling-revi</a
                             >
                           </div>
                         </div>
@@ -923,7 +974,7 @@ const handleResetNav = (e) => {
                             border-radius: 5px;
                           "
                         >
-                          0
+                          {{ numberOfPosts }}
                         </div>
                       </li>
                       <li
@@ -1133,7 +1184,7 @@ const handleResetNav = (e) => {
             class="nav_control_desk relative hidden md:flex items-center w-full"
           >
             <ul
-              class="nav-right_panel absolute w-5/6 flex items-center justify-end"
+              class="nav-right_panel absolute w-11/12 flex items-center justify-end"
             >
               <li id="profile_user_standard" class="nav_link text-xs">
                 <div
@@ -1186,7 +1237,7 @@ const handleResetNav = (e) => {
                     </i>
                   </div>
                   <!--modal container-->
-                  <div class="modal_container absolute w-56 right-24 px-2 pb-1">
+                  <div class="modal_container absolute w-56 left-28 px-2 pb-1">
                     <ul
                       class="modal_content flex flex-col space-y-4 w-full"
                       style="font-size: 1em; color: var(--text-link)"
@@ -1220,12 +1271,11 @@ const handleResetNav = (e) => {
                         id="user_last_read"
                         class="modal_link flex flex-col py-1"
                       >
-                        <a href="#" class="profile_link">last read</a>
+                        <a href="#" class="profile_link">recent read</a>
                         <div class="article_last_read">
                           <div class="article_title cursor-pointer">
                             <a href="#" class="profile_link text-center">
-                              lorem ipsum deum carnet fella bachhi katra pello
-                              madus infallum</a
+                              A guide to time management scheduling-revi</a
                             >
                           </div>
                         </div>
@@ -1369,7 +1419,7 @@ const handleResetNav = (e) => {
                 </div>
               </li>
               <li class="nav_link grid place-items-center w-24 text-xs">
-                <span class="this_day text-decoration">Fri, 21 March</span>
+                <span class="this_day text-decoration">{{ today }}</span>
               </li>
               <li class="nav_link grid place-items-center w-24 ml-2 text-xs">
                 <div class="archive_link">archive</div>
@@ -1443,6 +1493,20 @@ const handleResetNav = (e) => {
                     </li>
                   </ul>
                 </div>
+              </li>
+              <li class="nav_link flex items-center justify-center w-24 mx-4">
+                <button
+                  type="button"
+                  class="grid place-items-center w-full h-6 text-xs cursor-pointer"
+                  style="
+                    background-color: var(--card-box);
+                    color: var(--accent-color-3);
+                    border-radius: 5px;
+                  "
+                  @click="redirectPost('create')"
+                >
+                  create a post
+                </button>
               </li>
             </ul>
 
@@ -1548,13 +1612,14 @@ const handleResetNav = (e) => {
 
     <!--navbar admin-->
     <nav
-      class="nav_container hidden flex items-center z-30 w-full h-16 relative"
+      class="nav_container flex items-center z-30 w-full h-16 relative"
       data-admin="true"
-      ref="nav-login-admin"
+      v-else-if="navStatus === 'admin'"
       @mousedown="(e) => handleResetNav(e)"
     >
       <div
-        class="nav_space_fit flex items-center justify-between md:justify-center flex-1 h-7 lg:px-12 mx-4 lg:mx-0 gap-x-4"
+        class="nav_space_fit flex items-center justify-between md:justify-center flex-1 h-7 lg:pl-12 lg:pr-8 mx-4 lg:mx-0 gap-x-4"
+        ref="nav-login-admin"
       >
         <div
           id="logo_brand_admin"
@@ -1611,6 +1676,16 @@ const handleResetNav = (e) => {
           <div
             class="nav_control_mob w-16 h-full flex items-center justify-end md:hidden"
           >
+            <div class="btn_post_container flex items-center mr-4">
+              <button
+                type="button"
+                class="w-max underline cursor-pointer"
+                style="padding-bottom: 1px; background-color: var(--text-link)"
+                @click="redirectPost('create')"
+              >
+                create a post
+              </button>
+            </div>
             <button
               type="button"
               class="search_nav_container flex items-center flex-shrink-0"
@@ -1768,7 +1843,9 @@ const handleResetNav = (e) => {
                           id="user_last_read"
                           class="menu_link flex w-full h-10 py-1"
                         >
-                          <a href="#" class="profile_link w-1/5">last read :</a>
+                          <a href="#" class="profile_link w-1/5"
+                            >recent read :</a
+                          >
                           <div class="article_last_read w-4/5">
                             <div
                               class="article_title grid place-items-center w-full cursor-pointer"
@@ -1777,8 +1854,7 @@ const handleResetNav = (e) => {
                                 href="#"
                                 class="profile_link text-left max-w-sm"
                               >
-                                lorem ipsum deum carnet fella bachhi katra pello
-                                madus infallum</a
+                                A guide to time management scheduling-revi</a
                               >
                             </div>
                           </div>
@@ -1814,7 +1890,7 @@ const handleResetNav = (e) => {
                               border-radius: 5px;
                             "
                           >
-                            0
+                            {{ numberOfPosts }}
                           </div>
                         </li>
                         <li
@@ -2000,7 +2076,7 @@ const handleResetNav = (e) => {
             class="nav_control_desk relative hidden md:flex items-center w-full"
           >
             <ul
-              class="nav-right_panel absolute w-5/6 flex items-center justify-end"
+              class="nav-right_panel absolute w-11/12 flex items-center justify-end"
             >
               <li id="profile_user" class="nav_link text-xs">
                 <div
@@ -2051,7 +2127,7 @@ const handleResetNav = (e) => {
                     </i>
                   </div>
                   <!--modal container-->
-                  <div class="modal_container absolute w-56 right-24 px-2 pb-1">
+                  <div class="modal_container absolute w-56 left-28 px-2 pb-1">
                     <ul
                       class="modal_content flex flex-col w-full space-y-4"
                       style="font-size: 1em; color: var(--text-link)"
@@ -2085,12 +2161,11 @@ const handleResetNav = (e) => {
                         id="user_last_read"
                         class="modal_link flex flex-col py-1"
                       >
-                        <a href="#" class="profile_link">last read</a>
+                        <a href="#" class="profile_link">recent read</a>
                         <div class="article_last_read">
                           <div class="article_title cursor-pointer">
                             <a href="#" class="profile_link text-center">
-                              lorem ipsum deum carnet fella bachhi katra pello
-                              madus infallum</a
+                              A guide to time management scheduling-revi</a
                             >
                           </div>
                         </div>
@@ -2162,7 +2237,7 @@ const handleResetNav = (e) => {
                 </div>
               </li>
               <li class="nav_link grid place-items-center w-24 text-xs">
-                <span class="this_day text-decoration">Fri, 21 March</span>
+                <span class="this_day text-decoration">{{ today }}</span>
               </li>
               <li
                 id="source"
@@ -2290,6 +2365,20 @@ const handleResetNav = (e) => {
                     </li>
                   </ul>
                 </div>
+              </li>
+              <li class="nav_link flex items-center justify-center w-24 mx-4">
+                <button
+                  type="button"
+                  class="grid place-items-center w-full h-6 text-xs cursor-pointer"
+                  style="
+                    background-color: var(--card-box);
+                    color: var(--accent-color-3);
+                    border-radius: 5px;
+                  "
+                  @click="redirectPost('create')"
+                >
+                  create a post
+                </button>
               </li>
             </ul>
 

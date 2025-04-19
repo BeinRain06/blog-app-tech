@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
-import { RouterLink, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
+import { useUserStore } from "../stores/user";
 import { usePostStore } from "@/stores/post";
 import { deleteimageapi, primarimageapi, editpostapi } from "@/api/post-api.js";
 
@@ -10,7 +11,7 @@ const inputFileEdit = ref(null);
 
 const editorRef = ref(null);
 
-let originalNameImg = ref(null);
+let newNameFileImg = ref(null);
 
 let postItem = ref({
   id: "",
@@ -21,6 +22,10 @@ let postItem = ref({
   author: "",
 });
 
+const isLoading = ref(false);
+
+const areaText = ref(null);
+
 onMounted(() => {
   const postStore = usePostStore();
   const postToEdit = postStore.postInPage;
@@ -29,8 +34,12 @@ onMounted(() => {
   postItem.value.title = postToEdit?.title;
   postItem.value.image = postToEdit?.image;
   postItem.value.summary = postToEdit?.summary;
-  postItem.value.content = postToEdit?.content;
+  /* postItem.value.content = postToEdit?.content; */
   postItem.value.author = postToEdit?.author.id;
+
+  areaText.value.innerHTML = postToEdit?.content;
+  const myHTML = areaText.value.innerHTML;
+  postItem.value.content = myHTML.replace(/<[^>]+>/g, ""); //convert HTML into plain text;
 });
 
 watch(editorRef, (editor) => {
@@ -52,38 +61,37 @@ watch(editorRef, (editor) => {
 
 function grabImage(e) {
   const filename = e.target.files[0];
-  originalNameImg.value = filename;
+  newNameFileImg.value = filename;
 }
 
 async function submitEditedPost() {
+  isLoading.value = true;
+
   const postStore = usePostStore();
 
   const post = postItem.value;
-  const userId = postItem.value.author.id;
-  let newImageUrl;
 
-  if (inputFileEdit.value.files[0] !== undefined) {
-    const exUrlImgArr = postItem.value.image.split("/");
+  const userId = await sessionStorage.getItem("userid");
 
-    const postToEdit = postStore.postInPage;
+  let newImageUrl = null;
 
-    let nameExImg = exUrlImgArr[exUrlImgArr.length - 1];
+  const exUrlImgArr = postItem.value.image.split("/");
 
-    if (nameExImg !== "undefined") {
-      let arrExImg = nameExImg.split(" ");
+  let nameExImg = exUrlImgArr[exUrlImgArr.length - 1];
 
-      let newNameExImg = `${arrExImg[0]}`;
+  if (nameExImg !== "undefined") {
+    let arrExImg = nameExImg.split(" ");
 
-      const removeImage = await deleteimageapi(newNameExImg);
-      console.log("removeImage:", removeImage);
-    }
+    let newNameExImg = `${arrExImg[0]}`;
 
-    const myInputFileEdit = inputFileEdit.value;
+    const removeImage = await deleteimageapi(newNameExImg);
 
-    newImageUrl = await primarimageapi(myInputFileEdit, userId);
-  } else {
-    newImageUrl = null;
+    // console.log("removeImage:", removeImage);
   }
+
+  // const myInputFileEdit = inputFileEdit.value;
+
+  newImageUrl = await primarimageapi(newNameFileImg.value, userId);
 
   postItem.value.image = newImageUrl !== null ? newImageUrl : "";
 
@@ -93,6 +101,10 @@ async function submitEditedPost() {
     await postStore.updateHomePage();
 
     postStore.$patch({ postInPage: null });
+
+    setTimeout(() => {
+      isLoading.value = true;
+    }, 5000);
 
     setTimeout(() => {
       router.push({ path: "/" });
@@ -108,7 +120,7 @@ function backHome() {
 </script>
 
 <template>
-  <div class="edit_post_wrap relative w-full h-full">
+  <div class="edit_post_wrap relative w-full h-full" v-if="!isLoading">
     <div class="edit_post_content h-full">
       <form class="edit_form relative h-full">
         <fieldset class="fieldset_edit_post">
@@ -145,12 +157,22 @@ function backHome() {
                 @change="grabImage"
               />
             </div>
-            <Editor
+            <!--  <Editor
               v-model="postItem.content"
               ref="editorRef"
               editorStyle="height: 160px; color:#fff; border:1px solid #555555d0; border-radius: 3px"
               placeholder="edit your post content"
-            />
+            /> -->
+            <textarea
+              id="content"
+              name="content"
+              rows="5"
+              cols="33"
+              placeholder="write article ..."
+              ref="areaText"
+              v-model="postItem.content"
+            >
+            </textarea>
             <div class="form_submit flex items-center justify-end w-full h-36">
               <input
                 type="submit"
@@ -179,10 +201,95 @@ function backHome() {
       </p>
     </div>
   </div>
+  <!--LoadingPost-->
+  <div
+    class="loading_wrapper absolute top-0 left-0 flex flex-col items-center justify-start"
+    v-if="isLoading"
+  >
+    <div
+      class="loading_frame_edge active_loading grid place-items-center w-full h-full mx-auto"
+      style="background-color: #222"
+      ref="loading-frame-ref"
+    >
+      <div
+        class="absolute top-50 loading_frame w-28 h-28 flex flex-row justify-center items-center"
+      >
+        <div class="spinning_circle w-full h-full"></div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
 @import "tailwindcss";
+
+/* loading style */
+.loading_wrapper {
+  width: 100vw;
+  height: 100vh;
+  margin: 0 auto;
+  overflow-y: hidden;
+}
+
+.loading_frame_edge {
+  opacity: 0;
+  visibility: hidden;
+  z-index: 0;
+  transition: all 1.4s ease;
+}
+
+.loading_frame_edge.active_loading {
+  opacity: 1;
+  visibility: visible;
+  z-index: 20;
+}
+
+.spinning_circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  outline: 12px solid var(--card-box);
+  outline-offset: -3px;
+  border: 8px solid transparent;
+  animation: 1.1s linear infinite round-circle;
+}
+
+@keyframes round-circle {
+  0% {
+    border: 8px solid transparent;
+    border-bottom: 8px solid var(--text-body);
+  }
+  35% {
+    border-left: 8px solid var(--text-body);
+  }
+  70% {
+    border-top: 8px solid var(--text-body);
+  }
+  100% {
+    border-right: 8px solid var(--text-body);
+  }
+}
+
+/* textarea style */
+
+textarea {
+  width: 100%;
+  height: 220px;
+  text-indent: 10px;
+  padding: 20px 10px;
+  margin-top: 16px;
+  color: var(--text-body);
+  border: 1px solid #555555d0;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+textarea:focus {
+  outline: none;
+}
 
 @media (min-width: 180px) {
   h1,
@@ -197,6 +304,10 @@ function backHome() {
 
   input[type="file"] {
     background-color: var(--brand-text);
+  }
+
+  input[type="text"] {
+    color: var(--text-body);
   }
 
   p {

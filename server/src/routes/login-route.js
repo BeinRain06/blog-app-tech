@@ -59,7 +59,7 @@ router.post("/", requestInitUser, requestLoginByEmail, async (req, res) => {
   try {
     const userProceed = req.requestLoginByEmail;
 
-    console.log("login-route --userProceed-- :", userProceed);
+    // console.log("login-route --userProceed-- :", userProceed);
 
     // first case
     if (
@@ -85,6 +85,12 @@ router.post("/", requestInitUser, requestLoginByEmail, async (req, res) => {
 
     const maxAge = 6 * 60 * 60; // in sec
 
+    const allUserPost = await Post.find().populate("author", "username");
+
+    const filterPost = allUserPost.filter(
+      (item) => item.author.id === userProceed.userId
+    );
+
     const userInCookie = {
       userId: userProceed.userId,
       userName: userProceed.userName,
@@ -98,7 +104,9 @@ router.post("/", requestInitUser, requestLoginByEmail, async (req, res) => {
       maxAge: maxAge * 1000,
     });
 
-    res.status(200).json({ success: true, data: userProceed });
+    let newUserProceed = { ...userProceed, numberOfPosts: filterPost.length };
+
+    res.status(200).json({ success: true, data: newUserProceed });
   } catch (err) {
     console.log(err);
   }
@@ -115,7 +123,7 @@ router.put("/tokens/update/:userId", async (req, res) => {
     access_token: userPrimarInfo.access_token,
   };
 
-  console.log("update-token --userCatch :", userCatch);
+  // console.log("update-token --userCatch :", userCatch);
 
   const { access_token, ...newUserCatch } = userCatch;
 
@@ -145,6 +153,10 @@ router.put("/tokens/update/:userId", async (req, res) => {
 
     const maxAge = 6 * 60 * 60; // in sec
 
+    const allUserPost = await Post.find({ author: req.params.userId });
+
+    const numbersPost = allUserPost.length;
+
     userCatch.access_token = new_access_token;
 
     const userInCookies = userCatch;
@@ -153,6 +165,8 @@ router.put("/tokens/update/:userId", async (req, res) => {
       httpOnly: true,
       maxAge: maxAge * 1000,
     });
+
+    newUserCatch.postsCount = numbersPost;
 
     res.status(200).json({ success: true, data: newUserCatch });
   } catch (err) {
@@ -177,7 +191,7 @@ router.put("/admin/auth", async (req, res) => {
 
     const userInfo = JSON.parse(req.cookies.userInfo);
 
-    console.log("login-route --cookiesFetch-- :", userInfo);
+    // console.log("login-route --cookiesFetch-- :", userInfo);
 
     const { access_token, ...userCatch } = userInfo;
 
@@ -208,8 +222,6 @@ router.put("/admin/auth", async (req, res) => {
       admin: user.admin,
     };
 
-    console.log("PUT-ADMIN-AUTH --userInCookies-- :", userInCookies);
-
     res.cookie("userInfo", JSON.stringify(userInCookies), {
       httpOnly: true,
       maxAge: maxAge * 1000,
@@ -222,8 +234,6 @@ router.put("/admin/auth", async (req, res) => {
       admin: user.admin,
       access_token: new_access_token,
     };
-
-    console.log("PUT-ADMIN-AUTH --newUserInfo-- :", newUserInfo);
 
     res.status(200).json({ success: true, data: newUserInfo });
   } catch (err) {

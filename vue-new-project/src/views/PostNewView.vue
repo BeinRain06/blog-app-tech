@@ -10,7 +10,7 @@ const postInfo = reactive({
   image: "",
 });
 
-const contentRef = useTemplateRef("content-ref");
+const contentRef = ref(null);
 
 onMounted(async () => {
   const url = window.location.href;
@@ -38,14 +38,12 @@ onMounted(async () => {
   postInfo.title = thisPost.title;
   postInfo.image = thisPost.image;
   contentRef.value.innerHTML = thisPost.content;
-
-  return thisPost;
 });
 </script>
 <template>
   <div id="post_page" class="post_page w-full">
-    <div class="post_page_container flex justify-center w-full pt-16">
-      <div class="post_page_content">
+    <div class="post_page_container flex flex-col items-center mx-auto">
+      <div class="post_page_content w-full pt-16 mx-auto">
         <div id="post_profile" class="post_profile flex flex-col items-center">
           <h1 class="post_title">{{ postInfo.title }}</h1>
           <div class="cover_wrapper">
@@ -71,13 +69,10 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-        <!--post paragraphs-->
-        <div id="post_paragraphs" class="post_paragraphs flex justify-start">
-          <div
-            class="post_content flex flex-col items-center justify-start"
-            ref="content-ref"
-          ></div>
-        </div>
+      </div>
+      <!--post paragraphs-->
+      <div id="post_paragraphs" class="post_paragraphs grid place-items-center">
+        <div class="post_content" ref="contentRef"></div>
       </div>
     </div>
   </div>
@@ -103,10 +98,15 @@ onMounted(async () => {
     background-color: var(--bg-gen);
   }
 
-  .post_page_content {
+  .post_page_container {
     width: 90%;
     padding: 0 15px;
   }
+
+  /*  .post_page_content {
+    width: 90%;
+    padding: 0 15px;
+  } */
 
   /* post profile */
 
@@ -154,27 +154,32 @@ onMounted(async () => {
 
   /* post paragraphs */
 
-  .post_page_content .post_paragraphs {
+  .post_paragraphs {
+    position: relative;
     width: 100%;
+    height: auto;
+    color: var(--accent-color-3);
+    max-width: 906px;
     margin: 0 auto 3rem;
   }
 
-  .post_page_content .post_content {
+  .post_content {
+    position: relative;
     width: 100%;
     padding-top: 3rem;
     padding-right: 1rem;
     margin: 0;
     color: var(--text-body);
-    text-align: left;
+    display: grid;
+    place-items: center;
   }
 
   .post_content * {
-    width: 100%;
-    text-align: left;
+    position: relative;
+    max-width: 800px;
   }
 
   .post_content p {
-    width: 100%;
     font-family: "Mulish", sans-serif;
     font-optical-sizing: auto;
     font-weight: 600;
@@ -190,10 +195,15 @@ onMounted(async () => {
     line-height: 42px;
   }
 
-  .post_page_content {
+  .post_page_container {
     width: 80%;
     padding: 0 15px;
   }
+
+  /* .post_page_content {
+    width: 80%;
+    padding: 0 15px;
+  } */
 
   .post_page_content .post_profile {
     width: 90%;
@@ -207,7 +217,7 @@ onMounted(async () => {
     font-size: calc(15px + 0.025vw);
   }
 
-  .post_page_content .post_paragraphs {
+  .post_paragraphs {
     width: 90%;
     margin: 2rem auto 3rem;
   }
@@ -218,10 +228,15 @@ onMounted(async () => {
     line-height: 56px;
   }
 
-  .post_page_content {
+  .post_page_container {
     max-width: 906px;
     padding: 0;
   }
+
+  /*  .post_page_content {
+    max-width: 906px;
+    padding: 0;
+  } */
 
   .post_page_content .post_profile {
     width: 84%;

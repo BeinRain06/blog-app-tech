@@ -1,13 +1,22 @@
 <template>
   <div class="gen_container w-full" data-mode="dark">
-    <NavbarNewBlog v-if="isNavbar" v-model="closeProfile" />
-    <RouterView @mousedown="handleResetVar" />
+    <div class="nav_holder" ref="navbar-holder-ref">
+      <NavbarNewBlog v-model="closeProfile" />
+    </div>
+    <RouterView v-model="isLoading" @mousedown="handleResetVar" />
   </div>
 </template>
 
 <script setup>
 import { RouterLink, RouterView, useRouter } from "vue-router";
-import { ref, onMounted } from "vue";
+import {
+  ref,
+  useTemplateRef,
+  onMounted,
+  onUpdated,
+  computed,
+  nextTick,
+} from "vue";
 import { useUserStore } from "./stores/user";
 
 import NavbarNewBlog from "./components/NavbarNewBlog.vue";
@@ -15,32 +24,37 @@ import NavbarNewBlog from "./components/NavbarNewBlog.vue";
 const router = useRouter();
 
 const closeProfile = ref(false);
-const isNavbar = ref(false);
+const isNavbar = useTemplateRef("navbar-holder-ref");
+const isLoading = ref(true);
 
 onMounted(async () => {
   router.beforeEach(async (to, from) => {
     console.log("to", to);
+    const userStore = useUserStore();
+
+    if (from.name === "home") {
+      isLoading.value = false;
+    }
 
     if (to.name === "home" || to.name === "login" || to.name === "register") {
-      isNavbar.value = await true;
+      isNavbar.value?.classList.remove("hidden");
+
+      const navState = sessionStorage.getItem("navbar-state");
+      userStore.$patch({ navbarState: navState });
     } else {
-      isNavbar.value = await false;
+      isNavbar.value?.classList.add("hidden");
     }
   });
+});
 
-  async function mountNavBar() {
-    const checkPrevNav = await sessionStorage.getItem("navbar-state");
-    if (checkPrevNav) {
-      let newNavState;
-      setTimeout(async () => {
-        newNavState = checkPrevNav;
-        const userStore = await useUserStore();
-        userStore.$patch({ navbarState: newNavState });
-      }, 4000);
-    }
-  }
+onUpdated(async () => {
+  const userStore = useUserStore();
 
-  await mountNavBar();
+  const grabCurrentNav = await sessionStorage.getItem("navbar-state");
+
+  userStore.$patch({ navbarState: grabCurrentNav });
+
+  await nextTick();
 });
 
 const handleResetVar = () => {

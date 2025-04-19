@@ -52,7 +52,6 @@ export default defineComponent({
     async handleRegistration() {
       const userStore = useUserStore();
 
-      console.log("userStore :", userStore);
       setTimeout(() => {
         userStore.$patch({
           loading: true,
@@ -185,11 +184,19 @@ export default defineComponent({
             </button>
 
             <div
-              id="warning_msg"
-              class="warning_msg absolute top-2 w-full h-8 text-red-600 text-center bg-yellow-100"
-              v-if="warningState"
+              class="warning_container absolute left-0 top-5 flex items-center justify-center w-full h-8 mx-auto"
             >
-              <p>{{ warningError }}</p>
+              <div
+                id="warning_msg"
+                class="warning_msg absolute flex items-center justify-end w-2/5"
+                v-if="warningState"
+              >
+                <p
+                  class="absolute right-8 w-max h-8 py-1 px-4 text-red-600 text-center bg-yellow-400"
+                >
+                  {{ warningError }}
+                </p>
+              </div>
             </div>
 
             <div v-if="loading" class="load_wrapper">

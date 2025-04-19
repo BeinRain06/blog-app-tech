@@ -101,7 +101,7 @@ module.exports.requestLoginByEmail = async function (req, res, next) {
   // user obj from requestInitUser middleware
   const user = req.requestInitUser;
 
-  console.log("req.requestInitUser :", user);
+  // console.log("req.requestInitUser :", user);
 
   let userRes = {
     success: false,
@@ -206,40 +206,3 @@ module.exports.requestLoginByEmail = async function (req, res, next) {
     return next();
   }
 };
-
-/* const requestInitUser = async function (req, res, next) {
-  const userDetails = req.body;
-  const userAttribute = await User.findOne({ email: userDetails.email });
-  if (!userAttribute) {
-    throw new Error("user not Found");
-  }
-
-  const checkPwd = bcrypt.compareSync(
-    userDetails.password,
-    userAttribute.password
-  );
-
-  if (!checkPwd) {
-    throw new Error("wrong password ");
-  }
-
-  let admin = false;
-
-  if (userDetails.secret === process.env.admin_secret && userAttribute.admin) {
-    const check =
-      userDetails.secret === process.env.admin_secret ? true : false;
-
-    admin = check;
-  }
-
-  const sendingUser = {
-    id: userAttribute.id,
-    username: userAttribute.username,
-    email: userAttribute.email,
-    admin: admin,
-  };
-
-  req.requestInitUser = sendingUser;
-
-  next();
-}; */

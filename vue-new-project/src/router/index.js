@@ -25,17 +25,17 @@ const router = createRouter({
       component: RegisterNewView,
     },
     {
-      path: "/page/:id",
+      path: "/page/:userId",
       name: "page",
       component: PostNewView,
     },
     {
-      path: "/create",
+      path: "/create/:userId",
       name: "create",
       component: CreatePostView,
     },
     {
-      path: "/edit",
+      path: "/edit/:userId",
       name: "edit",
       component: EditPostView,
     },
@@ -47,9 +47,9 @@ const router = createRouter({
       return { top: 50 };
     }
 
-    if (from.name === "home") {
+    /* if (from.name === "home") {
       if (savedPosition) return savedPosition;
-    }
+    } */
   },
 });
 

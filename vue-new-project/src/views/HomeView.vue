@@ -1,46 +1,34 @@
 <script setup>
-import {
-  ref,
-  onBeforeMount,
-  computed,
-  onMounted,
-  onUnmounted,
-  onUpdated,
-} from "vue";
+import { ref, computed, reactive, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
 /* import TheWelcome from '../components/TheWelcome.vue' */
-import { arrayImg, dataPostsList } from "../assets/images-blog-post/index.js";
 import { useUserStore } from "@/stores/user.js";
+import LoadingHome from "@/components/LoadingHome.vue";
+import WarningView from "../components/WarningView.vue";
 import { usePostStore } from "@/stores/post.js";
+import { useWarningStore } from "@/stores/warning";
 import { shortNameUser } from "../reusable/collaborate-function.js";
-
-const postRef = ref(null);
-
-const allposts = ref();
-
-const authorShortName = ref([]);
 
 const router = useRouter();
 
+const isLoading = defineModel();
+
 onMounted(async () => {
-  setTimeout(() => {
-    console.log("updating...");
-  }, 4000);
+  isLoading.value = true;
 
   const postStore = await usePostStore();
 
   const postsFetch = await postStore.updateHomePage();
-  console.log("postsFetch :", postsFetch);
+  // console.log("postsFetch :", postsFetch);
 
   if (postsFetch) {
     postsFetch.map((post) => {
+      const newTextUpdate =
+        post.last_update !== "" ? `updated :  ${post.last_update}` : "";
+      textUpdateInfo.value.push(newTextUpdate);
+
       const authorName = post.author?.username;
 
-      /* const authorArrName = authorName.split(" ");
-       const shortname =
-        authorArrName[0][0].toUpperCase() + authorArrName[0].slice(1); */
-
-      console.log("authorname:", authorName);
       const shortname = shortNameUser(authorName);
 
       authorShortName.value.push(shortname);
@@ -48,50 +36,45 @@ onMounted(async () => {
   }
 
   allposts.value = postsFetch;
+
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 5000);
 });
 
-/* const allposts = computed(async () => {
-  const postStore = await usePostStore();
-  if (postStore.fetchPosts === null) {
-    setTimeout(() => {}, 5000);
-  }
+const postRef = ref(null);
 
-  const postFetch = postStore.fetchPosts;
+const allposts = ref();
 
-  if (postFetch) {
-    postFetch.map((post) => {
-      const authorName = post.author?.username;
-      const authorArrName = authorName.split(" ");
-      const shortname =
-        authorArrName[0][0].toUpperCase() + authorArrName[0].slice(1);
+const authorShortName = ref([]);
 
-      authorShortName.value.push(shortname);
-    });
-  }
+const textUpdateInfo = ref([]);
 
-  return postStore.fetchPosts;
-}); */
+const msgError = ref("");
 
 async function redirectEditPage(e, i) {
   const postStore = usePostStore();
-  const userStore = useUserStore();
-  const userId = userStore.currentUserId;
+
+  const userId = await sessionStorage.getItem("userid");
 
   const postEdit = postStore.allposts[i];
 
   const postId = postEdit.id;
 
-  const useridInPost = postEdit.author.id;
+  const authorId = postEdit.author.id;
 
-  if (userStore.currentUsername !== null && userId === useridInPost) {
+  if (!userId) {
+    alert("user not connected !");
+  }
+
+  if (authorId !== userId) {
+    toggleWarning();
+  } else {
     postStore.$patch({ postInPage: postEdit });
 
     setTimeout(() => {
-      router.push({ path: "/edit" });
+      router.push({ path: `/edit/${postId}` });
     }, 1500);
-  } else {
-    alert("can't edit this post, not login or not the author");
-    return;
   }
 }
 
@@ -105,7 +88,7 @@ async function reachPostPage(e, i) {
 
   sessionStorage.setItem("postPage", postSaved);
 
-  if (e.target.id === "title_article") {
+  if (e.target.id === "title_article" || e.target.id === "summary_paragraph") {
     await postStore.$patch({ postInPage: postTargeted });
 
     setTimeout(() => {
@@ -113,15 +96,12 @@ async function reachPostPage(e, i) {
       router.push({ path: `/page/${postId}` });
     }, 600);
   }
+}
 
-  /*  if (e.target.id === "post_title" || e.target.id === "inner_summary") {
-    await postStore.$patch({ postInPage: postTargeted });
-
-    setTimeout(() => {
-    
-      router.push({ path: `/page/${postId}` });
-    }, 600);
-  } */
+function toggleWarning() {
+  const warningStore = useWarningStore();
+  warningStore.$patch({ warningStage: true });
+  msgError.value = "not available!";
 }
 
 async function reloadHomeContent() {
@@ -134,7 +114,7 @@ async function reloadHomeContent() {
 </script>
 
 <template>
-  <main id="home_broadcast" class="home_broadcast">
+  <main id="home_broadcast" class="home_broadcast relative" v-if="!isLoading">
     <!--home card-->
     <div id="home_page" class="home_page relative w-full">
       <div
@@ -148,6 +128,12 @@ async function reloadHomeContent() {
         <div class="card_box" @click="(e) => reachPostPage(e, i)">
           <div class="card_box_up relative">
             <div class="card_username">
+              <div
+                class="absolute -top-2 left-0 flex items-center w-max h-4 text-xs"
+                style="color: var(--accent-color-3)"
+              >
+                <span>{{ postItem.author.username }}</span>
+              </div>
               <span class="username under_gray">
                 {{ authorShortName[i] }}
               </span>
@@ -160,10 +146,7 @@ async function reloadHomeContent() {
               class="card_profile flex flex-col items-center justify-center space-y-4 h-full"
             >
               <div class="title_article_wrap text-center w-4/5 py-2 mx-auto">
-                <h2
-                  id="title_article"
-                  class="title_article tone_text_title z-20"
-                >
+                <h2 id="title_article" class="title_article tone_text_title">
                   {{ postItem.title }}
                 </h2>
               </div>
@@ -201,7 +184,7 @@ async function reloadHomeContent() {
                   >
                     Published:
                   </div>
-                  <span>Wed, 5th Mar 2025</span>
+                  <span>{{ postItem.date }}</span>
                 </div>
               </div>
             </div>
@@ -215,12 +198,11 @@ async function reloadHomeContent() {
             <div class="box_tech_card">
               <div class="box_edition relative">
                 <div class="update_infos text_date">
-                  <span class="leading-snug">updated:</span>
-                  <span class="leading-snug">17 March, 2025</span>
+                  <span class="leading-snug">{{ textUpdateInfo[i] }}</span>
                 </div>
                 <div class="edit_wrap">
                   <div
-                    class="edit_article flex items-center justify-center gap-x-2 mx-auto"
+                    class="edit_article relative flex items-center justify-center gap-x-2 mx-auto z-20"
                   >
                     <span
                       class="edit_label text_edit grid place-items-start h-full"
@@ -246,6 +228,7 @@ async function reloadHomeContent() {
                         />
                       </svg>
                     </i>
+                    <WarningView :new-msg="msgError" />
                   </div>
                 </div>
               </div>
@@ -399,6 +382,8 @@ async function reloadHomeContent() {
       </div>
     </div>
   </main>
+  <!--loading Home-->
+  <LoadingHome v-if="isLoading" />
 </template>
 
 <style scoped>
@@ -458,6 +443,7 @@ async function reloadHomeContent() {
     padding-bottom: 2rem;
     font-weight: 500;
     line-height: 40px;
+    cursor: pointer;
   }
 
   h3 {
@@ -550,7 +536,7 @@ async function reloadHomeContent() {
   }
 
   .article_frame .image_article {
-    @apply grid place-items-center w-full h-auto;
+    @apply grid place-items-center w-full h-auto mt-4;
     aspect-ratio: 16/9;
   }
 
@@ -579,7 +565,7 @@ async function reloadHomeContent() {
   }
 
   .box_edition .update_infos {
-    @apply w-full flex-shrink-0 flex flex-row text-left;
+    @apply w-full flex-shrink-0 flex flex-row gap-1 text-left;
   }
 
   .box_edition .edit_wrap {

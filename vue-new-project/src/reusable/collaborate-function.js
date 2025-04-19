@@ -140,7 +140,6 @@ export const populateLocalStorage = async () => {
 
 export const shortNameUser = (userSentName) => {
   const username = userSentName;
-  console.log("username :", username);
 
   let shortname;
   const regex = /[\s|\-|_|.]/;
@@ -148,7 +147,7 @@ export const shortNameUser = (userSentName) => {
     shortname = "";
   } else {
     let matchName = username.match(regex);
-    console.log("matchName:", matchName);
+    // console.log("matchName:", matchName);
 
     if (matchName !== null) {
       const indexEnd = matchName.index;
@@ -157,8 +156,6 @@ export const shortNameUser = (userSentName) => {
       shortname = username;
     }
   }
-
-  console.log("shortname :", shortname);
 
   return shortname;
 };

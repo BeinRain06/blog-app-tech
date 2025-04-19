@@ -11,15 +11,18 @@ export const useWarningStore = defineStore("warning", {
     warningNews: (state) => state.warningMsg,
   },
   actions: {
-    warningUpdate(newMsg, user) {
+    warningUpdate(newMsg, thisUser) {
+      const user = thisUser ? thisUser : null;
       this.warningMsg = newMsg;
       this.isWarning = true;
       setTimeout(() => {
+        if (user) {
+          const userKeys = Object.keys(user);
+          userKeys.forEach((key) => (user[key] = ""));
+        }
         this.warningMsg = null;
         this.isWarning = false;
-        const userKeys = Object.keys(user);
-        userKeys.forEach((key) => (user[key] = ""));
-      }, 3000);
+      }, 5000);
     },
   },
 });

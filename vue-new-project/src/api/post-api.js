@@ -1,20 +1,29 @@
 const base_url = import.meta.env.VITE_API_URL;
 const base_url_1 = import.meta.env.VITE_API_URL_ONE;
 
-export const createpostapi = async (postElt, thisUserId) => {
+export const createpostapi = async (postElt) => {
   try {
-    const newPostElt = { ...postElt, userid: thisUserId };
+    const userId = sessionStorage.getItem("userid");
 
-    const postInfos = await fetch(`${base_url}/post`, {
+    const fetchInfos = await fetch(`${base_url}/post/${userId}`, {
       method: "POST",
-      body: JSON.stringify(newPostElt),
+      body: JSON.stringify(postElt),
       headers: {
         "Content-Type": "application/json",
       },
       credentials: "include",
     })
       .then((res) => res.json())
-      .then((newres) => newres.data);
+      .then((newres) => newres);
+
+    // console.log("fetchInfos --post-api-- :", fetchInfos);
+
+    if (!fetchInfos.success) {
+      alert(fetchInfos.error);
+      return;
+    }
+
+    const postInfos = fetchInfos.data;
 
     return postInfos;
   } catch (err) {
@@ -24,7 +33,11 @@ export const createpostapi = async (postElt, thisUserId) => {
 
 export const primarimageapi = async (myInputFile, thisUserId) => {
   try {
-    const file = myInputFile.files[0];
+    // const file = myInputFile.files[0];
+
+    const file = myInputFile;
+
+    console.log("--primarimageapi-- file:", file);
 
     //formData instance
     const formData = new FormData();
@@ -48,7 +61,7 @@ export const primarimageapi = async (myInputFile, thisUserId) => {
 export const deleteimageapi = async (nameImg) => {
   try {
     const sendImage = await fetch(`${base_url}/post/image/delete/${nameImg}`, {
-      method: "POST",
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
       },
@@ -65,7 +78,7 @@ export const deleteimageapi = async (nameImg) => {
 
 export const getpostsapi = async () => {
   try {
-    const posts = await fetch(`${base_url}/post/all`, {
+    const postsFetch = await fetch(`${base_url}/post/all`, {
       method: "GET",
       mode: "cors",
       headers: {
@@ -75,6 +88,8 @@ export const getpostsapi = async () => {
     })
       .then((res) => res.json())
       .then((newres) => newres.data);
+
+    const posts = postsFetch.reverse();
 
     return posts;
   } catch (err) {
@@ -87,7 +102,7 @@ export const editpostapi = async (post) => {
     const postId = post.id;
 
     const updatedPost = await fetch(`${base_url}/post/edit/${postId}`, {
-      method: "POST",
+      method: "PUT",
       body: JSON.stringify(post),
       headers: {
         "Content-Type": "application/json",

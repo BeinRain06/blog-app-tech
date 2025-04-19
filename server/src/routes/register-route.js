@@ -44,8 +44,6 @@ router.post("/", async (req, res) => {
       password: req.body.password,
     };
 
-    // console.log("register-route-userCatch :", userCatch);
-
     const checkExistUser = await User.findOne({ email: userCatch.userEmail });
 
     // console.log("register-checkExistUser :", checkExistUser);

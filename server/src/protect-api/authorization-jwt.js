@@ -86,17 +86,3 @@ function verifyThisToken(key_tool, token, options) {
 module.exports.errorToken = function (msgErr) {
   throw new Error(msgErr);
 };
-
-/* function JWTVerifyFake(token, label) {
-  const options =
-    label === "access"
-      ? { algorithm: "RS256", expiresIn: "6h" }
-      : { algorithm: "RS256", expiresIn: "2w" };
-
-  verifyThisToken(jwtPublicFakeKey, token, options);
-}
-
-module.exports.verifyFakeToken = async function (token, label) {
-  const result = await JWTVerifyFake(token, label);
-  return result;
-}; */

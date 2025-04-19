@@ -9,6 +9,7 @@ export const useUserStore = defineStore("user", {
     currentUserId: null,
     loading: false,
     isAdmin: false,
+    numbersofPosts: 0,
     navbarState: "logout",
   }),
   getters: {
