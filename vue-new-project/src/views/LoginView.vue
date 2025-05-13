@@ -314,7 +314,6 @@ button.submit_button[type="submit"]:hover {
 
   .login_container {
     border-radius: 3px;
-    /*  border: 1px solid var(--accent-color-1); */
     box-shadow: 0px 0px 2px var(--text-body-1);
   }
 
@@ -326,7 +325,7 @@ button.submit_button[type="submit"]:hover {
     text-indent: 10px;
     transform: skewX(-2deg);
     border: 1px solid transparent;
-    box-shadow: 1px 1px 1px var(--accent-color-3);
+    box-shadow: 1px 1px 1px var(--text-body);
     transition: all 600ms ease-in-out;
   }
 }

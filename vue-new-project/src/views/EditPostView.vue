@@ -132,6 +132,7 @@ function backHome() {
                 type="text"
                 id="title"
                 name="title"
+                class="input_field"
                 placeholder="title"
                 v-model="postItem.title"
               />
@@ -142,6 +143,7 @@ function backHome() {
                 type="text"
                 id="summary"
                 name="summary"
+                class="input_field"
                 placeholder="summary"
                 v-model="postItem.summary"
               />
@@ -289,6 +291,7 @@ textarea {
 
 textarea:focus {
   outline: none;
+  box-shadow: 0px 0px 3px var(--brand-text);
 }
 
 @media (min-width: 180px) {
@@ -300,14 +303,6 @@ textarea:focus {
 
   a {
     color: var(--text-body-1);
-  }
-
-  input[type="file"] {
-    background-color: var(--brand-text);
-  }
-
-  input[type="text"] {
-    color: var(--text-body);
   }
 
   p {

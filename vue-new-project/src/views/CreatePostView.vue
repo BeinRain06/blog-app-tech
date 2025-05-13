@@ -121,6 +121,7 @@ export default defineComponent({
                 type="text"
                 id="title"
                 name="title"
+                class="input_field"
                 placeholder="title"
                 v-model="postElt.title"
               />
@@ -131,6 +132,7 @@ export default defineComponent({
                 type="text"
                 id="summary"
                 name="summary"
+                class="input_field"
                 placeholder="summary"
                 v-model="postElt.summary"
               />
@@ -261,6 +263,7 @@ textarea {
 
 textarea:focus {
   outline: none;
+  box-shadow: 0px 0px 3px var(--brand-text);
 }
 
 @keyframes round-circle {
@@ -288,14 +291,6 @@ textarea:focus {
 
   a {
     color: var(--text-body-1);
-  }
-
-  input[type="file"] {
-    background-color: var(--accent-color-2);
-  }
-
-  input[type="text"] {
-    color: var(--text-body);
   }
 
   p {

@@ -2749,8 +2749,8 @@ img {
     background-color: var(--bg-gen);
     border-radius: 5px;
     border: 1px solid transparent;
-    border-top-color: var(--accent-color-1);
-    box-shadow: 0px 2px 3px 1px var(--accent-color-1);
+    /* border-top-color: var(--accent-color-1); */
+    box-shadow: 0px 1px 3px 0px var(--brand-text);
   }
   .modal_content {
     height: max-content;

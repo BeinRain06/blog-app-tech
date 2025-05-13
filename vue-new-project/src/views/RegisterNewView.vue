@@ -247,17 +247,18 @@ input[type="text"]:focus,
 input[type="password"]:focus {
   height: auto;
   transform: skewX(0deg);
-  box-shadow: 0px 1px 3px var(--accent-color-2);
+  box-shadow: 1px 1px 3px var(--brand-text);
   outline: none;
 }
 
 button.submit_button[type="submit"] {
-  @apply w-full bg-gray-800 rounded-lg text-center cursor-pointer;
+  @apply w-full rounded-lg text-center cursor-pointer;
   position: relative;
   top: 0;
   font-size: calc(15px + 0.35vw);
   padding: 0.5em 0;
   color: var(--title);
+  background-color: var(--card-box);
 }
 
 .load_wrapper {
@@ -280,7 +281,7 @@ button.submit_button[type="submit"] {
 
   .register_container {
     border-radius: 3px;
-    border: 1px solid var(--accent-color-1);
+    box-shadow: 0px 0px 2px var(--text-body-1);
   }
 
   .input_field {
@@ -290,7 +291,7 @@ button.submit_button[type="submit"] {
     text-indent: 10px;
     transform: skewX(-2deg);
     border: 1px solid transparent;
-    box-shadow: 1px 1px 2px var(--accent-color-1);
+    box-shadow: 1px 1px 1px var(--text-body);
     transition: all 600ms ease-in-out;
   }
 }

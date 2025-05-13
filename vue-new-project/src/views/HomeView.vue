@@ -112,7 +112,6 @@ async function reloadHomeContent() {
   }, 1500);
 }
 </script>
-
 <template>
   <main id="home_broadcast" class="home_broadcast relative" v-if="!isLoading">
     <!--home card-->
@@ -233,7 +232,7 @@ async function reloadHomeContent() {
                 </div>
               </div>
               <div class="summary_content">
-                <div class="summary_title tone_text_title">Summary:</div>
+                <div class="summary_title tone_text_title">Summary :</div>
 
                 <p>
                   {{ postItem.summary }}
@@ -257,7 +256,7 @@ async function reloadHomeContent() {
                   <span>3</span>
                 </div>
                 <div class="comment_wrapper">
-                  <span class="under_green">Comments:</span>
+                  <span class="under_transparent">Comments:</span>
                   <span>14</span>
                 </div>
                 <div class="view_wrapper">
@@ -287,7 +286,7 @@ async function reloadHomeContent() {
                 <span>3</span>
               </div>
               <div class="comment_wrapper">
-                <span class="under_green">Comments:</span>
+                <span class="under_transparent">Comments:</span>
                 <span>14</span>
               </div>
               <div class="view_wrapper">
@@ -331,19 +330,22 @@ async function reloadHomeContent() {
           <h3>Latest Articles</h3>
           <div class="latest_articles aside_group">
             <div id="last_1" class="in_board">
-              <h4 class="title_last underline">
+              <h4 class="title_last mulish-600">
                 The Motherhood Penalty and the Fatherhood Competence Gap
+                <div></div>
               </h4>
             </div>
             <div id="last_2" class="in_board">
-              <h4 class="title_last underline">
+              <h4 class="title_last mulish-600">
                 5 conversation habits that make people secretly lose respect for
                 you
+                <div></div>
               </h4>
             </div>
             <div id="last_3" class="in_board">
-              <h4 class="title_last underline">
+              <h4 class="title_last mulish-600">
                 What I Wish I Knew: “Your writing is not about you”
+                <div></div>
               </h4>
             </div>
           </div>
@@ -352,19 +354,19 @@ async function reloadHomeContent() {
           <h3>Last Update</h3>
           <div class="latest_articles aside_group">
             <div id="last_up_1" class="in_board">
-              <h4 class="title_last underline">
+              <h4 class="title_last mulish-600">
                 Craziest MCP Servers You Must Try
               </h4>
               <div class="topic_updated">AI</div>
             </div>
             <div id="last_up_2" class="in_board">
-              <h4 class="title_last underline">
+              <h4 class="title_last mulish-600">
                 CORS Finally Explained — Simply
               </h4>
               <div class="topic_updated">Javascript</div>
             </div>
             <div id="last_up_3" class="in_board">
-              <h4 class="title_last underline">
+              <h4 class="title_last mulish-600">
                 The Great Mental Health Privilege
               </h4>
               <div class="topic_updated">Psychology</div>
@@ -422,10 +424,10 @@ async function reloadHomeContent() {
     border-bottom: 1px solid var(--text-link);
   }
 
-  .under_green {
+  .under_transparent {
     width: max-content;
     padding-bottom: 1px;
-    border-bottom: 1px solid var(--accent-color-1);
+    border-bottom: 1px solid transparent;
   }
 
   p {
@@ -455,7 +457,7 @@ async function reloadHomeContent() {
 
   h4 {
     font-size: calc(11px + 0.1vw);
-    font-weight: 500;
+    /* font-weight: 500; */
     color: var(--text-body-1);
     line-height: 24px;
 
@@ -654,6 +656,13 @@ async function reloadHomeContent() {
     flex-direction: column-reverse;
     align-items: center;
     gap: 0.25rem;
+  }
+
+  .title_last > div {
+    width: 100%;
+    height: 1px;
+    padding-top: 2px;
+    background: var(--card-box);
   }
 
   .topic_updated {
@@ -980,7 +989,7 @@ async function reloadHomeContent() {
     width: 106px;
     height: 32px;
     font-size: 18px;
-    background-color: var(--accent-color-1);
+    /* background-color: var(--accent-color-1); */
     text-align: center;
   }
 
