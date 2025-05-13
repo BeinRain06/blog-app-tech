@@ -767,7 +767,11 @@ const handleResetNav = (e) => {
               <button
                 type="button"
                 class="w-max underline cursor-pointer"
-                style="padding-bottom: 1px; background-color: var(--text-link)"
+                style="
+                  padding-bottom: 1px;
+                  color: var(--text-body);
+                  font-size: 0.85rem;
+                "
                 @click="redirectPost('create')"
               >
                 create a post
@@ -1680,7 +1684,11 @@ const handleResetNav = (e) => {
               <button
                 type="button"
                 class="w-max underline cursor-pointer"
-                style="padding-bottom: 1px; background-color: var(--text-link)"
+                style="
+                  padding-bottom: 1px;
+                  color: var(--text-body);
+                  font-size: 0.85rem;
+                "
                 @click="redirectPost('create')"
               >
                 create a post
