@@ -1,47 +1,196 @@
+<script>
+import { ref, defineComponent, nextTick } from "vue";
+import { useUserStore } from "@/stores/user.js";
+import { useWarningStore } from "@/stores/warning.js";
+import { loginapi, loginUpdateTokensFirst } from "../api/login-api.js";
+import {
+  populateLocalStorage,
+  checkInputError,
+  resetUserInput,
+  updateSessionStorage,
+} from "@/reusable/collaborate-function.js";
+
+export default defineComponent({
+  setup() {
+    const inputPwd = ref(null);
+    const user = ref({
+      email: "",
+      password: "",
+    });
+
+    return {
+      user,
+      inputPwd,
+    };
+  },
+
+  computed: {
+    warningError: function () {
+      const warningStore = useWarningStore();
+      return warningStore.warningNews;
+    },
+    warningState: function () {
+      const warningStore = useWarningStore();
+      return warningStore.warningStage;
+    },
+    loading: function () {
+      const userStore = useUserStore();
+      return userStore.loading;
+    },
+  },
+
+  methods: {
+    showPassword(e) {
+      if (e.target.id === "toggle_password") {
+        const typeEl = this.inputPwd.getAttribute("type");
+        if (typeEl === "password") {
+          this.inputPwd.setAttribute("type", "text");
+        } else if (typeEl === "text") {
+          this.inputPwd.setAttribute("type", "password");
+        }
+      }
+    },
+
+    async handleLogin() {
+      const userStore = useUserStore();
+
+      userStore.$patch({
+        loading: true,
+      });
+
+      const isStateWarning = checkInputError(this.user, "login");
+
+      if (isStateWarning) {
+        return;
+      }
+      const userInfoProceed = await loginapi(this.user);
+
+      // console.log("login-view userInfoProceed :", userInfoProceed);
+
+      if (!userInfoProceed.success) {
+        // do warning show
+
+        this.toggleWarning(userInfoProceed.error);
+        return;
+      }
+
+      //loginapi call surely done
+      let newUserInfo;
+      if (userInfoProceed.message === "update all tokens before sending data") {
+        newUserInfo = await loginUpdateTokensFirst(userInfoProceed);
+      } else if (userInfoProceed.message === "send data to client side") {
+        newUserInfo = userInfoProceed;
+      }
+
+      if (newUserInfo.admin) {
+        populateLocalStorage();
+      }
+
+      let numbersOfPosts = newUserInfo.numberOfPosts;
+
+      if (!numbersOfPosts) {
+        numbersOfPosts = 0;
+      }
+
+      sessionStorage.setItem("numbers-of-post", numbersOfPosts.toString());
+
+      userStore.$patch({
+        numbersofPosts: sessionStorage.getItem("numbers-of-post"),
+      });
+
+      updateSessionStorage(newUserInfo);
+
+      setTimeout(() => {
+        userStore.$patch({
+          loading: false,
+        });
+      }, 3000);
+
+      await nextTick();
+
+      userStore.$patch({
+        navbarState: sessionStorage.getItem("navbar-state"),
+      });
+
+      userStore.updateUserStore(newUserInfo);
+
+      resetUserInput(this.user, this.inputPwd);
+
+      await nextTick();
+
+      this.$router.push({ path: "/" });
+    },
+
+    toggleWarning(errMsg) {
+      const userWarningStore = useWarningStore();
+
+      userWarningStore.warningUpdate(errMsg, this.user);
+    },
+  },
+});
+</script>
+
 <template>
-  <div class="about w-full">
-    <div class="upper_wrapper w-full"></div>
-    <div class="lower_wrapper w-full h-full bg-blue-100"></div>
-    <div class="login_wrapper">
-      <form class="login_form h-full">
-        <fieldset class="fieldset_area h-full">
-          <legend class="login_title">Login</legend>
-          <div class="form_content">
-            <div class="field_msg w-full flex flex-col justify-start pl-2">
-              <p class="text-gray-600">
+  <div
+    id="login_page"
+    class="login_page grid place-items-center relative w-full h-full px-4 md:px-0"
+  >
+    <div
+      class="login_container grid place-items-center max-w-full h-max md:max-w-xl lg:h-11/12"
+    >
+      <form
+        action=""
+        class="login_form w-full h-full flex items-center justify-center"
+      >
+        <fieldset
+          class="fieldset_area flex flex-col w-full gap-4 pt-4 pb-3 px-8"
+        >
+          <legend
+            class="legend_area"
+            style="
+              width: min-content;
+
+              color: var(--text-body-1);
+            "
+          >
+            Login
+          </legend>
+          <div class="fieldset_content">
+            <div class="field_msg w-full flex flex-col justify-start">
+              <p class="expectation_1">
                 Read Tech Articles, Discovery and Culture Trends
               </p>
-              <p class="text-gray-400">
+              <p class="expectation_2">
                 Enhance Journey to skills the Best of Yourself ¬
               </p>
             </div>
-            <div class="form_control">
+            <div class="input_area">
               <label for="email"> Email</label>
               <input
                 type="email"
                 id="email"
-                class="input_content"
+                class="input_field"
                 name="email"
                 ref="inputEml"
                 placeholder="address_Email"
                 focus="true"
-                v-model="email"
+                v-model="user.email"
               />
             </div>
-            <div class="form_control" @click="showPassword">
+            <div class="input_area" @click="showPassword">
               <label for="password"> Password</label>
               <input
                 type="password"
                 id="password"
-                class="input_content password_input"
+                class="input_field password_input"
                 name="password"
                 min-length="8"
                 ref="inputPwd"
                 placeholder="Password"
-                v-model="password"
+                v-model="user.password"
               />
               <div
-                class="pwd_wrap_toggle w-full flex justify-end text-base text-blue-900 font-bold"
+                class="pwd_wrap_toggle w-full flex justify-end text-base text-gray-700 font-bold"
               >
                 <span
                   id="toggle_password"
@@ -50,23 +199,32 @@
                 >
               </div>
             </div>
-            <div class="form_submit w-full mt-3">
-              <input
-                type="button"
-                id="btn_identity"
-                class="btn_identity cursor-pointer w-full text-center text-gray-200 py-2 bg-blue-800 rounded-xl z-10 transition-all duration-1000 ease-in-out hover:bg-gray-800 hover: text-gray-50"
-                value="login"
+            <div class="submit_form my-4">
+              <button
+                type="submit"
+                class="submit_button"
                 @click.prevent="handleLogin"
-              />
-              <div
-                id="warning_msg"
-                class="warning_msg absolute bottom-12 w-full h-8 text-red-600 text-center bg-yellow-100"
-                v-if="warningStore.warningNews"
               >
-                <p>{{ warningStore.warningNews }}</p>
+                Login
+              </button>
+
+              <div
+                class="warning_container absolute left-0 top-5 flex items-center justify-center w-full h-8 mx-auto"
+              >
+                <div
+                  id="warning_msg"
+                  class="warning_msg absolute flex items-center justify-end w-2/5"
+                  v-if="warningState"
+                >
+                  <p
+                    class="absolute right-16 w-max h-8 py-1 px-4 text-red-600 text-center bg-yellow-400"
+                  >
+                    {{ warningError }}
+                  </p>
+                </div>
               </div>
 
-              <div v-if="userStore.loadingState" class="load_wrapper">
+              <div v-if="loading" class="load_wrapper">
                 <ul
                   class="loading_content flex justify-center gap-2 justify-center items-center py-2"
                 >
@@ -83,191 +241,92 @@
   </div>
 </template>
 
-<script>
-import { ref, defineComponent } from "vue";
-import { useRouter } from "vue-router";
-import { useUserStore } from "@/stores/user.js";
-import { useWarningStore } from "@/stores/warning.js";
-import { loginapi } from "../api/login-api.js";
-import { checkInputError, resetUser } from "@/reusable/collaborate-function.js";
-
-export default defineComponent({
-  setup() {
-    const userStore = ref(useUserStore());
-    const warningStore = ref(useWarningStore());
-    const inputEml = ref(null);
-    const inputPwd = ref(null);
-    const email = ref("");
-    const password = ref("");
-
-    async function handleLogin(e) {
-      const userStore = useUserStore();
-
-      setTimeout(() => {
-        userStore.$patch({
-          loading: !userStore.loadingState,
-        });
-      }, 4000);
-
-      userStore.$patch({
-        loading: !userStore.loadingState,
-      });
-
-      const user = {
-        email: inputEml.value.value,
-        password: inputPwd.value.value,
-      };
-
-      const isStateWarning = checkInputError(user, "login");
-
-      if (isStateWarning) {
-        return;
-      }
-
-      //loginapi call
-      const newUserInfo = await loginapi(user);
-
-      const exUsersArr = userStore.usersLogin;
-      userStore.$patch({
-        currentUsername: newUserInfo.username,
-        currentUserId: newUserInfo.id,
-        usersLogin: [...exUsersArr, newUserInfo.username],
-        isAdmin: false,
-        access_token: newUserInfo.access,
-      });
-
-      resetUser(user, null, inputPwd);
-
-      this.$router.push({ path: "/" });
-    }
-
-    function showPassword(e) {
-      if (e.target.id === "toggle_password") {
-        const typeEl = inputPwd.value.getAttribute("type");
-        if (typeEl === "password") {
-          inputPwd.value.setAttribute("type", "text");
-        } else if (typeEl === "text") {
-          inputPwd.value.setAttribute("type", "password");
-        }
-      }
-    }
-
-    return {
-      email,
-      password,
-      userStore,
-      warningStore,
-      inputPwd,
-      inputEml,
-      handleLogin,
-      showPassword,
-    };
-  },
-});
-</script>
-
 <style scoped>
 @import "tailwindcss";
 
-@media (min-width: 180px) {
-  p {
-    font-size: calc(12px + 0.5vw);
-    padding: 0.25rem 0;
-    text-align: center;
-    line-height: 1.3;
-  }
-
-  .about {
-    position: relative;
-    height: calc(120vh);
-    display: grid;
-    grid-auto-columns: 100%;
-    grid-template-rows: 56% 1fr;
-  }
-
-  .login_wrapper {
-    @apply w-11/12 max-w-lg  border-2 border-solid border-blue-200 rounded-xl;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    height: 30rem;
-    padding: 0 1rem;
-    transform: translate(-50%, -50%);
-    box-shadow: 0px 0px 4px hsl(240, 2%, 62%);
-  }
-
-  .login_title {
-    position: relative;
-    top: -2rem;
-    left: -0.25rem;
-    width: 8rem;
-    padding: 0.5rem;
-    background-color: #fff;
-    font-size: calc(30px + 0.3vw);
-
-    font-family: "Ubuntu Sans", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 440;
-    font-style: normal;
-    font-variation-settings: "wdth" 100;
-  }
-
-  .form_content {
-    position: relative;
-    top: -1.4rem;
-    width: 100%;
-    height: 100%;
-    display: grid;
-    grid-auto-columns: 100%;
-    grid-auto-rows: 20% 32% 32% auto;
-  }
-
-  .form_control {
-    @apply w-full h-auto flex flex-col justify-center text-gray-600 gap-2;
-  }
-
-  .input_content {
-    @apply border border-solid border-gray-300;
-    width: 100%;
-    height: 3.2rem;
-    text-indent: 10px;
-    transform: skewX(-2deg);
-    transition: all 600ms ease-in-out;
-  }
-
-  .input_content:focus {
-    transform: skewX(0deg);
-  }
-
-  input[type="submit"] {
-    @apply w-full h-auto text-white bg-gray-800 p-2 rounded-lg text-center;
-    position: relative;
-    top: 0.5rem;
-  }
-
-  .load_wrapper {
-    position: absolute;
-    bottom: 2rem;
-    width: 140px;
-    height: 70px;
-  }
-
-  .loading_msg {
-    padding: 0.25rem 1rem;
-    animation: load-msg 2.4s ease-in-out infinite;
-    @apply text-gray-50 bg-gray-400;
-  }
+p {
+  font-size: calc(13px + 0.25vw);
+  line-height: 26px;
 }
 
-@media (min-width: 540px) {
-  p {
-    font-size: calc(15px + 0.3vw);
+p.expectation_1 {
+  color: #5f5397;
+}
+
+p.expectation_2 {
+  font-size: calc(13px + 0.15vw);
+  color: var(--text-body-1);
+  text-align: right;
+}
+
+label {
+  color: var(--accent-color-3);
+}
+
+.input_area {
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+input[type="email"]:focus,
+input[type="text"]:focus,
+input[type="password"]:focus {
+  transform: skewX(0deg);
+  box-shadow: 1px 1px 3px var(--brand-text);
+  outline: none;
+}
+
+button.submit_button[type="submit"] {
+  @apply w-full rounded-lg text-center cursor-pointer;
+  position: relative;
+  top: 0;
+  font-size: calc(15px + 0.35vw);
+  padding: 0.5em 0;
+  margin-top: 0.5rem;
+  color: var(--title);
+  background-color: var(--card-box);
+  transition: all 650ms ease;
+}
+
+button.submit_button[type="submit"]:hover {
+  background-color: var(--accent-color-1);
+}
+
+.load_wrapper {
+  position: absolute;
+  top: -0.5rem;
+  width: 140px;
+  height: 70px;
+}
+
+.loading_msg {
+  padding: 0.25rem 1rem;
+  animation: load-msg 2.4s ease-in-out infinite;
+}
+
+@media (min-width: 180px) {
+  .login_page {
+    min-height: calc(100vh - 64px);
+    background-color: var(--bg-gen);
   }
 
-  .login_wrapper {
-    @apply w-8/12 max-w-lg  border-2 border-solid border-blue-200 rounded-xl;
-    height: 28rem;
-    padding: 0 1rem;
+  .login_container {
+    border-radius: 3px;
+    box-shadow: 0px 0px 2px var(--text-body-1);
+  }
+
+  .input_field {
+    width: 100%;
+    height: 1.9rem;
+    margin: 1rem 0;
+    color: var(--text-body);
+    text-indent: 10px;
+    transform: skewX(-2deg);
+    border: 1px solid transparent;
+    box-shadow: 1px 1px 1px var(--text-body);
+    transition: all 600ms ease-in-out;
   }
 }
 </style>

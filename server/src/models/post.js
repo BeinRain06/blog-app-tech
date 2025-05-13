@@ -30,6 +30,10 @@ const postSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  last_update: {
+    type: String,
+    default: "",
+  },
 });
 
 const Post = mongoose.model("Post", postSchema);

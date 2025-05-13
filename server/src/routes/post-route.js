@@ -54,9 +54,11 @@ router.post("/image/create", upload.single("cover"), (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/:userId", async (req, res) => {
   try {
-    const { title, summary, image_path, content, userid, username } = req.body;
+    const userId = req.params.userId;
+
+    const { title, summary, image_path, content } = req.body;
 
     const PORT = process.env.PORT;
 
@@ -68,21 +70,21 @@ router.post("/", async (req, res) => {
 
     const image_url_1 = `https://blog-app-server-tech.vercel.app/${base_url}/post/${image_path}`;
 
-    let prevCookie;
-    let refreshDataUser;
-    let userId;
-
-    if (userid !== null || userid !== undefined) {
-      if (req.cookies.userInfo !== undefined) {
-        prevCookie = req.cookies.userInfo;
-        userId = prevCookie.userId;
-      } else {
-        refreshDataUser = await User.findById(userid);
-        userId = refreshDataUser.id;
-      }
-    }
+    let thisUser = await User.findById(userId);
 
     let date = format(new Date(), "dd MMM yyyy ,  hh:mm a");
+
+    const postExist = await Post.findOne({ title: title });
+
+    if (postExist) {
+      const infosNewPost = {
+        title: title,
+        summary: summary,
+        error: "this Title already exist!",
+      };
+
+      return res.status(200).json({ success: false, data: infosNewPost });
+    }
 
     let post = new Post({
       title: title,
@@ -90,17 +92,15 @@ router.post("/", async (req, res) => {
       image: image_url,
       image_1: image_url_1,
       content: content,
-      author: userId,
+      author: thisUser.id,
       date: date,
     });
 
     post = await post.save();
 
-    const allUserPost = await Post.find({ author: userId });
+    const allUserPost = await Post.find({ author: thisUser.id });
 
-    const thisUser = await User.findById(userId);
-
-    const countAllPost = allUserPost.length;
+    const postsCount = allUserPost.length;
     let access_token;
 
     if (thisUser.admin) {
@@ -113,11 +113,28 @@ router.post("/", async (req, res) => {
 
     const infosNewPost = {
       title: post.title,
-      author: thisUser.username,
+      summary: post.summary,
       date: date,
-      countPost: countAllPost,
-      access_token: access_token,
+      userId: thisUser.id,
+      userName: thisUser.username,
+      countPost: postsCount,
+      admin: thisUser.admin,
     };
+
+    const maxAge = 6 * 60 * 60; // in sec
+
+    const userInCookie = {
+      userId: thisUser.id,
+      userName: thisUser.username,
+      userEmail: thisUser.email,
+      access_token: access_token,
+      admin: thisUser.admin,
+    };
+
+    res.cookie("userInfo", JSON.stringify(userInCookie), {
+      httpOnly: true,
+      maxAge: maxAge * 1000,
+    });
 
     res.status(200).json({ success: true, data: infosNewPost });
   } catch (err) {
@@ -125,11 +142,11 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.post("/edit/:postId", async (req, res) => {
+router.put("/edit/:postId", async (req, res) => {
   try {
     const postId = req.params.postId;
 
-    let date = format(new Date(), "dd MMM yyyy ,  hh:mm a");
+    let date = format(new Date(), "dd MMM yyyy");
 
     const newPost = req.body;
 
@@ -155,7 +172,7 @@ router.post("/edit/:postId", async (req, res) => {
             image: image_url,
             image_1: image_url_1,
             content: newPost.content,
-            date: date,
+            last_update: date,
           },
         },
         { new: true }
@@ -164,14 +181,37 @@ router.post("/edit/:postId", async (req, res) => {
       updationPost = await Post.findByIdAndUpdate(
         postId,
         {
-          title: newPost.title,
-          summary: newPost.summary,
-          content: newPost.content,
-          date: date,
+          $set: {
+            title: newPost.title,
+            summary: newPost.summary,
+            content: newPost.content,
+            last_update: date,
+          },
         },
         { new: true }
       );
     }
+
+    const userInfo = JSON.parse(req.cookies.userInfo);
+
+    const stringAdmin = userInfo.admin ? "admin" : "common";
+
+    const { access_token, ...userCatch } = userInfo;
+
+    const new_access_token = await generateToken(
+      userCatch,
+      stringAdmin,
+      "access"
+    );
+
+    userInfo.access_token = new_access_token;
+
+    const maxAge = 6 * 60 * 60; // in sec
+
+    res.cookie("userInfo", JSON.stringify(userInfo), {
+      httpOnly: true,
+      maxAge: maxAge * 1000,
+    });
 
     res.status(200).json({ success: true, data: updationPost });
   } catch (err) {
@@ -179,9 +219,11 @@ router.post("/edit/:postId", async (req, res) => {
   }
 });
 
-router.post("/image/delete/:nameImg", async (req, res) => {
+router.delete("/image/delete/:nameImg", async (req, res) => {
   try {
     const nameImg = req.params.nameImg;
+
+    console.log("post-route DELETE nameImg:", nameImg);
 
     const filePath = path.join(__dirname, `../public/images/${nameImg}`);
 

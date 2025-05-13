@@ -9,6 +9,10 @@ const logoutRouter = require("./src/routes/logout-route.js");
 
 const app = express();
 
+app.use(cookie());
+
+require("dotenv").config();
+
 app.use(
   cors({
     origin: [
@@ -20,10 +24,6 @@ app.use(
     credentials: true,
   })
 );
-
-app.use(cookie());
-
-require("dotenv").config();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -39,10 +39,12 @@ app.use(`/${base_url}/login`, loginRouter);
 app.use(`/${base_url}/logout`, logoutRouter);
 
 app.get("/", (req, res) => {
+  const userInfo = JSON.parse(req.cookies.userInfo);
   const post = {
     title: "breathe",
     summary: "i'm breathing that¹s why almight count",
     name: "Leave",
+    userInfo: userInfo,
   };
 
   res.status(200).json({ data: post });

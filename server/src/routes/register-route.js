@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const express = require("express");
 const cors = require("cors");
+const cookie = require("cookie-parser");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -8,6 +9,8 @@ const { format } = require("date-fns");
 const { generateToken } = require("../protect-api/authorization-jwt");
 
 const router = express.Router();
+
+router.use(cookie());
 
 router.use(
   cors({
@@ -36,13 +39,14 @@ router.get("/", (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const userCatch = {
-      email: req.body.email,
-      username: req.body.username,
+      userEmail: req.body.email,
+      userName: req.body.username,
       password: req.body.password,
-      secret: req.body.secret,
     };
 
-    const checkExistUser = await User.findOne({ username: userCatch.username });
+    const checkExistUser = await User.findOne({ email: userCatch.userEmail });
+
+    // console.log("register-checkExistUser :", checkExistUser);
 
     if (checkExistUser) {
       const collected = null;
@@ -51,62 +55,61 @@ router.post("/", async (req, res) => {
 
     // encrypt password
     const passwordHash = bcrypt.hashSync(`${userCatch.password}`, 10); //10 autogen salt & hash
-    let secret;
 
-    //generate session_token & access_token
-    const userName = userCatch.username;
-    let session_token;
-    let access_token;
-    let admin = false;
-    if (userCatch.secret === process.env.admin_secret) {
-      secret = userCatch.secret;
-      //session_token
-      session_token = await generateToken(userCatch, "admin", "session");
-      //access_token
-      access_token = await generateToken(userCatch, "admin", "access");
-      admin = true;
-    } else {
-      //session_token
-      session_token = await generateToken(userCatch, "common", "session");
-      //access_token
-      access_token = await generateToken(userCatch, "common", "access");
-      admin = false;
-    }
+    /* let secret; */
+
+    //generate refresh_token & access_token
+
+    let refresh_token, access_token;
+    const { password, ...newUserCatch } = userCatch;
+
+    //refresh_token
+    refresh_token = await generateToken(newUserCatch, "common", "refresh");
+
+    // encrypt refresh_token
+    const refreshTokenHash = bcrypt.hashSync(`${refresh_token}`, 10); //10 autogen salt & hash
+
+    //access_token
+    access_token = await generateToken(newUserCatch, "common", "access");
 
     let date = format(new Date(), "dd, MMMM yyyy");
 
     let user = new User({
-      email: userCatch.email,
-      username: userCatch.username,
+      email: userCatch.userEmail,
+      username: userCatch.userName,
       password: passwordHash,
-      admin: admin,
+      admin: false,
+      refresh_token: refreshTokenHash,
       registrationDate: date,
     });
 
     user = await user.save();
 
-    //send session_tokies in cookie
+    //send session_token in cookie
     const userId = user.id;
     const maxAge = 6 * 60 * 60; // in sec
 
-    res.cookie(
-      "userInfo",
-      { userId, userName, session_token },
-      {
-        httpOnly: true,
-        maxAge: maxAge * 1000,
-      }
-    );
+    const userInCookie = {
+      userId: user.id,
+      userName: user.username,
+      access_token: access_token,
+      admin: false,
+      userEmail: user.email,
+    };
 
-    const collected = {
-      username: user.username,
+    res.cookie("userInfo", JSON.stringify(userInCookie), {
+      httpOnly: true,
+      maxAge: maxAge * 1000,
+    });
+
+    const newUserInfo = {
+      userName: user.username,
       userId: userId,
-      access: access_token,
-      admin: admin,
+      admin: false,
     };
 
     //send final json response (with access_token inside)
-    res.json({ success: true, data: collected });
+    res.json({ success: true, data: newUserInfo });
   } catch (err) {
     console.log(err);
   }
