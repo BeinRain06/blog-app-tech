@@ -1,8 +1,8 @@
-# <img with="20px" height="20px" src="./vue-project/src/assets/link-solid.svg"/> Blog App Tech <span></span> <img with="20px" height="20px" src="./vue-project/src/assets/chalkboard-solid.svg"/>
+# <img with="20px" height="20px" src="./vue-new-project/src/assets/link-solid.svg"/> Blog App Tech <span></span> <img with="20px" height="20px" src="./vue-new-project/src/assets/chalkboard-solid.svg"/>
 
 This tech app is a sample **blog** prototype for techreviews. Informatals is a powerful tool to enhance growth around community. Hope you will find this project helpfull
 
-<img with="20px" height="20px" src="./vue-project/src/assets/link-solid.svg"/> To View live
+<img with="20px" height="20px" src="./vue-new-project/src/assets/link-solid.svg"/> To View live
 
 - Clone the repository
   [ Link repository](https://github.com/BeinRain06/blog-app-tech)
@@ -10,7 +10,7 @@ This tech app is a sample **blog** prototype for techreviews. Informatals is a p
 
   `blog-tech-app/`
 
-## <img with="16px" margin-right="0.15rem" height="16px" src="./vue-project/src/assets/link-solid.svg"/> Features <span > </span> <img with="16px"  position="relative" left="2rem" height="16px" src="./vue-project/src/assets/patch-check.svg"/>
+## <img with="16px" margin-right="0.15rem" height="16px" src="./vue-new-project/src/assets/link-solid.svg"/> Features <span > </span> <img with="16px"  position="relative" left="2rem" height="16px" src="./vue-new-project/src/assets/patch-check.svg"/>
 
 - register or login like admin/not
   >
@@ -25,10 +25,10 @@ This tech app is a sample **blog** prototype for techreviews. Informatals is a p
 - dark/light mode process
 - <br>
 
-- <img src="./vue-project/src/assets/Screenshot-1.png" width="385px" margin="1rem 0 1rem">
+- <img src="./vue-new-project/src/assets/blog-app-tech-d-mode.png" width="385px" margin="1rem 0 1rem">
     <br>
     <br>
-- <img src="./vue-project/src/assets/Screenshot-2.png" width="385px" margin="1rem 0 0.75rem">
+- <img src="./vue-new-project/src/assets/blog-app-tech-mob-d-mode.png" width="385px" margin="1rem 0 0.75rem">
 
 [view code](https://github.com/BeinRain06/blog-app-tech)
 
@@ -68,7 +68,6 @@ This tech app is a sample **blog** prototype for techreviews. Informatals is a p
   <br>
 
 1.  ENTER `cd Desktop`
-
 
     - to shift into the **Desktop** Directory of your computer
     - For Mac `cd ~/Desktop/`

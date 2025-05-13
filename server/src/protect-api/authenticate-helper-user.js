@@ -101,7 +101,7 @@ module.exports.requestLoginByEmail = async function (req, res, next) {
   // user obj from requestInitUser middleware
   const user = req.requestInitUser;
 
-  // console.log("req.requestInitUser :", user);
+  console.log("req.requestInitUser :", user);
 
   let userRes = {
     success: false,
